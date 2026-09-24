@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
-import { BRIDGE_LEVELS } from './levels.js';
-import { OP_NAMES, fmtNum, evalTokens, solveSteps } from './math.js';
+import { pickRound } from './levels.js';
+import { OP_NAMES, fmtNum } from './math.js';
+import { diagnose, feedbackCard } from './feedback.js';
 import { BridgeScene, bridgeCtl } from './scene.js';
 import { shuffled } from '../../../../shared/random.js';
 import { showToast } from '../../../../shared/toast.js';
@@ -11,7 +12,7 @@ import { aiThinkingHtml, aiBubbleHtml } from '../../../../shared/ai.js';
 // given tiles; the value of the expression is the length of the bridge that
 // grows across the abyss. It only holds when it matches the gap exactly, so
 // the player discovers operator precedence by seeing the bridge come out
-// "wrong" and reading the step-by-step solution afterwards.
+// "wrong" and reading the feedback card, which explains where the mistake is.
 
 /* ---- controller (DOM: slots, tiles, drag & drop) ---- */
 var elBO = document.getElementById('bridge-overlay');
@@ -23,7 +24,7 @@ var elBPanel = document.getElementById('bridge-panel');
 var elBGoal = document.getElementById('bridge-goal');
 var elBExpr = document.getElementById('bridge-expr');
 var elBTray = document.getElementById('bridge-tray');
-var elBSteps = document.getElementById('bridge-steps');
+var elBFeedback = document.getElementById('bridge-feedback');
 var elBHint = document.getElementById('bridge-hint');
 var elBClear = document.getElementById('bridge-clear');
 var elBBuild = document.getElementById('bridge-build');
@@ -36,13 +37,13 @@ var bridgeRO = null, bridgeDrag = null, bannerTimer = null;
 
 // onFinish(score, close) runs when the player completes every abyss.
 export function openBridge(node, onFinish){
-  bridge = { node: node, onFinish: onFinish, level: 0, fails: 0, levelFails: 0,
-             busy: false, won: false, result: null, stepsHtml: '', nope: -1, pop: '', tiles: [], slots: [] };
+  bridge = { node: node, onFinish: onFinish, round: pickRound(), level: 0, fails: 0, levelFails: 0,
+             busy: false, won: false, result: null, feedback: null, nope: -1, pop: '', tiles: [], slots: [] };
   elBFinal.classList.remove('show');
   hideBridgeBanner();
   elBO.classList.add('open');
   document.addEventListener('keydown', onBridgeKey);
-  bridgeCtl.initialTarget = BRIDGE_LEVELS[0].target;
+  bridgeCtl.initialTarget = bridge.round[0].target;
   setupBridgeLevel();
   try{
     createBridgeGame();
@@ -96,12 +97,12 @@ function onBridgeKey(e){
 }
 
 function setupBridgeLevel(){
-  var b = bridge, lv = BRIDGE_LEVELS[b.level];
-  b.won = false; b.busy = false; b.result = null; b.stepsHtml = ''; b.levelFails = 0; b.nope = -1; b.pop = '';
+  var b = bridge, lv = b.round[b.level];
+  b.won = false; b.busy = false; b.result = null; b.feedback = null; b.levelFails = 0; b.nope = -1; b.pop = '';
   b.slots = lv.tpl.split(' ').map(function(c){
-    if(c === 'n') return { kind: 'num', tile: null };
-    if(c === 'o') return { kind: 'op', tile: null };
-    return { kind: c === '(' ? 'lp' : 'rp', tile: null };
+    if(c === 'n') return { kind: 'num', tile: null, wrong: false };
+    if(c === 'o') return { kind: 'op', tile: null, wrong: false };
+    return { kind: c === '(' ? 'lp' : 'rp', tile: null, wrong: false };
   });
   var nums = lv.nums.map(function(v, i){ return { id: 'n' + i, kind: 'num', value: v, slot: null }; });
   var ops = lv.ops.map(function(v, i){ return { id: 'o' + i, kind: 'op', value: v, slot: null }; });
@@ -120,7 +121,7 @@ function setupBridgeLevel(){
 
 function renderBridgePips(){
   var html = '';
-  for(var i = 0; i < BRIDGE_LEVELS.length; i++){
+  for(var i = 0; i < bridge.round.length; i++){
     var cls = 'bg-pip' + (i < bridge.level || (i === bridge.level && bridge.won) ? ' done' : (i === bridge.level ? ' active' : ''));
     html += '<span class="' + cls + '"></span>';
   }
@@ -137,13 +138,13 @@ function allSlotsFilled(){
 }
 
 function renderBridgePanel(){
-  var b = bridge, lv = BRIDGE_LEVELS[b.level];
-  elBGoal.innerHTML = '<i>Abismo ' + (b.level + 1) + ' de ' + BRIDGE_LEVELS.length + '</i>Necesitas un puente de exactamente <b>' + lv.target + ' m</b>';
+  var b = bridge, lv = b.round[b.level];
+  elBGoal.innerHTML = '<i>Abismo ' + (b.level + 1) + ' de ' + b.round.length + '</i>Necesitas un puente de exactamente <b>' + lv.target + ' m</b>';
 
   var exprHtml = b.slots.map(function(s, i){
     if(s.kind === 'lp') return '<span class="paren" aria-hidden="true">(</span>';
     if(s.kind === 'rp') return '<span class="paren" aria-hidden="true">)</span>';
-    var cls = 'slot ' + s.kind + (s.tile ? ' filled' : '') + (b.nope === i ? ' nope' : '');
+    var cls = 'slot ' + s.kind + (s.tile ? ' filled' : '') + (s.wrong ? ' wrong' : '') + (b.nope === i ? ' nope' : '');
     return '<div class="' + cls + '" data-slot="' + i + '" data-hint="' + (s.kind === 'num' ? 'nº' : 'op') + '">' + (s.tile ? tileHtml(s.tile) : '') + '</div>';
   }).join('');
   exprHtml += '<span class="eq">=</span><div class="res' + (b.result ? ' ' + b.result.cls : '') + '">' + (b.result ? b.result.text : '? m') + '</div>';
@@ -154,8 +155,8 @@ function renderBridgePanel(){
     ? loose.map(tileHtml).join('')
     : '<span class="bg-tray-empty">' + (b.won ? '¡Puente completado!' : 'Todas las fichas están en el puente. Arrástralas para cambiarlas.') + '</span>';
 
-  elBSteps.innerHTML = b.stepsHtml;
-  var last = b.level === BRIDGE_LEVELS.length - 1;
+  renderBridgeFeedback();
+  var last = b.level === b.round.length - 1;
   elBBuild.textContent = b.won ? (last ? '★ Ver resultado' : 'Siguiente abismo →') : '🌉 Construir puente';
   elBBuild.disabled = b.busy || (!b.won && !allSlotsFilled());
   elBClear.disabled = b.busy || b.won || !b.tiles.some(function(t){ return t.slot !== null; });
@@ -164,7 +165,21 @@ function renderBridgePanel(){
   b.nope = -1; b.pop = '';
 }
 
-function bridgeChanged(){ bridge.result = null; bridge.stepsHtml = ''; }
+// Moving a tile invalidates the last result and the slots marked as wrong;
+// the explanation stays (dimmed) so the player can keep reading it.
+function bridgeChanged(){
+  bridge.result = null;
+  bridge.slots.forEach(function(s){ s.wrong = false; });
+  if(bridge.feedback) bridge.feedback.stale = true;
+}
+
+var FEEDBACK_IDLE = '<p class="fb-idle"><b>Recuerda:</b> primero los paréntesis, luego la multiplicación, y al final las sumas y restas de izquierda a derecha.</p>';
+
+function renderBridgeFeedback(){
+  var f = bridge.feedback;
+  elBFeedback.className = 'bg-feedback' + (f ? ' ' + f.kind + (f.stale ? ' stale' : '') : '');
+  elBFeedback.innerHTML = f ? '<div class="fb-title">' + f.title + '</div>' + f.html : FEEDBACK_IDLE;
+}
 
 function placeTile(tile, si){
   var b = bridge, slot = b.slots[si];
@@ -318,7 +333,7 @@ elBHint.addEventListener('click', function(){
   setTimeout(function(){
     if(!bridge || bridge.level !== lvIdx) return;
     elBHintPanel.classList.remove('ai-loading');
-    elBHintPanel.innerHTML = aiBubbleHtml(BRIDGE_LEVELS[lvIdx].hint);
+    elBHintPanel.innerHTML = aiBubbleHtml(bridge.round[lvIdx].hint);
     elBHintPanel.dataset.loaded = '1';
     elBHint.disabled = false;
     elBHint.classList.remove('pulse');
@@ -336,7 +351,7 @@ function showBridgeBanner(kind, title, sub, ms){
 function hideBridgeBanner(){ clearTimeout(bannerTimer); elBBanner.classList.remove('show'); }
 
 function showBridgeIntro(){
-  var T = BRIDGE_LEVELS[bridge.level].target;
+  var T = bridge.round[bridge.level].target;
   showBridgeBanner('info', 'Abismo de ' + T + ' m', 'Usa todas las fichas para que tu puente mida exactamente ' + T + ' m. Arrástralas o tócalas.', 6000);
 }
 
@@ -350,13 +365,13 @@ elBBuild.addEventListener('click', function(){
   if(b.won){ nextBridgeLevel(); return; }
   if(!allSlotsFilled()) return;
 
-  var T = BRIDGE_LEVELS[b.level].target;
+  var lv = b.round[b.level], T = lv.target;
   var tokens = b.slots.map(function(s){
     if(s.kind === 'lp') return '(';
     if(s.kind === 'rp') return ')';
     return s.tile.value;
   });
-  var val = evalTokens(tokens), sol = solveSteps(tokens), kind = kindOfBridge(val, T);
+  var d = diagnose(lv, tokens), val = d.value, kind = kindOfBridge(val, T);
 
   b.busy = true;
   hideBridgeBanner();
@@ -366,9 +381,8 @@ elBBuild.addEventListener('click', function(){
   var onResult = function(){
     if(bridge !== b) return;
     b.result = { text: fmtNum(val) + ' m', cls: kind === 'win' ? 'ok' : 'bad' };
-    b.stepsHtml = sol.steps.length
-      ? '<em>Paso a paso:</em> ' + sol.steps.map(function(s){ return '<b>' + s + '</b>'; }).join(' <em>→</em> ')
-      : '';
+    var card = feedbackCard(d, T);
+    b.feedback = { kind: kind === 'win' ? 'win' : 'fail', title: card.title, html: card.html, stale: false };
     if(kind === 'win'){
       b.won = true;
       renderBridgePips();
@@ -376,11 +390,12 @@ elBBuild.addEventListener('click', function(){
     } else {
       b.fails++; b.levelFails++;
       if(b.levelFails >= 2) elBHint.classList.add('pulse');
+      d.wrongSlots.forEach(function(i){ b.slots[i].wrong = true; });
       var title, sub;
       if(kind === 'short'){ title = '¡Se quedó corto!'; sub = 'Tu puente mide ' + val + ' m y el abismo ' + T + ' m. Faltan ' + (T - val) + ' m.'; }
       else if(kind === 'long'){ title = '¡Se pasó de largo!'; sub = 'Tu puente mide ' + val + ' m y el abismo solo ' + T + ' m. Sobran ' + (val - T) + ' m.'; }
       else { title = '¡No hay puente!'; sub = 'Tu expresión da ' + fmtNum(val) + ' m, y un puente necesita medir más de 0 m.'; }
-      showBridgeBanner('fail', title, sub + ' Cambia las fichas y prueba de nuevo.', 0);
+      showBridgeBanner('fail', title, sub + ' Mira abajo dónde está el error.', 0);
     }
     renderBridgePanel();
   };
@@ -396,22 +411,22 @@ elBBuild.addEventListener('click', function(){
 
 function nextBridgeLevel(){
   var b = bridge;
-  if(b.level >= BRIDGE_LEVELS.length - 1){ showBridgeFinal(); return; }
+  if(b.level >= b.round.length - 1){ showBridgeFinal(); return; }
   b.level++;
   hideBridgeBanner();
   setupBridgeLevel();
-  if(bridgeCtl.scene) bridgeCtl.scene.changeLevel(BRIDGE_LEVELS[b.level].target);
+  if(bridgeCtl.scene) bridgeCtl.scene.changeLevel(b.round[b.level].target);
   showBridgeIntro();
 }
 
 function showBridgeFinal(){
   var b = bridge, fails = b.fails;
-  var stars = fails <= 2 ? 3 : (fails <= 5 ? 2 : 1);
+  var stars = fails <= 2 ? 3 : (fails <= 6 ? 2 : 1);
   var starsHtml = '';
   for(var i = 0; i < 3; i++) starsHtml += i < stars ? '★' : '<span class="off">★</span>';
   var msg = fails === 0
-    ? 'Cruzaste los ' + BRIDGE_LEVELS.length + ' abismos sin un solo intento fallido. ¡Impecable!'
-    : 'Cruzaste los ' + BRIDGE_LEVELS.length + ' abismos tras ' + fails + ' ' + (fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
+    ? 'Cruzaste los ' + b.round.length + ' abismos sin un solo intento fallido. ¡Impecable!'
+    : 'Cruzaste los ' + b.round.length + ' abismos tras ' + fails + ' ' + (fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
   elBFinalCard.innerHTML =
     '<div class="result-icon">🌉</div>' +
     '<div class="result-title">¡Abismos superados!</div>' +

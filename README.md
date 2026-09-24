@@ -13,6 +13,7 @@ npm install
 npm run dev       # http://localhost:5173
 npm run build     # static site in dist/
 npm run preview   # serve dist/ locally
+npm run check:levels  # validate the bridge exercise bank
 ```
 
 ## Layout
@@ -34,11 +35,30 @@ src/
       planets.js              which planets have a game, opening/finishing them
       map-scene.js            Phaser scene: the winding path of planets
       games/bridge/           "Puente de operaciones"
-        levels.js             exercise data
-        math.js               evaluation + step-by-step solution
+        levels.js             exercise bank: 20 abysses in 5 tiers
+        math.js               evaluation (right and left-to-right) + steps
+        feedback.js           works out where the mistake is + card text
         controller.js         tiles, drag & drop, panel, flow
         scene.js              Phaser scene: abyss, planks, rover, effects
 ```
+
+## Puente de operaciones
+
+Each play is a round of 5 abysses, one per difficulty tier (× before +,
+× before −, four numbers, parentheses, parentheses with four numbers), drawn
+from a bank of 20 in `levels.js`, so replaying brings different exercises.
+`npm run check:levels` checks every abyss has a solution and that the rule its
+tier teaches actually matters for it.
+
+After each build, the feedback card under the expression explains the result:
+- **Order mistake:** the tiles would give the target if read left to right,
+  so the card replays that calculation and shows why × goes first.
+- **Parentheses mistake:** same idea when the tiles only work without the
+  parentheses.
+- **Otherwise:** the tiles that differ from the closest correct arrangement
+  get a red border, and the card notes when × changed the result.
+
+Every step is listed with the rule that made it go first.
 
 A new mini-game goes in `galaxies/<galaxy>/games/<name>/`, exposes
 `open(node, onFinish)` and is registered in that galaxy's `planets.js`.
