@@ -6,6 +6,7 @@ import './styles/map.css';
 import './styles/ai.css';
 import './styles/dialogs.css';
 import './styles/galaxy-select.css';
+import './styles/game-shell.css';
 import './styles/bridge.css';
 
 import { initGalaxySelect } from './galaxies/select.js';
