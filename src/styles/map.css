@@ -1,0 +1,23 @@
+/* ---------- Game canvas area ---------- */
+#game-wrap{position:relative;flex:1;min-height:0;}
+#game-container{position:absolute;inset:0;}
+#game-container canvas{display:block;}
+
+#tooltip{
+  position:absolute;pointer-events:none;z-index:15;
+  background:#0d1530ee;border:1px solid #3a447c;border-radius:7px;
+  padding:6px 10px;font-size:12px;color:var(--text);white-space:nowrap;
+  transform:translate(-50%,-125%);opacity:0;transition:opacity .1s;
+  font-family:'Manrope',sans-serif;
+}
+#tooltip.show{opacity:1;}
+#tooltip b{color:var(--gold);}
+
+#toast{
+  position:absolute;left:50%;bottom:22px;transform:translate(-50%,10px);z-index:25;
+  background:#161f42;border:1px solid #4a5697;color:var(--text);
+  padding:10px 16px;border-radius:10px;font-size:13px;
+  box-shadow:0 12px 30px -8px rgba(0,0,0,.6);
+  opacity:0;transition:opacity .25s, transform .25s;pointer-events:none;
+}
+#toast.show{opacity:1;transform:translate(-50%,0);}

@@ -1,0 +1,17 @@
+/* ---------- Generic confirm dialog (skip-ahead warning) ---------- */
+#confirm-overlay{
+  position:fixed;inset:0;z-index:60;display:none;
+  align-items:center;justify-content:center;padding:20px;
+  background:rgba(5,8,20,.78);backdrop-filter:blur(3px);
+}
+#confirm-overlay.open{display:flex;}
+.confirm-card{
+  width:min(400px,100%);text-align:center;
+  background:linear-gradient(180deg,#161f42,#101731);
+  border:1px solid var(--amber);border-radius:16px;padding:24px 22px 20px;
+  box-shadow:0 30px 70px -18px rgba(0,0,0,.7);
+}
+.confirm-icon{font-size:36px;margin-bottom:8px;}
+.confirm-title{font-family:'Cinzel',serif;font-size:17px;font-weight:600;margin-bottom:8px;text-wrap:balance;}
+.confirm-msg{font-size:13.5px;color:var(--text-dim);line-height:1.55;margin-bottom:18px;}
+.confirm-actions{display:flex;justify-content:center;gap:10px;}
