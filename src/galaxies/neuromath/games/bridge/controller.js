@@ -321,7 +321,7 @@ elBBuild.addEventListener('click', function(){
       if(kind === 'short'){ title = '¡Se quedó corto!'; sub = 'Tu puente mide ' + val + ' m y el abismo ' + T + ' m. Faltan ' + (T - val) + ' m.'; }
       else if(kind === 'long'){ title = '¡Se pasó de largo!'; sub = 'Tu puente mide ' + val + ' m y el abismo solo ' + T + ' m. Sobran ' + (val - T) + ' m.'; }
       else { title = '¡No hay puente!'; sub = 'Tu expresión da ' + fmtNum(val) + ' m, y un puente necesita medir más de 0 m.'; }
-      shell.showBanner('fail', title, sub + ' Mira abajo dónde está el error.', 0);
+      shell.showBanner('fail', title, sub + ' Mira abajo dónde está el error.', 5000);
     }
     renderBridgePanel();
   };

@@ -8,6 +8,7 @@ import './styles/dialogs.css';
 import './styles/galaxy-select.css';
 import './styles/game-shell.css';
 import './styles/bridge.css';
+import './styles/cannon.css';
 
 import { initGalaxySelect } from './galaxies/select.js';
 import { MapScene } from './galaxies/neuromath/map-scene.js';

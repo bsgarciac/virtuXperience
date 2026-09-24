@@ -1,7 +1,9 @@
 # VirtuXperience
 
-Learning galaxies as mini-games. Only **Neuromath** (math) is built so far; its
-first playable planet is *Fundamentos · Inicial* — **Puente de operaciones**.
+Learning galaxies as mini-games, aimed at university students who want to
+check their foundations. Only **Neuromath** (math) is built so far, with two
+playable planets: *Fundamentos · Inicial* — **Puente de operaciones** — and
+*Fundamentos · Intermedio* — **Cañón parabólico**.
 
 Plain JavaScript + [Phaser 3](https://phaser.io) for the canvas scenes, bundled
 with Vite. No framework.
@@ -13,7 +15,7 @@ npm install
 npm run dev       # http://localhost:5173
 npm run build     # static site in dist/
 npm run preview   # serve dist/ locally
-npm run check:levels  # validate the bridge exercise bank
+npm run check:levels  # validate every game's exercise bank
 ```
 
 ## Layout
@@ -25,6 +27,10 @@ src/
   styles/                     CSS split by area; tokens live in base.css
   shared/                     toast, tooltip, confirm dialog, AI hint bubbles,
                               random helpers, host (iframe) messaging
+    game/shell.js             mini-game frame: overlay, pips, banner, hint,
+                              feedback card, final stars card
+    game/scene-kit.js         Phaser pieces every game reuses (backdrop, rover,
+                              particles, driving, celebration)
   galaxies/
     catalog.js                the galaxies shown on the select screen
     select.js                 galaxy select screen
@@ -40,6 +46,7 @@ src/
         feedback.js           works out where the mistake is + card text
         controller.js         tiles, drag & drop, panel, flow
         scene.js              Phaser scene: abyss, planks, rover, effects
+      games/cannon/           "Cañón parabólico", same layout
 ```
 
 ## Puente de operaciones
@@ -60,8 +67,28 @@ After each build, the feedback card under the expression explains the result:
 
 Every step is listed with the rule that made it go first.
 
-A new mini-game goes in `galaxies/<galaxy>/games/<name>/`, exposes
-`open(node, onFinish)` and is registered in that galaxy's `planets.js`.
+## Cañón parabólico
+
+A wall with a crack blocks the rover. The shot follows
+`f(x) = a·x² + b·x + c` from the cannon at the origin; the player sets the
+parameters each wall allows with − / + steppers (the rest are fixed) and fires.
+Hitting the crack brings the wall down and the rover drives on.
+
+Rounds are 5 walls, one per tier, from a bank of 20: **Pendiente** (b, the
+launch slope f'(0)), **Apertura** (a), **Vértice** (a and b — the crack only
+gives way to a horizontal hit, f'(w) = 0), **Mástil** (c, the cannon's height)
+and **Roca** (a and b, clearing a rock on the way).
+
+The feedback card says what happened (landed at a root, hit the wall above or
+below the crack, cleared the wall, hit the rock, hit the crack at an angle),
+which parameter to move and which way, and why, with the calculation as
+numbered steps. It never gives the value. The previous shot's trail stays on
+the plane, dimmed, for comparison.
+
+A new mini-game goes in `galaxies/<galaxy>/games/<name>/`, builds its panel
+with `createShell` (shared/game/shell.js), mixes `SceneKit` into its Phaser
+scene, exposes `open(node, onFinish)` and is registered with a title in that
+galaxy's `planets.js`.
 
 ## Embedding
 

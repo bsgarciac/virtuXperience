@@ -87,7 +87,7 @@
 .gm-feedback.win .fb-steps li{border-color:rgba(79,191,139,.45);}
 
 .gm-actions{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;}
-.gm-build{padding:12px 26px;font-size:14.5px;box-shadow:0 10px 30px -10px rgba(232,184,75,.75);}
+.gm-build{height:46px;padding:0 26px;font-size:14.5px;box-shadow:0 10px 30px -10px rgba(232,184,75,.75);}
 .ai-btn.pulse{border-style:solid;border-color:var(--cyan);}
 
 .gm-final{
@@ -126,7 +126,7 @@
   .gm-panel{padding:10px 10px 12px;gap:8px;}
   .gm-top{padding:8px 10px;gap:8px;}
   .gm-emblem{width:34px;height:34px;font-size:17px;}
-  .gm-build{padding:11px 18px;}
+  .gm-build{height:44px;padding:0 18px;}
   .gm-feedback{height:140px;padding:7px 10px 8px;font-size:13px;}
   .fb-title{font-size:14px;}
   .fb-steps b{font-size:13px;}

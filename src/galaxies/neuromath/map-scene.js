@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { TOPICS, LEVELS, NODES } from './data.js';
 import { isDone, isUnlocked, topicFullyDone, allDone } from './progress.js';
-import { isPlayable, attemptOpenNode } from './planets.js';
+import { isPlayable, gameTitle, attemptOpenNode } from './planets.js';
 import { showTooltip, hideTooltip } from '../../shared/tooltip.js';
 
 /* ---- Rocket cursors ---- */
@@ -250,7 +250,7 @@ MapScene.prototype.drawNodes = function(){
       var sx = x - self.cameras.main.scrollX + rect.left;
       var sy = y - self.cameras.main.scrollY + rect.top;
       var status = done ? 'Dominado' : (unlocked ? 'Disponible' : (isPlayable(idx) ? 'Bloqueado' : 'Próximamente'));
-      showTooltip(sx, sy, '<b>' + node.topic.name + '</b> · ' + node.level.label + '<br>' + status + (isPlayable(idx) ? ' · 🎮 Minijuego' : ''));
+      showTooltip(sx, sy, '<b>' + node.topic.name + '</b> · ' + node.level.label + '<br>' + (isPlayable(idx) ? '🎮 ' + gameTitle(idx) + ' · ' : '') + status);
       bg.setStrokeStyle(3, accent, 1);
     });
     bg.on('pointerout', function(){ hideTooltip(); bg.setStrokeStyle(2.4, unlocked ? accent : 0x35406e, 1); });

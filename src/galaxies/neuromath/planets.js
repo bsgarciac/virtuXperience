@@ -3,16 +3,22 @@ import { isDone, isUnlocked, markDone, topicFullyDone, allDone } from './progres
 import { refreshHud } from './hud.js';
 import { mapRef } from './map-ref.js';
 import { openBridge } from './games/bridge/controller.js';
+import { openCannon } from './games/cannon/controller.js';
 import { showToast } from '../../shared/toast.js';
 import { showConfirm } from '../../shared/confirm.js';
 import { notifyHost } from '../../shared/host.js';
 
 // Only the planets listed here are built; every other planet stays locked.
 // Each game exposes open(node, onFinish), and calls onFinish(score, close)
-// when the player completes it.
-var GAMES = { 'fund-inicial': { open: openBridge } };
+// when the player completes it. title is shown on the map.
+var GAMES = {
+  'fund-inicial':    { title: 'Puente de operaciones', open: openBridge },
+  'fund-intermedio': { title: 'Cañón parabólico', open: openCannon }
+};
 
 export function isPlayable(index){ return !!GAMES[NODES[index].id]; }
+
+export function gameTitle(index){ var g = GAMES[NODES[index].id]; return g ? g.title : ''; }
 
 function openNode(nodeIndex){
   var node = NODES[nodeIndex];

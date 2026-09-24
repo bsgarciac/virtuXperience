@@ -1,4 +1,4 @@
-// Validates the bridge exercise bank. Run with `npm run check:levels`.
+// Validates the bridge exercise bank (run through `npm run check:levels`).
 import { BANK } from '../src/galaxies/neuromath/games/bridge/levels.js';
 import { arrangements, solutions, solve, evaluate, stripParens, templateSlots } from '../src/galaxies/neuromath/games/bridge/math.js';
 
@@ -25,4 +25,4 @@ BANK.forEach(function(lv, i){
   else console.log('✓ ' + label + '  (' + sols.length + ' solution' + (sols.length === 1 ? '' : 's') + (trap ? ', has a left-to-right trap' : '') + ')');
 });
 console.log('\n' + BANK.length + ' abysses, ' + failures + ' invalid');
-process.exit(failures ? 1 : 0);
+if(failures) process.exitCode = 1;
