@@ -29,6 +29,7 @@ src/
                               random helpers, host (iframe) messaging
     guides.js                 Luma and Aura, the two narrative guides
     dialogue.js               the guides' one-line-at-a-time conversation box
+    markdown.js               Markdown + KaTeX renderer for the lessons
     game/shell.js             mini-game frame: overlay, pips, banner, hint,
                               feedback card, final stars card
     game/scene-kit.js         Phaser pieces every game reuses (backdrop, rover,
@@ -43,6 +44,8 @@ src/
       story.js                intro and per-island briefings (BIOSA narrative)
       hud.js                  progress bar, info popover, reset
       islands.js              which islands have a game, opening/finishing them
+      lessons/                the topic lesson shown when each island opens
+                              (one Markdown file per island, $math$ via KaTeX)
       scene-common.js         starfield, rocket cursor, resize handling
       system-scene.js         Phaser scene: the sun and the orbiting planets
       island-scene.js         Phaser scene: one planet's path of islands
@@ -111,6 +114,11 @@ below the crack, cleared the wall, hit the rock, hit the crack at an angle),
 which parameter to move and which way, and why, with the calculation as
 numbered steps. It never gives the value. The previous shot's trail stays on
 the plane, dimmed, for comparison.
+
+Each island opens with a short lesson on its topic before the game starts
+(📖 Tema reopens it). To add or edit one, write `lessons/<island-id>.md` and
+register it in `lessons/index.js`; formulas go between `$…$` (inline) or
+`$$…$$` (on their own line).
 
 A new mini-game goes in `galaxies/<galaxy>/games/<name>/`, builds its panel
 with `createShell` (shared/game/shell.js), mixes `SceneKit` into its Phaser

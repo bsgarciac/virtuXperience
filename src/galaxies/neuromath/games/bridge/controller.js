@@ -57,7 +57,7 @@ export function openBridge(node, onFinish){
     showToast('No se pudo iniciar el juego. Recarga la página e inténtalo de nuevo.');
     return;
   }
-  showBridgeIntro();
+  shell.showLesson(node.lesson, showBridgeIntro);
 }
 
 function closeBridge(){

@@ -1,3 +1,5 @@
+import { LESSONS } from './lessons/index.js';
+
 // The Neuromath galaxy: a solar system of planets (the subareas), each one
 // with its own chain of islands (the challenges), one per difficulty level.
 export var PLANETS = [
@@ -18,6 +20,7 @@ PLANETS.forEach(function(planet){
     ISLANDS.push({
       id: planet.id + '-' + level.id,
       planet: planet, level: level, levelIndex: li,
+      lesson: LESSONS[planet.id + '-' + level.id] || null, // Markdown, shown when it opens
       isLastOfPlanet: li === LEVELS.length - 1
     });
   });

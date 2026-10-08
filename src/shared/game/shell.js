@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { isConfirmOpen } from '../confirm.js';
 import { aiThinkingHtml, aiBubbleHtml } from '../ai.js';
 import { guideAvatarHtml } from '../guides.js';
+import { renderMarkdown } from '../markdown.js';
 
 // The frame every mini-game shares: a full-screen overlay with a top bar
 // (emblem, title, progress pips, close), a stage where the Phaser scene lives
@@ -28,7 +29,8 @@ export function createShell(opts){
         '<div class="gm-emblem">' + opts.emblem + '</div>' +
         '<div class="gm-titles"><span class="hud-eyebrow"></span><span class="gm-title">' + opts.title + '</span></div>' +
         '<div class="gm-pips" aria-label="' + opts.pipsLabel + '"></div>' +
-        '<button class="hud-btn" type="button" aria-label="Cerrar juego">✕ Cerrar</button>' +
+        '<button class="hud-btn gm-lesson-btn" type="button" hidden>📖 Tema</button>' +
+        '<button class="hud-btn gm-close-btn" type="button" aria-label="Cerrar juego">✕ Cerrar</button>' +
       '</div>' +
       '<div class="gm-stage">' +
         '<div class="gm-fog" aria-hidden="true"><i></i><i></i><i></i></div>' +
@@ -37,12 +39,18 @@ export function createShell(opts){
       '</div>' +
       '<div class="gm-panel">' + opts.panelHtml + '</div>' +
       '<div class="gm-final"><div class="gm-final-card"></div></div>' +
+      '<div class="gm-lesson"><div class="gm-lesson-card">' +
+        '<div class="gm-lesson-head">' + guideAvatarHtml('aura') + '<span><b>Aura</b> Antes de empezar, repasemos el tema.</span></div>' +
+        '<div class="gm-lesson-body"></div>' +
+        '<div class="result-actions"><button type="button" class="btn-primary">¡A la misión!</button></div>' +
+      '</div></div>' +
     '</div>';
   document.body.appendChild(root);
 
   function q(sel){ return root.querySelector(sel); }
   var el = {
-    root: root, eyebrow: q('.gm-titles .hud-eyebrow'), pips: q('.gm-pips'), close: q('.gm-top .hud-btn'),
+    root: root, eyebrow: q('.gm-titles .hud-eyebrow'), pips: q('.gm-pips'), close: q('.gm-close-btn'),
+    lessonBtn: q('.gm-lesson-btn'), lesson: q('.gm-lesson'), lessonBody: q('.gm-lesson-body'), lessonGo: q('.gm-lesson .btn-primary'),
     stage: q('.gm-stage'), banner: q('.gm-banner'), hintPanel: q('.gm-hint'), panel: q('.gm-panel'),
     goal: q('.gm-goal'), feedback: q('.gm-feedback'), hintBtn: q('.gm-hint-btn'), build: q('.gm-build'),
     final: q('.gm-final'), finalCard: q('.gm-final-card')
@@ -50,11 +58,20 @@ export function createShell(opts){
 
   var game = null, ro = null, bannerTimer = null, onClose = null, isOpen = false;
   var hintSource = null, hintBusy = null;
+  var lessonDone = null; // runs once when the player leaves the lesson the first time
 
   function onKey(e){
     if(e.key === 'Escape' && isOpen && !isConfirmOpen() && onClose) onClose();
   }
   el.close.addEventListener('click', function(){ if(isOpen && onClose) onClose(); });
+
+  el.lessonGo.addEventListener('click', function(){
+    el.lesson.classList.remove('show');
+    var done = lessonDone;
+    lessonDone = null;
+    if(done) done();
+  });
+  el.lessonBtn.addEventListener('click', function(){ if(isOpen) el.lesson.classList.add('show'); });
 
   // Hint: canned text after a short "thinking" delay (see shared/ai.js).
   el.hintBtn.addEventListener('click', function(){
@@ -84,6 +101,9 @@ export function createShell(opts){
       onClose = closeFn;
       isOpen = true;
       el.final.classList.remove('show');
+      el.lesson.classList.remove('show');
+      el.lessonBtn.hidden = true;
+      lessonDone = null;
       shell.hideBanner();
       root.classList.add('open');
       document.addEventListener('keydown', onKey);
@@ -97,8 +117,22 @@ export function createShell(opts){
       clearTimeout(bannerTimer);
       root.classList.remove('open');
       el.final.classList.remove('show');
+      el.lesson.classList.remove('show');
+      lessonDone = null;
       el.banner.classList.remove('show');
       el.hintPanel.hidden = true;
+    },
+
+    // The topic's short lesson (Markdown with $math$), shown over the game
+    // before it starts; onStart runs when the player dismisses it. Without a
+    // lesson, onStart runs right away. 📖 Tema reopens it later.
+    showLesson: function(md, onStart){
+      if(!md){ onStart(); return; }
+      el.lessonBody.innerHTML = renderMarkdown(md);
+      el.lessonBody.scrollTop = 0;
+      el.lessonBtn.hidden = false;
+      lessonDone = onStart;
+      el.lesson.classList.add('show');
     },
 
     // Starts the Phaser scene in the stage; throws if Phaser can't start.

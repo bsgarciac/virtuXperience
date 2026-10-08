@@ -161,3 +161,46 @@
   .fb-title{font-size:14px;}
   .fb-steps b{font-size:13px;}
 }
+
+/* ---------- Lesson card: the topic, shown before the game starts ---------- */
+.gm-lesson{
+  position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(5,8,20,.9);backdrop-filter:blur(3px);
+}
+.gm-lesson.show{display:flex;}
+.gm-lesson-card{
+  width:min(620px,100%);max-height:100%;display:flex;flex-direction:column;
+  padding:20px 22px 18px;border-radius:18px;
+  background:linear-gradient(180deg,#1a2350,#101731);border:1px solid var(--aura);
+  box-shadow:0 30px 70px -18px rgba(0,0,0,.75), 0 0 60px -22px var(--aura);
+}
+.gm-lesson-head{
+  display:flex;gap:10px;align-items:center;flex:none;
+  font-size:13px;color:var(--text-dim);padding-bottom:12px;margin-bottom:4px;border-bottom:1px solid #2c376b;
+}
+.gm-lesson-head b{color:var(--aura);}
+.gm-lesson-body{
+  overflow:auto;min-height:0;padding:4px 8px 8px 0;
+  scrollbar-width:thin;scrollbar-color:#3a447c transparent;
+  font-size:14px;line-height:1.6;color:var(--text);text-align:left;
+}
+.gm-lesson-body h2{font-family:'Cinzel',serif;font-size:21px;color:var(--gold);margin:10px 0 8px;font-weight:700;}
+.gm-lesson-body h3{font-family:'Cinzel',serif;font-size:15px;color:var(--text);margin:18px 0 6px;font-weight:600;}
+.gm-lesson-body p{margin:0 0 10px;color:var(--text-dim);}
+.gm-lesson-body strong{color:var(--text);}
+.gm-lesson-body ul,.gm-lesson-body ol{margin:0 0 10px;padding-left:22px;color:var(--text-dim);}
+.gm-lesson-body li{margin-bottom:6px;}
+.gm-lesson-body blockquote{
+  margin:14px 0 4px;padding:10px 14px;border-radius:10px;
+  background:#101a3a;border:1px solid rgba(232,184,75,.45);border-left-width:4px;
+}
+.gm-lesson-body blockquote p{margin:0;color:var(--text);}
+.gm-lesson-body .katex{font-size:1.08em;color:#fff3cf;}
+.gm-lesson-body .katex-display{
+  margin:10px 0 14px;padding:12px 8px;border-radius:10px;background:#0b1226;border:1px solid #26305a;
+  overflow-x:auto;overflow-y:hidden;
+}
+.gm-lesson .result-actions{flex:none;padding-top:12px;}
+@media (prefers-reduced-motion: no-preference){
+  .gm-lesson.show .gm-lesson-card{animation:gm-rise .45s cubic-bezier(.2,1.2,.4,1);}
+}

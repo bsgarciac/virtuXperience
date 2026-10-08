@@ -54,7 +54,7 @@ export function openCannon(node, onFinish){
     showToast('No se pudo iniciar el juego. Recarga la página e inténtalo de nuevo.');
     return;
   }
-  showIntro();
+  shell.showLesson(node.lesson, showIntro);
 }
 
 function closeCannon(){
