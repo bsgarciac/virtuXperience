@@ -50,3 +50,16 @@ body{
 .result-actions{display:flex;justify-content:center;gap:10px;}
 
 [hidden]{display:none!important;}
+
+/* ---------- Developer mode bar (shared/dev.js) ---------- */
+#dev-bar{
+  position:fixed;left:10px;bottom:10px;z-index:80;display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  max-width:calc(100% - 20px);padding:6px;border-radius:10px;
+  background:rgba(40,8,30,.9);border:1px dashed #ff6fae;box-shadow:0 10px 30px -10px rgba(0,0,0,.8);
+}
+#dev-bar .dev-tag{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.12em;color:#ff6fae;padding:0 4px;}
+#dev-bar button{
+  appearance:none;border:1px solid #ff6fae;background:#2a0f24;color:#ffd1e6;cursor:pointer;
+  font-family:'Manrope',sans-serif;font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:7px;
+}
+#dev-bar button:hover{background:#45163a;}

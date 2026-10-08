@@ -103,6 +103,7 @@ export function createShell(opts){
       el.final.classList.remove('show');
       el.lesson.classList.remove('show');
       el.lessonBtn.hidden = true;
+      el.panel.hidden = false;
       lessonDone = null;
       shell.hideBanner();
       root.classList.add('open');
@@ -135,7 +136,8 @@ export function createShell(opts){
       el.lesson.classList.add('show');
     },
 
-    // Starts the Phaser scene in the stage; throws if Phaser can't start.
+    // Starts the Phaser scene in the stage and returns the Phaser.Game;
+    // throws if Phaser can't start.
     startScene: function(SceneCtor){
       game = new Phaser.Game({
         type: Phaser.AUTO,
@@ -156,6 +158,7 @@ export function createShell(opts){
         });
         ro.observe(el.stage);
       }
+      return game;
     },
 
     stopScene: function(){
@@ -173,6 +176,10 @@ export function createShell(opts){
       el.pips.innerHTML = html;
       shell.setRestored((current + (currentDone ? 1 : 0)) / total);
     },
+
+    // Hides the controls panel so the stage takes the whole frame (e.g. while
+    // the player walks up to the Nodo); the Phaser scene resizes with it.
+    setPanelHidden: function(hidden){ el.panel.hidden = !!hidden; },
 
     // 0 = the stage is under the fog, 1 = fully restored.
     setRestored: function(f){ el.stage.style.setProperty('--restored', f.toFixed(3)); },
@@ -203,19 +210,20 @@ export function createShell(opts){
       el.feedback.innerHTML = fb ? '<div class="fb-title">' + fb.title + '</div>' + fb.html : idleHtml;
     },
 
-    // o: { icon, title, total, unit ('abismos'), fails, luma, recap, onContinue }
+    // o: { icon, title, total, unit ('abismos'), article ('los' | 'las'), fails, luma, recap, rewardsHtml, onContinue }
     showFinal: function(o){
       var stars = starsFor(o.fails);
       var starsHtml = '';
       for(var i = 0; i < 3; i++) starsHtml += i < stars ? '★' : '<span class="off">★</span>';
       var msg = o.fails === 0
-        ? 'Superaste los ' + o.total + ' ' + o.unit + ' sin un solo intento fallido. ¡Impecable!'
-        : 'Superaste los ' + o.total + ' ' + o.unit + ' tras ' + o.fails + ' ' + (o.fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
+        ? 'Superaste ' + (o.article || 'los') + ' ' + o.total + ' ' + o.unit + ' sin un solo intento fallido. ¡Impecable!'
+        : 'Superaste ' + (o.article || 'los') + ' ' + o.total + ' ' + o.unit + ' tras ' + o.fails + ' ' + (o.fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
       el.finalCard.innerHTML =
         '<div class="result-icon">' + o.icon + '</div>' +
         '<div class="result-title">' + o.title + '</div>' +
         '<div class="gm-stars" aria-label="' + stars + ' de 3 estrellas">' + starsHtml + '</div>' +
         '<div class="result-msg" style="margin-bottom:12px;">' + msg + '</div>' +
+        (o.rewardsHtml ? '<div class="gm-rewards">' + o.rewardsHtml + '</div>' : '') +
         (o.luma ? '<div class="gm-say luma">' + guideAvatarHtml('luma') + '<span><b>Luma</b> ' + o.luma + '</span></div>' : '') +
         '<div class="gm-say aura">' + guideAvatarHtml('aura') + '<span><b>Aura</b> Recuerda: ' + o.recap + '</span></div>' +
         '<div class="result-actions"><button type="button" class="btn-primary">Continuar</button></div>';

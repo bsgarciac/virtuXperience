@@ -34,21 +34,26 @@ src/
                               feedback card, final stars card
     game/scene-kit.js         Phaser pieces every game reuses (backdrop, rover,
                               particles, driving, celebration)
+  atlas/                      the map engine, shared by every galaxy
+    define.js                 galaxy content → planets × levels = islands
+    world.js                  the galaxies with a built path; the current one
+    progress.js               completed islands, Células Lógicas, badges
+                              (localStorage)
+    story.js                  each galaxy's intro and per-island briefings
+    hud.js                    Índice de Equilibrio, Células, info, reset
+    islands.js                opening/finishing islands, rewards
+    scene-common.js           starfield, rocket cursor, resize handling
+    system-scene.js           Phaser scene: the sun and the orbiting planets
+    island-scene.js           Phaser scene: one planet's path of islands
   galaxies/
     catalog.js                the galaxies shown on the select screen
     galaxy-art.js             procedural spiral-galaxy SVG for each card
+    starfield.js              canvas backdrop: stars flying towards you
     select.js                 galaxy select screen
     neuromath/
-      data.js                 planets (subareas) × levels = the islands
-      progress.js             completed islands (localStorage)
-      story.js                intro and per-island briefings (BIOSA narrative)
-      hud.js                  progress bar, info popover, reset
-      islands.js              which islands have a game, opening/finishing them
+      index.js                planets, games, intro and briefings
       lessons/                the topic lesson shown when each island opens
                               (one Markdown file per island, $math$ via KaTeX)
-      scene-common.js         starfield, rocket cursor, resize handling
-      system-scene.js         Phaser scene: the sun and the orbiting planets
-      island-scene.js         Phaser scene: one planet's path of islands
       games/bridge/           "Puente de operaciones"
         levels.js             exercise bank: 20 abysses in 5 tiers
         math.js               evaluation (right and left-to-right) + steps
@@ -56,16 +61,64 @@ src/
         controller.js         tiles, drag & drop, panel, flow
         scene.js              Phaser scene: abyss, planks, rover, effects
       games/cannon/           "Cañón parabólico", same layout
+    creagenesis/
+      index.js                Distrito Cristalino, its game, intro
+      lessons/                lesson for each island
+      games/alianzas/         "El Vacío de Alianzas"
+        content.js            entities, needs, call steps, decision cards
+        sprites.js            cuts the Sintonizador's poses out of the sheet
+        scene.js              Phaser scene: the walkable district, the Nodo
+        controller.js         the four phases, panel, flow
+public/assets/                images served as-is (art, Aura's portrait)
 ```
 
 ## Galaxias → planetas → islas
 
-A galaxy is an area (Neuromath). Entering it shows a solar system: the
-*Matriz Lógica* as the sun and one planet per subarea (Cálculo, Fundamentos
+A galaxy is an area (Neuromath, CreaGenesis). Entering it shows a solar
+system: its hack as the sun (the *Matriz Lógica*, the *Nanocatalizador
+Creativo*) and one planet per subarea (Cálculo, Fundamentos
 de matemáticas, Álgebra, Estadística), which the player can visit in any
 order. A planet holds islands, one challenge each (Inicial, Intermedio,
 Avanzado). Inside a planet the islands suggest an order: jumping past an
 unfinished built island asks first; unbuilt islands don't block.
+
+Each galaxy has its own way of playing an island: in Neuromath you fly the
+map and the challenge is a mini-game; in CreaGenesis you land and **walk**
+the Sintonizador to the island's Nodo before the challenge opens.
+
+Islands pay **Células Lógicas** the first time they're restored (and
+CreaGenesis adds the ones picked up while walking); some also award an Open
+Badge. The HUD shows the wallet and the current galaxy's *Índice de
+Equilibrio* (islands restored).
+
+## CreaGenesis · El Vacío de Alianzas
+
+Content and art come from the team's prototype proposal (AI-generated
+mockups, adapted). The player walks and jumps across the Distrito Cristalino
+(← → / A D, ↑ / W to jump, touch buttons on phones) and picks up the five
+Células: a force field seals the corrupted Nodo until all of them are in,
+then E / Espacio activates it. Luma frames the problem, the
+lesson follows, and four phases run in the panel: **Mapa de Actores** (sort
+entities into three orbits), **Directorio de Contactos** (match needs to
+contacts), **Ruta de Convocatorias** (drag six steps into a column; on
+"Postular" the application walks down it, lighting each step green, and stops
+in red at the first misplaced one with the proposal's feedback) and **Lienzo de
+Decisión** (three strategies, only one clears the fog). Each phase blends the
+Nodo's art from corrupted to purified.
+
+The Sintonizador's poses are keyed out of a JPG sheet at load time
+(`sprites.js`); with transparent PNGs that file can go. Open the game with
+`?debug` in the URL to see the platforms' physics bodies.
+
+## Modo desarrollador
+
+Open the site with `?dev=<code>` to get a small bar of shortcuts (complete
+the open island, skip the walk, win the current phase); `?dev=off` turns it
+off. The code is in `.dev-code` (git-ignored, never published); the source
+only has its SHA-256 (`src/shared/dev.js`). It keeps the shortcuts out of
+students' way, but it is not security: the flag lives in localStorage. To
+change the code, write a new one to `.dev-code` and put
+`printf '%s' "$(cat .dev-code)" | shasum -a 256` into `CODE_SHA256`.
 
 ## Narrativa (BIOSA)
 
@@ -74,7 +127,7 @@ every island past the first unfinished one; it drifts, its edge creeps
 forward, and it rolls back when an island is restored. In the solar system
 it drains the planets' colour, which comes back island by island. Inside a game the stage
 starts grey and regains its colour exercise by exercise.
-**Aura** (blue, logic) gives the hints and the closing recap; **Luma** (gold,
+**Aura** (blue, logic; drawn as the crystal fox) gives the hints and the closing recap; **Luma** (gold,
 ethics) says why the island matters. The intro plays the first time the
 player enters Neuromath (📜 Historia replays it), and each island has a
 short briefing the first time it is opened.

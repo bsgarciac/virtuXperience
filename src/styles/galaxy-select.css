@@ -6,9 +6,8 @@
   overflow:auto;padding:32px 20px;
 }
 #galaxy-select.hidden{display:none;}
-.galaxy-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-.galaxy-stars i{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;display:block;}
-.galaxy-select-inner{position:relative;max-width:920px;width:100%;text-align:center;}
+.galaxy-stars{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;}
+.galaxy-select-inner{position:relative;max-width:1060px;width:100%;text-align:center;}
 .galaxy-select-head{margin-bottom:36px;}
 .galaxy-select-title{
   font-family:'Cinzel',serif;font-weight:700;font-size:clamp(26px,4vw,38px);margin:6px 0 10px;
@@ -17,12 +16,13 @@
 }
 .galaxy-select-sub{font-size:14px;color:var(--text-dim);max-width:520px;margin:0 auto;line-height:1.55;}
 .galaxy-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:28px 12px;
-  max-width:860px;margin:0 auto;
+  display:flex;flex-wrap:wrap;justify-content:center;gap:28px 12px;
+  max-width:1020px;margin:0 auto;
 }
 .galaxy-card{
   appearance:none;border:none;background:none;cursor:pointer;color:inherit;
   display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px;font-family:inherit;
+  width:188px;
 }
 .galaxy-art{
   display:block;width:min(40vw,176px);height:min(40vw,176px);overflow:visible;
@@ -45,5 +45,5 @@
 .galaxy-card:focus-visible{outline:2px solid var(--cyan);outline-offset:4px;border-radius:14px;}
 
 @media (max-width:640px){
-  .galaxy-grid{grid-template-columns:repeat(2,1fr);row-gap:30px;}
+  .galaxy-card{width:calc(50% - 6px);}
 }

@@ -1,14 +1,15 @@
 import Phaser from 'phaser';
-import { PLANETS, islandsOf } from './data.js';
-import { doneCount, planetFullyDone, allDone } from './progress.js';
+import { galaxy, islandsOf } from './world.js';
+import { doneCount, planetFullyDone, galaxyDone } from './progress.js';
 import { playableCount } from './islands.js';
 import { mapRef } from './map-ref.js';
-import { showTooltip, hideTooltip } from '../../shared/tooltip.js';
+import { showTooltip, hideTooltip } from '../shared/tooltip.js';
 import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor } from './scene-common.js';
 
-/* ---- System scene: the Matriz Lógica and its planets ---- */
-// The Neuromath galaxy seen from above: the Matriz Lógica burns at the centre
-// as a sun, and each subarea is a planet on its own orbit. The player can
+/* ---- System scene: a galaxy's sun and its planets ---- */
+// The current galaxy seen from above: its hack (the Matriz Lógica, the
+// Nanocatalizador…) burns at the centre as a sun, and each subarea is a
+// planet on its own orbit. The player can
 // land on any planet, in any order. The Neblina Gris drains a planet's
 // colour; it comes back island by island as the player restores them.
 
@@ -27,6 +28,8 @@ SystemScene.prototype.constructor = SystemScene;
 
 SystemScene.prototype.create = function(){
   mapRef.scene = this;
+  this.galaxy = galaxy();
+  this.planetDefs = this.galaxy.planets;
   this.W = this.scale.width;
   this.H = this.scale.height;
   this.cx = this.W / 2;
@@ -54,9 +57,11 @@ SystemScene.prototype.computeOrbits = function(){
   // Spread the orbits between just outside the sun and the edge of the view.
   var inner = (this.sunR + this.planetR + 14) / Math.max(1, Math.min(maxRx, ry));
   inner = Phaser.Math.Clamp(inner, 0.3, 0.55);
-  this.orbits = PLANETS.map(function(p, i){
-    var f = inner + (1 - inner) * i / (PLANETS.length - 1);
-    return { rx: maxRx * f, ry: ry * f, angle: ORBITS[i].start, speed: Math.PI * 2 / ORBITS[i].period };
+  var n = this.planetDefs.length;
+  this.orbits = this.planetDefs.map(function(p, i){
+    var f = n === 1 ? (inner + 1) / 2 : inner + (1 - inner) * i / (n - 1);
+    var o = ORBITS[i % ORBITS.length];
+    return { rx: maxRx * f, ry: ry * f, angle: o.start, speed: Math.PI * 2 / o.period };
   });
 };
 
@@ -64,32 +69,32 @@ SystemScene.prototype.drawOrbits = function(){
   var g = this.add.graphics();
   var self = this;
   this.orbits.forEach(function(o, i){
-    g.lineStyle(1.5, ColorNum(PLANETS[i].color), 0.22);
+    g.lineStyle(1.5, ColorNum(self.planetDefs[i].color), 0.22);
     g.strokeEllipse(self.cx, self.cy, o.rx * 2, o.ry * 2);
   });
 };
 
 SystemScene.prototype.drawSun = function(){
   var r = this.sunR, cx = this.cx, cy = this.cy;
-  var done = allDone();
+  var done = galaxyDone(this.galaxy);
   var halo2 = this.add.circle(cx, cy, r * 2.4, ColorNum('#e8b84b'), 0.05);
   var halo1 = this.add.circle(cx, cy, r * 1.6, ColorNum('#f2a34d'), 0.12);
   var body = this.add.circle(cx, cy, r, ColorNum('#f2b84b'), 1);
   var inner = this.add.circle(cx - r * 0.18, cy - r * 0.2, r * 0.62, ColorNum('#ffe3a3'), 0.75);
   var core = this.add.circle(cx - r * 0.26, cy - r * 0.28, r * 0.26, 0xffffff, 0.7);
-  var glyph = this.add.text(cx, cy, 'Σ', { fontFamily:'Cinzel, serif', fontSize: Math.round(r * 0.8) + 'px', fontStyle:'700', color:'#7a4a10' }).setOrigin(0.5).setAlpha(0.75);
+  var glyph = this.add.text(cx, cy, this.galaxy.sun.glyph, { fontFamily:'Cinzel, serif', fontSize: Math.round(r * 0.8) + 'px', fontStyle:'700', color:'#7a4a10' }).setOrigin(0.5).setAlpha(0.75);
   [halo2, halo1, body, inner, core, glyph].forEach(function(o){ o.setDepth(50); });
   this.tweens.add({ targets: halo1, scale: { from: 1, to: 1.15 }, alpha: { from: 0.1, to: 0.2 }, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   this.tweens.add({ targets: halo2, scale: { from: 1, to: 1.1 }, duration: 3400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-  var label = this.add.text(cx, cy + r * 1.25 + 10, done ? '♛ ATLAS COMPLETADO' : 'MATRIZ LÓGICA', {
+  var label = this.add.text(cx, cy + r * 1.25 + 10, done ? '♛ SECTOR RESTAURADO' : this.galaxy.sun.label, {
     fontFamily:'Space Mono, monospace', fontSize:'10px', color: done ? '#e8b84b' : '#c9a35a'
   }).setOrigin(0.5).setDepth(50).setAlpha(0.85);
   label.setLetterSpacing(2);
 };
 
 SystemScene.prototype.drawTitle = function(){
-  var title = this.add.text(this.cx, 26, 'Sistema Neuromath', {
+  var title = this.add.text(this.cx, 26, 'Sistema ' + this.galaxy.name, {
     fontFamily:'Cinzel, serif', fontSize:'20px', fontStyle:'600', color:'#ecebf7'
   }).setOrigin(0.5, 0).setDepth(200);
   title.setShadow(0, 2, '#05070f', 6, false, true);
@@ -101,7 +106,7 @@ SystemScene.prototype.drawTitle = function(){
 
 SystemScene.prototype.drawPlanets = function(){
   var self = this;
-  this.planets = PLANETS.map(function(planet, i){
+  this.planets = this.planetDefs.map(function(planet, i){
     var r = self.planetR;
     var total = islandsOf(planet.id).length;
     var done = doneCount(planet.id);

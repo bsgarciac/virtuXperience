@@ -9,16 +9,27 @@ import './styles/galaxy-select.css';
 import './styles/game-shell.css';
 import './styles/bridge.css';
 import './styles/cannon.css';
+import './styles/alianzas.css';
 import './styles/story.css';
 
+import './shared/dev.js'; // reads ?dev=… before anything else
 import { initGalaxySelect } from './galaxies/select.js';
-import { SystemScene } from './galaxies/neuromath/system-scene.js';
-import { IslandScene } from './galaxies/neuromath/island-scene.js';
-import { refreshHud } from './galaxies/neuromath/hud.js';
+import { SystemScene } from './atlas/system-scene.js';
+import { IslandScene } from './atlas/island-scene.js';
+import { refreshHud } from './atlas/hud.js';
+import { mapRef } from './atlas/map-ref.js';
+import { galaxy, setGalaxy } from './atlas/world.js';
 import { notifyHost } from './shared/host.js';
-import { showIntroOnce } from './galaxies/neuromath/story.js';
+import { showIntroOnce } from './atlas/story.js';
 
-initGalaxySelect(function(){ showIntroOnce(); });
+// Entering a galaxy shows its solar system (the map may still be on the
+// previous galaxy's planets or islands) and its intro the first time.
+initGalaxySelect(function(g){
+  setGalaxy(g.id);
+  refreshHud();
+  if(mapRef.scene) mapRef.scene.scene.start('SystemScene');
+  showIntroOnce(galaxy());
+});
 
 function boot(){
   var config = {

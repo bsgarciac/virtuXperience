@@ -175,10 +175,14 @@
   box-shadow:0 30px 70px -18px rgba(0,0,0,.75), 0 0 60px -22px var(--aura);
 }
 .gm-lesson-head{
-  display:flex;gap:10px;align-items:center;flex:none;
-  font-size:13px;color:var(--text-dim);padding-bottom:12px;margin-bottom:4px;border-bottom:1px solid #2c376b;
+  display:flex;gap:14px;align-items:center;flex:none;
+  font-size:14px;color:var(--text);padding-bottom:12px;margin-bottom:4px;border-bottom:1px solid #2c376b;
 }
-.gm-lesson-head b{color:var(--aura);}
+.gm-lesson-head .guide-avatar{width:68px;height:68px;font-size:28px;}
+.gm-lesson-head > span:last-child{
+  position:relative;padding:9px 13px;border-radius:12px;background:#0f1838;border:1px solid rgba(108,196,255,.45);
+}
+.gm-lesson-head b{display:block;font-family:'Cinzel',serif;font-size:15px;color:var(--aura);}
 .gm-lesson-body{
   overflow:auto;min-height:0;padding:4px 8px 8px 0;
   scrollbar-width:thin;scrollbar-color:#3a447c transparent;
@@ -204,3 +208,14 @@
 @media (prefers-reduced-motion: no-preference){
   .gm-lesson.show .gm-lesson-card{animation:gm-rise .45s cubic-bezier(.2,1.2,.4,1);}
 }
+
+.gm-panel[hidden]{display:none;}
+/* Rewards on the final card: Células Lógicas, badges */
+.gm-rewards{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 14px;}
+.gm-reward{
+  display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;
+  background:#101a3a;border:1px solid rgba(232,184,75,.5);font-size:12.5px;color:var(--text);
+}
+.gm-reward b{color:var(--gold);font-family:'Space Mono',monospace;}
+.gm-reward.badge{border-color:rgba(111,227,154,.6);}
+.gm-reward.badge b{color:#6fe39a;font-family:'Cinzel',serif;}

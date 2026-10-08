@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Atlas Neuromath</title>
+<title>Atlas VirtuXperience</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
@@ -16,8 +16,9 @@
       <span class="hud-eyebrow">VirtuXperience &middot; Camino</span>
       <span class="hud-title">Atlas Neuromath</span>
     </div>
+    <div class="hud-cells" title="Células Lógicas"><span class="hud-cells-gem" aria-hidden="true">◆</span><span id="hud-cells">0</span><span class="hud-cells-label">Células</span></div>
     <div class="hud-progress">
-      <div class="hud-progress-top"><span id="progress-label">0/12 islas</span><span id="progress-pct">0%</span></div>
+      <div class="hud-progress-top"><span id="progress-label">Equilibrio · 0/12 islas</span><span id="progress-pct">0%</span></div>
       <div class="hud-bar-track"><div class="hud-bar-fill" id="progress-fill" style="width:0%"></div></div>
     </div>
     <button class="hud-btn" id="btn-galaxies" type="button">🌌 Galaxias</button>
@@ -28,7 +29,7 @@
 
   <div id="info-pop" role="dialog" aria-label="Cómo leer el atlas">
     <h3>Tu misión</h3>
-    <p>La <b style="color:var(--text)">Neblina Gris</b> cubre el sector Neuromath y congela sus planetas. Elige un planeta en el orden que quieras y resuelve el Nodo de Pregunta de cada una de sus islas para hacerla retroceder y devolverle el color.</p>
+    <p>La <b style="color:var(--text)">Neblina Gris</b> cubre cada galaxia y congela sus planetas. Elige un planeta en el orden que quieras y resuelve el Nodo de Pregunta de cada una de sus islas para hacerla retroceder, devolverle el color y ganar <b style="color:var(--gold)">Células Lógicas</b>.</p>
     <div class="legend-row"><span class="legend-dot locked"></span> Bajo la neblina &mdash; se abrirá pronto</div>
     <div class="legend-row"><span class="legend-dot available"></span> Listo para restaurar</div>
     <div class="legend-row"><span class="legend-dot done"></span> Isla restaurada</div>
@@ -37,7 +38,7 @@
 
   <div id="game-wrap">
     <div id="game-container"></div>
-    <button class="hud-btn map-back" id="btn-back" type="button" hidden>← Sistema Neuromath</button>
+    <button class="hud-btn map-back" id="btn-back" type="button" hidden>← Sistema</button>
     <div id="tooltip"></div>
     <div id="toast"></div>
   </div>
@@ -56,12 +57,12 @@
 </div>
 
 <div id="galaxy-select">
-  <div class="galaxy-stars" id="galaxy-stars"></div>
+  <canvas class="galaxy-stars" id="galaxy-stars" aria-hidden="true"></canvas>
   <div class="galaxy-select-inner">
     <div class="galaxy-select-head">
       <span class="hud-eyebrow">VirtuXperience</span>
       <h1 class="galaxy-select-title">Elige tu galaxia</h1>
-      <p class="galaxy-select-sub">Cada galaxia guarda un camino de misiones para afianzar una disciplina distinta. Empecemos por Neuromath.</p>
+      <p class="galaxy-select-sub">Cada galaxia guarda un camino de misiones para afianzar una disciplina distinta. Neuromath y CreaGenesis ya están abiertas.</p>
     </div>
     <div class="galaxy-grid" id="galaxy-grid"></div>
   </div>

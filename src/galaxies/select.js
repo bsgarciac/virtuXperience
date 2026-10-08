@@ -1,21 +1,13 @@
 import { GALAXIES } from './catalog.js';
 import { showToast } from '../shared/toast.js';
 import { galaxySvg } from './galaxy-art.js';
+import { startStarfield } from './starfield.js';
 
 var galaxySelect = document.getElementById('galaxy-select');
 var galaxyGrid = document.getElementById('galaxy-grid');
 var galaxyStars = document.getElementById('galaxy-stars');
 
-(function seedGalaxyStars(){
-  var html = '';
-  for(var i=0;i<140;i++){
-    var top = Math.random()*100, left = Math.random()*100;
-    var size = (Math.random()*1.6 + 0.6).toFixed(2);
-    var op = (Math.random()*0.6 + 0.25).toFixed(2);
-    html += '<i style="top:' + top + '%;left:' + left + '%;width:' + size + 'px;height:' + size + 'px;opacity:' + op + ';"></i>';
-  }
-  galaxyStars.innerHTML = html;
-})();
+startStarfield(galaxyStars, galaxySelect);
 
 var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

@@ -1,4 +1,4 @@
-import { GUIDES, guideAvatarHtml } from './guides.js';
+import { GUIDES, guidePortraitHtml } from './guides.js';
 
 // A short conversation between the guides, one line at a time.
 // lines: [{ who: 'luma'|'aura', text }]. opts: { eyebrow, doneLabel, onDone }.
@@ -10,9 +10,12 @@ root.setAttribute('aria-modal', 'true');
 root.innerHTML =
   '<div class="dlg-card">' +
     '<div class="dlg-eyebrow hud-eyebrow"></div>' +
-    '<div class="dlg-body">' +
-      '<div class="dlg-who"></div>' +
-      '<p class="dlg-text" aria-live="polite"></p>' +
+    '<div class="dlg-main">' +
+      '<div class="dlg-portrait"></div>' +
+      '<div class="dlg-body">' +
+        '<div class="dlg-who"></div>' +
+        '<p class="dlg-text" aria-live="polite"></p>' +
+      '</div>' +
     '</div>' +
     '<div class="dlg-foot">' +
       '<div class="dlg-dots"></div>' +
@@ -23,7 +26,7 @@ root.innerHTML =
 document.body.appendChild(root);
 
 var el = {
-  card: root.querySelector('.dlg-card'), eyebrow: root.querySelector('.dlg-eyebrow'),
+  card: root.querySelector('.dlg-card'), eyebrow: root.querySelector('.dlg-eyebrow'), portrait: root.querySelector('.dlg-portrait'),
   who: root.querySelector('.dlg-who'), text: root.querySelector('.dlg-text'),
   dots: root.querySelector('.dlg-dots'), skip: root.querySelector('.dlg-skip'), next: root.querySelector('.dlg-next')
 };
@@ -32,7 +35,11 @@ var cur = null;
 function render(){
   var line = cur.lines[cur.i], g = GUIDES[line.who], last = cur.i === cur.lines.length - 1;
   el.card.className = 'dlg-card ' + line.who;
-  el.who.innerHTML = guideAvatarHtml(line.who) + '<span><b>' + g.name + '</b><i>' + g.role + '</i></span>';
+  if(el.portrait.dataset.who !== line.who){
+    el.portrait.innerHTML = guidePortraitHtml(line.who);
+    el.portrait.dataset.who = line.who;
+  }
+  el.who.innerHTML = '<b>' + g.name + '</b><i>' + g.role + '</i>';
   el.text.innerHTML = line.text;
   var dots = '';
   for(var i = 0; i < cur.lines.length; i++) dots += '<span class="' + (i === cur.i ? 'on' : '') + '"></span>';

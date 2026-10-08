@@ -1,0 +1,126 @@
+/* ---------- El Vacío de Alianzas (CreaGenesis) ---------- */
+#alianzas-game .gm-shell{--btn-accent:#6fe39a;}
+#alianzas-game .gm-emblem{color:#6fe39a;border-color:#6fe39a;box-shadow:0 0 16px -2px #6fe39a;background:radial-gradient(circle at 35% 30%, #1d4a3a, #0f1530 75%);}
+#alianzas-game .gm-goal{line-height:1.5;}
+.ag-phase-tag{
+  display:inline-block;margin-right:6px;padding:2px 9px;border-radius:999px;
+  font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:#6fe39a;background:rgba(111,227,154,.1);border:1px solid rgba(111,227,154,.4);
+}
+
+/* Touch controls during the walk (hidden on devices with a fine pointer) */
+.ag-touch{position:absolute;left:12px;right:12px;bottom:12px;z-index:4;display:flex;gap:8px;pointer-events:none;}
+.ag-touch span{flex:1;}
+.ag-touch button{
+  pointer-events:auto;width:52px;height:52px;border-radius:14px;touch-action:none;user-select:none;
+  background:rgba(13,21,48,.8);border:1px solid #4a5697;color:var(--text);font-size:20px;font-weight:700;
+}
+.ag-touch button:active{background:#1d285a;border-color:var(--aura);}
+.ag-touch[hidden]{display:none;}
+@media (hover:hover) and (pointer:fine){ .ag-touch{display:none;} }
+
+/* Cards you place into slots (phases 1–2) */
+.ag-work{display:flex;flex-direction:column;gap:10px;}
+.ag-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.ag-slots.single{grid-template-columns:repeat(2,1fr);}
+.ag-slot{
+  border:1.5px dashed color-mix(in srgb, var(--slot) 60%, transparent);border-radius:12px;padding:8px;
+  background:color-mix(in srgb, var(--slot) 7%, #0d1530);cursor:pointer;min-height:74px;
+  transition:background .15s, border-color .15s;
+}
+.ag-slot.over,.ag-slot:hover{background:color-mix(in srgb, var(--slot) 16%, #0d1530);border-style:solid;}
+.ag-slot-label{font-size:11.5px;font-weight:700;color:var(--slot);margin-bottom:6px;line-height:1.35;}
+.ag-slots.single .ag-slot-label{color:var(--text);font-weight:600;font-size:12.5px;}
+.ag-slot-items{display:flex;flex-wrap:wrap;gap:6px;}
+.ag-drop{font-size:11px;color:var(--text-faint);font-style:italic;}
+.ag-tray{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:36px;align-items:center;}
+.ag-tray-empty{font-size:12px;color:var(--text-faint);}
+.ag-chip{
+  appearance:none;border:1px solid #4a5697;background:#1a2350;color:var(--text);
+  font-family:'Manrope',sans-serif;font-weight:700;font-size:12.5px;padding:7px 11px;border-radius:9px;cursor:grab;
+  transition:transform .1s, border-color .15s, background .15s;
+}
+.ag-chip:hover{border-color:var(--aura);}
+.ag-chip.selected{border-color:var(--gold);background:#2a2c4a;box-shadow:0 0 12px -2px var(--gold);transform:translateY(-2px);}
+.ag-chip.locked{cursor:default;border-color:#4fbf8b;background:rgba(79,191,139,.16);color:#d8ffe9;}
+.ag-chip.locked::before{content:'✓ ';color:#6fe39a;}
+.ag-chip.wrong{border-color:var(--ember);animation:ag-shake .4s;}
+@keyframes ag-shake{20%,60%{transform:translateX(-4px);}40%,80%{transform:translateX(4px);}}
+
+.ag-why{margin:0;padding-left:18px;}
+.ag-why li{margin-bottom:5px;}
+.ag-tip{margin:8px 0 0;font-size:12px;color:var(--text-dim);}
+
+/* Phase 3: the route — one column, first step at the top */
+.ag-route{list-style:none;margin:0 auto;padding:0;display:flex;flex-direction:column;gap:5px;width:min(620px,100%);}
+.ag-step{
+  display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:10px;
+  background:#131b3a;border:1px solid #33407c;cursor:grab;touch-action:none;user-select:none;
+  transition:transform .18s ease, background .25s, border-color .25s, box-shadow .25s;
+}
+.ag-step:hover{border-color:#4a5697;}
+.ag-step:focus-visible{outline:2px solid var(--aura);outline-offset:2px;}
+.ag-step.dragging{
+  cursor:grabbing;transition:none;position:relative;z-index:2;
+  background:#1d285a;border-color:var(--gold);box-shadow:0 12px 26px -8px rgba(0,0,0,.7), 0 0 16px -4px var(--gold);
+}
+.ag-grip{color:var(--text-faint);font-size:13px;letter-spacing:-2px;}
+.ag-step-n{
+  flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#0b1226;background:#8f9bc8;transition:background .25s;
+}
+.ag-step-t{display:flex;flex-direction:column;min-width:0;margin-right:auto;}
+.ag-step-t b{font-size:13px;color:var(--text);}
+.ag-step-t i{font-style:normal;font-size:11px;color:var(--text-dim);line-height:1.35;}
+.ag-step-mark{flex:none;width:22px;text-align:center;font-weight:800;font-size:16px;}
+/* walking the route on "Postular" */
+.ag-step.ok{background:rgba(79,191,139,.14);border-color:#4fbf8b;box-shadow:0 0 16px -6px #4fbf8b;}
+.ag-step.ok .ag-step-n{background:#6fe39a;}
+.ag-step.ok .ag-step-mark{color:#6fe39a;}
+.ag-step.bad{background:rgba(226,96,79,.14);border-color:var(--ember);box-shadow:0 0 18px -6px var(--ember);}
+.ag-step.bad .ag-step-n{background:var(--ember);}
+.ag-step.bad .ag-step-mark{color:var(--ember);}
+@media (prefers-reduced-motion: no-preference){
+  .ag-step.ok,.ag-step.bad{animation:ag-pop .35s ease-out;}
+}
+@keyframes ag-pop{0%{transform:scale(.97);}60%{transform:scale(1.02);}100%{transform:scale(1);}}
+
+/* Phase 4: the decision cards */
+.ag-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.ag-card{
+  --tone:#e8b84b;
+  appearance:none;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:8px;
+  padding:12px;border-radius:14px;background:#111a3a;border:1.5px solid color-mix(in srgb, var(--tone) 55%, transparent);
+  color:var(--text);font-family:'Manrope',sans-serif;transition:transform .12s, box-shadow .15s;
+}
+.ag-card.tone-teal{--tone:#57d9c9;}
+.ag-card.tone-rose{--tone:#e2708f;}
+.ag-card:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 0 22px -6px var(--tone);}
+.ag-card-tag{font-family:'Cinzel',serif;font-weight:700;font-size:14px;color:var(--tone);}
+.ag-card-text{font-size:12.5px;line-height:1.5;color:var(--text-dim);}
+.ag-card.tried{opacity:.45;}
+.ag-card.chosen{border-color:#6fe39a;box-shadow:0 0 26px -4px #6fe39a;}
+.ag-card:disabled{cursor:default;}
+
+@media (max-width:640px){
+  .ag-slots,.ag-slots.single,.ag-cards{grid-template-columns:1fr;}
+  .ag-step-t i{display:none;}
+}
+/* the shared feedback card sets <b> in monospace for numbers; here it's prose */
+#alianzas-game .gm-feedback b{font-family:inherit;font-size:inherit;white-space:normal;}
+#alianzas-game .gm-feedback{scrollbar-width:thin;scrollbar-color:#3a447c transparent;}
+/* the shared goal line styles <b> as a big number; here it's prose */
+#alianzas-game .gm-goal b{font-family:inherit;font-size:inherit;color:var(--text);text-shadow:none;white-space:normal;}
+
+/* Células counter during the walk */
+.ag-room-hud{
+  position:absolute;left:12px;top:12px;z-index:4;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;max-width:calc(100% - 24px);
+  padding:7px 12px;border-radius:10px;background:rgba(11,18,38,.85);border:1px solid #ff7a6b;
+  font-size:13px;color:var(--text);box-shadow:0 8px 20px -8px rgba(0,0,0,.7);
+}
+.ag-room-hud b{font-family:'Space Mono',monospace;font-size:15px;color:#9ff7ff;}
+.ag-room-hud i{font-style:normal;font-size:11.5px;color:#ffd2cc;}
+.ag-room-gem{color:#9ff7ff;text-shadow:0 0 8px #7ff6ff;}
+.ag-room-hud.done{border-color:#6fe39a;}
+.ag-room-hud.done i{color:#b8f5cf;}
+.ag-room-hud[hidden]{display:none;}

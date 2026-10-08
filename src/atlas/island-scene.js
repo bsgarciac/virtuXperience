@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
-import { getPlanet, islandsOf, PLANETS } from './data.js';
+import { galaxy, getPlanet, islandsOf } from './world.js';
 import { isDone, planetFullyDone } from './progress.js';
 import { isPlayable, isUnlocked, gameTitle, attemptOpenIsland } from './islands.js';
 import { mapRef } from './map-ref.js';
-import { showTooltip, hideTooltip } from '../../shared/tooltip.js';
+import { showTooltip, hideTooltip } from '../shared/tooltip.js';
 import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor } from './scene-common.js';
 
 /* ---- Island scene: one planet's chain of floating islands ---- */
@@ -21,7 +21,7 @@ IslandScene.prototype.constructor = IslandScene;
 
 IslandScene.prototype.create = function(data){
   mapRef.scene = this;
-  this.planet = getPlanet(data && data.planetId) || PLANETS[0];
+  this.planet = getPlanet(data && data.planetId) || galaxy().planets[0];
   this.islands = islandsOf(this.planet.id);
   this.W = this.scale.width;
   this.H = this.scale.height;
@@ -43,7 +43,7 @@ IslandScene.prototype.create = function(data){
   this.scrollToFrontier(true);
 
   backBtn.hidden = false;
-  backBtn.textContent = '← Sistema Neuromath';
+  backBtn.textContent = '← Sistema ' + this.planet.galaxy.name;
   this.events.once('shutdown', function(){ backBtn.hidden = true; hideTooltip(); });
   restartOnResize(this, { planetId: this.planet.id });
 };
