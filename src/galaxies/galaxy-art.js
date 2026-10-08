@@ -27,8 +27,8 @@ function mix(stops, t){
 
 function f1(n){ return n.toFixed(1); }
 
-// animate: whether the arms slowly turn (off for locked galaxies and when
-// the player prefers reduced motion).
+// animate: whether the arms slowly turn (off for locked galaxies; CSS also
+// stops it when the player prefers reduced motion).
 export function galaxySvg(g, animate){
   var rand = seeded(g.id);
   var uid = 'gx-' + g.id;
@@ -65,9 +65,8 @@ export function galaxySvg(g, animate){
     stars += '<circle cx="' + f1(Math.cos(ha) * hr) + '" cy="' + f1(Math.sin(ha) * hr) + '" r="' + f1(0.4 + rand() * 0.7) + '" fill="#fff" opacity="' + f1(0.25 + rand() * 0.45) + '"/>';
   }
 
-  var spin = animate
-    ? '<animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="' + (70 + Math.round(rand() * 30)) + 's" repeatCount="indefinite"/>'
-    : '';
+  // One turn every ~40 s, each galaxy at its own pace (galaxy-select.css).
+  var spin = animate ? ' class="galaxy-spin" style="--spin:' + (36 + Math.round(rand() * 12)) + 's"' : '';
 
   return '<svg class="galaxy-art" viewBox="-100 -100 200 200" aria-hidden="true">' +
     '<defs>' +
@@ -77,7 +76,7 @@ export function galaxySvg(g, animate){
     '</defs>' +
     '<g transform="rotate(' + angle + ') scale(1 ' + f1(tilt) + ')">' +
       '<circle r="98" fill="url(#' + uid + '-halo)"/>' +
-      '<g>' + spin +
+      '<g' + spin + '>' +
         '<g filter="url(#' + uid + '-blur)">' + glow + '</g>' +
         stars +
       '</g>' +

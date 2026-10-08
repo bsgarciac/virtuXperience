@@ -33,6 +33,12 @@
   transform:scale(1.06);
   filter:drop-shadow(0 0 24px color-mix(in srgb, var(--g1) 70%, transparent));
 }
+/* The arms turn around the galaxy's centre, which is (0,0) of the SVG's
+   viewBox — hence view-box and an origin of 0 0. */
+.galaxy-spin{transform-box:view-box;transform-origin:0 0;}
+@media (prefers-reduced-motion: no-preference){
+  .galaxy-spin{animation:galaxy-spin var(--spin,40s) linear infinite;}
+}
 .galaxy-card.locked .galaxy-art{filter:saturate(.85) brightness(.72);}
 .galaxy-lock{
   position:absolute;bottom:14%;right:14%;width:26px;height:26px;border-radius:50%;

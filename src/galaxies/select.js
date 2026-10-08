@@ -9,8 +9,6 @@ var galaxyStars = document.getElementById('galaxy-stars');
 
 startStarfield(galaxyStars, galaxySelect);
 
-var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 // onEnter(galaxy) runs when the player picks an enabled galaxy.
 export function initGalaxySelect(onEnter){
   GALAXIES.forEach(function(g){
@@ -22,7 +20,7 @@ export function initGalaxySelect(onEnter){
     if(g.colors.g3) btn.style.setProperty('--g3', g.colors.g3);
     btn.innerHTML =
       '<span class="galaxy-orb-wrap">' +
-        galaxySvg(g, g.enabled && !reduceMotion) +
+        galaxySvg(g, g.enabled) +
         (g.enabled ? '' : '<span class="galaxy-lock">🔒</span>') +
       '</span>' +
       '<span class="galaxy-name">' + g.name + '</span>' +
