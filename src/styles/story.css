@@ -1,0 +1,55 @@
+/* ---------- Guides (Luma, Aura) and the story dialogue ---------- */
+.guide-avatar{
+  flex:none;width:30px;height:30px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:15px;line-height:1;color:#0b1226;font-weight:700;
+}
+.guide-avatar.luma{
+  background:radial-gradient(circle at 35% 30%, #fff1c2, var(--luma) 55%, #8a6420);
+  box-shadow:0 0 14px -2px var(--luma);
+}
+.guide-avatar.aura{
+  background:radial-gradient(circle at 35% 30%, #e2f4ff, var(--aura) 55%, #2a5f99);
+  box-shadow:0 0 14px -2px var(--aura);
+}
+.ai-panel .guide-avatar{width:24px;height:24px;font-size:12px;}
+
+#dialogue{
+  position:fixed;inset:0;z-index:55;display:none;
+  align-items:flex-end;justify-content:center;padding:24px 16px 40px;
+  background:linear-gradient(180deg, rgba(5,8,20,.35), rgba(5,8,20,.85));
+}
+#dialogue.open{display:flex;}
+.dlg-card{
+  --who:var(--aura);
+  width:min(620px,100%);padding:16px 18px 14px;border-radius:16px;
+  background:linear-gradient(180deg,#161f42,#0f1530);
+  border:1px solid var(--who);
+  box-shadow:0 30px 70px -18px rgba(0,0,0,.75), 0 0 50px -20px var(--who);
+  transition:border-color .3s, box-shadow .3s;
+}
+.dlg-card.luma{--who:var(--luma);}
+.dlg-eyebrow{display:block;margin-bottom:10px;}
+.dlg-body{min-height:96px;}
+.dlg-who{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.dlg-who .guide-avatar{width:40px;height:40px;font-size:19px;}
+.dlg-who span{display:flex;flex-direction:column;line-height:1.15;}
+.dlg-who b{font-family:'Cinzel',serif;font-size:17px;color:var(--who);}
+.dlg-who i{font-style:normal;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);}
+.dlg-text{margin:0;font-size:15px;line-height:1.6;color:var(--text);text-wrap:pretty;}
+.dlg-text b{color:var(--who);}
+.dlg-foot{display:flex;align-items:center;gap:10px;margin-top:14px;}
+.dlg-dots{display:flex;gap:5px;margin-right:auto;}
+.dlg-dots span{width:7px;height:7px;border-radius:50%;background:#33407c;transition:background .2s;}
+.dlg-dots span.on{background:var(--who);box-shadow:0 0 8px var(--who);}
+.dlg-next{--btn-accent:var(--who);}
+
+@media (prefers-reduced-motion: no-preference){
+  .dlg-card.enter .dlg-body{animation:dlg-in .35s ease-out;}
+}
+@keyframes dlg-in{0%{opacity:0;transform:translateY(6px);}100%{opacity:1;transform:none;}}
+
+@media (max-width:560px){
+  #dialogue{padding:12px 12px 20px;}
+  .dlg-text{font-size:14px;}
+}

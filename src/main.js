@@ -9,16 +9,16 @@ import './styles/galaxy-select.css';
 import './styles/game-shell.css';
 import './styles/bridge.css';
 import './styles/cannon.css';
+import './styles/story.css';
 
 import { initGalaxySelect } from './galaxies/select.js';
-import { MapScene } from './galaxies/neuromath/map-scene.js';
-import { mapRef } from './galaxies/neuromath/map-ref.js';
+import { SystemScene } from './galaxies/neuromath/system-scene.js';
+import { IslandScene } from './galaxies/neuromath/island-scene.js';
 import { refreshHud } from './galaxies/neuromath/hud.js';
 import { notifyHost } from './shared/host.js';
+import { showIntroOnce } from './galaxies/neuromath/story.js';
 
-initGalaxySelect(function(){
-  if(mapRef.scene) mapRef.scene.scrollToFrontier(true);
-});
+initGalaxySelect(function(){ showIntroOnce(); });
 
 function boot(){
   var config = {
@@ -26,16 +26,11 @@ function boot(){
     parent: 'game-container',
     backgroundColor: '#0b1226',
     scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-    scene: [MapScene],
+    scene: [SystemScene, IslandScene], // the first one starts
     render: { antialias: true }
   };
   var game = new Phaser.Game(config);
-  game.events.once('ready', function(){
-    mapRef.scene = game.scene.getScene('MapScene');
-    notifyHost('ready', {});
-  });
-  // Fallback in case 'ready' already fired synchronously
-  setTimeout(function(){ if(!mapRef.scene) mapRef.scene = game.scene.getScene('MapScene'); }, 50);
+  game.events.once('ready', function(){ notifyHost('ready', {}); });
 }
 
 refreshHud();

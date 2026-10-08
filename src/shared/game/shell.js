@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
 import { isConfirmOpen } from '../confirm.js';
 import { aiThinkingHtml, aiBubbleHtml } from '../ai.js';
+import { guideAvatarHtml } from '../guides.js';
 
 // The frame every mini-game shares: a full-screen overlay with a top bar
 // (emblem, title, progress pips, close), a stage where the Phaser scene lives
 // (with a banner and an AI hint panel over it), a panel below for the game's
-// own controls, and a final "stars" card. Games pass their panel markup and
+// own controls, and a final "stars" card. The stage starts grey under the
+// Neblina Gris and gets its colour back as the player clears each exercise. Games pass their panel markup and
 // then drive the shell through the returned object.
 //
 // The panel markup can use these shared pieces, found by class:
@@ -29,6 +31,7 @@ export function createShell(opts){
         '<button class="hud-btn" type="button" aria-label="Cerrar juego">✕ Cerrar</button>' +
       '</div>' +
       '<div class="gm-stage">' +
+        '<div class="gm-fog" aria-hidden="true"><i></i><i></i><i></i></div>' +
         '<div class="gm-banner" role="status" aria-live="polite"></div>' +
         '<div class="ai-panel gm-hint" hidden></div>' +
       '</div>' +
@@ -134,7 +137,11 @@ export function createShell(opts){
         html += '<span class="' + cls + '"></span>';
       }
       el.pips.innerHTML = html;
+      shell.setRestored((current + (currentDone ? 1 : 0)) / total);
     },
+
+    // 0 = the stage is under the fog, 1 = fully restored.
+    setRestored: function(f){ el.stage.style.setProperty('--restored', f.toFixed(3)); },
 
     showBanner: function(kind, title, sub, ms){
       clearTimeout(bannerTimer);
@@ -162,7 +169,7 @@ export function createShell(opts){
       el.feedback.innerHTML = fb ? '<div class="fb-title">' + fb.title + '</div>' + fb.html : idleHtml;
     },
 
-    // o: { icon, title, total, unit ('abismos'), fails, recap, onContinue }
+    // o: { icon, title, total, unit ('abismos'), fails, luma, recap, onContinue }
     showFinal: function(o){
       var stars = starsFor(o.fails);
       var starsHtml = '';
@@ -175,7 +182,8 @@ export function createShell(opts){
         '<div class="result-title">' + o.title + '</div>' +
         '<div class="gm-stars" aria-label="' + stars + ' de 3 estrellas">' + starsHtml + '</div>' +
         '<div class="result-msg" style="margin-bottom:12px;">' + msg + '</div>' +
-        '<div class="gm-recap"><b>Recuerda:</b> ' + o.recap + '</div>' +
+        (o.luma ? '<div class="gm-say luma">' + guideAvatarHtml('luma') + '<span><b>Luma</b> ' + o.luma + '</span></div>' : '') +
+        '<div class="gm-say aura">' + guideAvatarHtml('aura') + '<span><b>Aura</b> Recuerda: ' + o.recap + '</span></div>' +
         '<div class="result-actions"><button type="button" class="btn-primary">Continuar</button></div>';
       el.final.classList.add('show');
       el.finalCard.querySelector('.btn-primary').addEventListener('click', o.onContinue);

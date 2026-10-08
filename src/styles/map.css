@@ -21,3 +21,7 @@
   opacity:0;transition:opacity .25s, transform .25s;pointer-events:none;
 }
 #toast.show{opacity:1;transform:translate(-50%,0);}
+
+/* Back to the solar system, shown while a planet's islands are open */
+.map-back{position:absolute;top:14px;left:14px;z-index:12;background:#161f42e6;backdrop-filter:blur(4px);}
+.map-back[hidden]{display:none;}

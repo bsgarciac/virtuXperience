@@ -15,14 +15,14 @@ import { createShell } from '../../../../shared/game/shell.js';
 /* ---- controller (DOM: slots, tiles, drag & drop) ---- */
 var shell = createShell({
   id: 'bridge-game', emblem: '±', title: 'Puente de operaciones',
-  pipsLabel: 'Progreso de abismos', hintThinking: 'Analizando tu puente',
+  pipsLabel: 'Progreso de abismos', hintThinking: 'Aura analiza tu puente',
   panelHtml:
     '<div class="gm-goal"></div>' +
     '<div class="bg-expr"></div>' +
     '<div class="gm-feedback" role="status" aria-live="polite"></div>' +
     '<div class="bg-tray"></div>' +
     '<div class="gm-actions">' +
-      '<button type="button" class="ai-btn gm-hint-btn">✨ Pista con IA</button>' +
+      '<button type="button" class="ai-btn gm-hint-btn">◈ Pregúntale a Aura</button>' +
       '<button type="button" class="btn-secondary bg-clear">Limpiar</button>' +
       '<button type="button" class="btn-primary gm-build" disabled>🌉 Construir puente</button>' +
     '</div>'
@@ -46,7 +46,7 @@ shell.setHint(
 export function openBridge(node, onFinish){
   bridge = { node: node, onFinish: onFinish, round: pickRound(), level: 0, fails: 0, levelFails: 0,
              busy: false, won: false, result: null, feedback: null, nope: -1, pop: '', tiles: [], slots: [] };
-  shell.open(node.topic.name + ' · ' + node.level.label, closeBridge);
+  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeBridge);
   bridgeCtl.initialTarget = bridge.round[0].target;
   setupBridgeLevel();
   try{
@@ -349,6 +349,7 @@ function showBridgeFinal(){
   var b = bridge;
   shell.showFinal({
     icon: '🌉', title: '¡Abismos superados!', total: b.round.length, unit: 'abismos', fails: b.fails,
+    luma: 'Los puentes vuelven a unir a las colonias y los cristales fluyen otra vez. Eso es restaurar el flujo.',
     recap: 'primero los paréntesis, luego la multiplicación, y al final las sumas y restas de izquierda a derecha.',
     onContinue: function(){ b.onFinish(b.fails, closeBridge); }
   });

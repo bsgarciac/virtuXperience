@@ -17,25 +17,27 @@
       <span class="hud-title">Atlas Neuromath</span>
     </div>
     <div class="hud-progress">
-      <div class="hud-progress-top"><span id="progress-label">0/15 saberes</span><span id="progress-pct">0%</span></div>
+      <div class="hud-progress-top"><span id="progress-label">0/12 islas</span><span id="progress-pct">0%</span></div>
       <div class="hud-bar-track"><div class="hud-bar-fill" id="progress-fill" style="width:0%"></div></div>
     </div>
     <button class="hud-btn" id="btn-galaxies" type="button">🌌 Galaxias</button>
+    <button class="hud-btn" id="btn-story" type="button">📜 Historia</button>
     <button class="hud-btn" id="btn-info" type="button" aria-haspopup="true" aria-expanded="false">ⓘ Cómo funciona</button>
     <button class="hud-btn danger" id="btn-reset" type="button">⟲ Reiniciar progreso</button>
   </header>
 
   <div id="info-pop" role="dialog" aria-label="Cómo leer el atlas">
     <h3>Tu misión</h3>
-    <p>Pilotea tu nave por la galaxia Neuromath, visita cada planeta y supera sus minijuegos hasta alcanzar el rango <b style="color:var(--text)">Avanzado</b> en todas las disciplinas.</p>
-    <div class="legend-row"><span class="legend-dot locked"></span> Planeta bloqueado &mdash; se abrirá pronto</div>
-    <div class="legend-row"><span class="legend-dot available"></span> Listo para jugar</div>
-    <div class="legend-row"><span class="legend-dot done"></span> Planeta dominado</div>
-    <p style="margin-bottom:0;">En cada juego, la IA te da una pista sin revelar la solución. Arrastra o usa la rueda del mouse para volar por el mapa.</p>
+    <p>La <b style="color:var(--text)">Neblina Gris</b> cubre el sector Neuromath y congela sus planetas. Elige un planeta en el orden que quieras y resuelve el Nodo de Pregunta de cada una de sus islas para hacerla retroceder y devolverle el color.</p>
+    <div class="legend-row"><span class="legend-dot locked"></span> Bajo la neblina &mdash; se abrirá pronto</div>
+    <div class="legend-row"><span class="legend-dot available"></span> Listo para restaurar</div>
+    <div class="legend-row"><span class="legend-dot done"></span> Isla restaurada</div>
+    <p style="margin-bottom:0;">En cada juego, <b style="color:var(--aura)">Aura</b> te da una pista sin revelar la solución y <b style="color:var(--gold)">Luma</b> te recuerda para quién lo haces. En un planeta, arrastra o usa la rueda del mouse para volar entre sus islas.</p>
   </div>
 
   <div id="game-wrap">
     <div id="game-container"></div>
+    <button class="hud-btn map-back" id="btn-back" type="button" hidden>← Sistema Neuromath</button>
     <div id="tooltip"></div>
     <div id="toast"></div>
   </div>

@@ -15,14 +15,14 @@ import { createShell } from '../../../../shared/game/shell.js';
 /* ---- controller (DOM: formula, steppers, fire) ---- */
 var shell = createShell({
   id: 'cannon-game', emblem: 'x²', title: 'Cañón parabólico',
-  pipsLabel: 'Progreso de muros', hintThinking: 'Analizando tu disparo',
+  pipsLabel: 'Progreso de muros', hintThinking: 'Aura analiza tu disparo',
   panelHtml:
     '<div class="gm-goal"></div>' +
     '<div class="cn-formula" aria-live="polite"></div>' +
     '<div class="cn-params"></div>' +
     '<div class="gm-feedback" role="status" aria-live="polite"></div>' +
     '<div class="gm-actions">' +
-      '<button type="button" class="ai-btn gm-hint-btn">✨ Pista con IA</button>' +
+      '<button type="button" class="ai-btn gm-hint-btn">◈ Pregúntale a Aura</button>' +
       '<button type="button" class="btn-primary gm-build">🎯 Disparar</button>' +
     '</div>'
 });
@@ -44,7 +44,7 @@ var FEEDBACK_IDLE = '<p class="fb-idle"><b>Recuerda:</b> f(0) = c es la altura d
 export function openCannon(node, onFinish){
   game = { node: node, onFinish: onFinish, round: pickRound(), level: 0, fails: 0, levelFails: 0,
            busy: false, won: false, feedback: null, params: null };
-  shell.open(node.topic.name + ' · ' + node.level.label, closeCannon);
+  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeCannon);
   setupLevel();
   try{
     shell.startScene(CannonScene);
@@ -190,6 +190,7 @@ function showFinal(){
   var g = game;
   shell.showFinal({
     icon: '🎯', title: '¡Muros derribados!', total: g.round.length, unit: 'muros', fails: g.fails,
+    luma: 'Los muros cayeron y los rovers vuelven a moverse entre colonias. La neblina ya no los detiene.',
     recap: 'f(0) = c es la altura de salida, f\'(0) = b la pendiente, las raíces dicen dónde cae la bala y el vértice está en x = −b / 2a.',
     onContinue: function(){ g.onFinish(g.fails, closeCannon); }
   });

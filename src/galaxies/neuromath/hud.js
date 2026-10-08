@@ -1,17 +1,18 @@
-import { NODES } from './data.js';
+import { ISLANDS } from './data.js';
 import { isDone, resetState } from './progress.js';
 import { mapRef } from './map-ref.js';
 import { showToast } from '../../shared/toast.js';
 import { notifyHost } from '../../shared/host.js';
+import { showIntro, resetStory } from './story.js';
 
 var elProgressFill = document.getElementById('progress-fill');
 var elProgressLabel = document.getElementById('progress-label');
 var elProgressPct = document.getElementById('progress-pct');
 export function refreshHud(){
-  var count = NODES.filter(function(n){ return isDone(n.id); }).length; // ignores stale saved ids
-  var pct = Math.round(count / NODES.length * 100);
+  var count = ISLANDS.filter(function(i){ return isDone(i.id); }).length; // ignores stale saved ids
+  var pct = Math.round(count / ISLANDS.length * 100);
   elProgressFill.style.width = pct + '%';
-  elProgressLabel.textContent = count + '/' + NODES.length + ' saberes';
+  elProgressLabel.textContent = count + '/' + ISLANDS.length + ' islas';
   elProgressPct.textContent = pct + '%';
 }
 
@@ -46,9 +47,12 @@ btnReset.addEventListener('click', function(){
     btnReset.classList.remove('confirming');
     btnReset.textContent = '⟲ Reiniciar progreso';
     resetState();
+    resetStory();
     refreshHud();
     if(mapRef.scene) mapRef.scene.rebuild();
     notifyHost('progress-reset', {});
-    showToast('Progreso reiniciado. ¡Comienza de nuevo tu viaje!');
+    showToast('Progreso reiniciado. La neblina volvió a cubrir el sector.');
   }
 });
+
+document.getElementById('btn-story').addEventListener('click', function(){ showIntro(); });

@@ -1,5 +1,6 @@
 import { GALAXIES } from './catalog.js';
 import { showToast } from '../shared/toast.js';
+import { galaxySvg } from './galaxy-art.js';
 
 var galaxySelect = document.getElementById('galaxy-select');
 var galaxyGrid = document.getElementById('galaxy-grid');
@@ -16,6 +17,8 @@ var galaxyStars = document.getElementById('galaxy-stars');
   galaxyStars.innerHTML = html;
 })();
 
+var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // onEnter(galaxy) runs when the player picks an enabled galaxy.
 export function initGalaxySelect(onEnter){
   GALAXIES.forEach(function(g){
@@ -27,7 +30,7 @@ export function initGalaxySelect(onEnter){
     if(g.colors.g3) btn.style.setProperty('--g3', g.colors.g3);
     btn.innerHTML =
       '<span class="galaxy-orb-wrap">' +
-        '<span class="galaxy-orb"></span>' +
+        galaxySvg(g, g.enabled && !reduceMotion) +
         (g.enabled ? '' : '<span class="galaxy-lock">🔒</span>') +
       '</span>' +
       '<span class="galaxy-name">' + g.name + '</span>' +

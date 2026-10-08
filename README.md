@@ -27,19 +27,25 @@ src/
   styles/                     CSS split by area; tokens live in base.css
   shared/                     toast, tooltip, confirm dialog, AI hint bubbles,
                               random helpers, host (iframe) messaging
+    guides.js                 Luma and Aura, the two narrative guides
+    dialogue.js               the guides' one-line-at-a-time conversation box
     game/shell.js             mini-game frame: overlay, pips, banner, hint,
                               feedback card, final stars card
     game/scene-kit.js         Phaser pieces every game reuses (backdrop, rover,
                               particles, driving, celebration)
   galaxies/
     catalog.js                the galaxies shown on the select screen
+    galaxy-art.js             procedural spiral-galaxy SVG for each card
     select.js                 galaxy select screen
     neuromath/
-      data.js                 topics × levels = the planets (NODES)
-      progress.js             completed planets (localStorage)
+      data.js                 planets (subareas) × levels = the islands
+      progress.js             completed islands (localStorage)
+      story.js                intro and per-island briefings (BIOSA narrative)
       hud.js                  progress bar, info popover, reset
-      planets.js              which planets have a game, opening/finishing them
-      map-scene.js            Phaser scene: the winding path of planets
+      islands.js              which islands have a game, opening/finishing them
+      scene-common.js         starfield, rocket cursor, resize handling
+      system-scene.js         Phaser scene: the sun and the orbiting planets
+      island-scene.js         Phaser scene: one planet's path of islands
       games/bridge/           "Puente de operaciones"
         levels.js             exercise bank: 20 abysses in 5 tiers
         math.js               evaluation (right and left-to-right) + steps
@@ -48,6 +54,27 @@ src/
         scene.js              Phaser scene: abyss, planks, rover, effects
       games/cannon/           "Cañón parabólico", same layout
 ```
+
+## Galaxias → planetas → islas
+
+A galaxy is an area (Neuromath). Entering it shows a solar system: the
+*Matriz Lógica* as the sun and one planet per subarea (Cálculo, Fundamentos
+de matemáticas, Álgebra, Estadística), which the player can visit in any
+order. A planet holds islands, one challenge each (Inicial, Intermedio,
+Avanzado). Inside a planet the islands suggest an order: jumping past an
+unfinished built island asks first; unbuilt islands don't block.
+
+## Narrativa (BIOSA)
+
+The player is the *Sintonizador*. On a planet, the **Neblina Gris** covers
+every island past the first unfinished one; it drifts, its edge creeps
+forward, and it rolls back when an island is restored. In the solar system
+it drains the planets' colour, which comes back island by island. Inside a game the stage
+starts grey and regains its colour exercise by exercise.
+**Aura** (blue, logic) gives the hints and the closing recap; **Luma** (gold,
+ethics) says why the island matters. The intro plays the first time the
+player enters Neuromath (📜 Historia replays it), and each island has a
+short briefing the first time it is opened.
 
 ## Puente de operaciones
 
@@ -87,8 +114,8 @@ the plane, dimmed, for comparison.
 
 A new mini-game goes in `galaxies/<galaxy>/games/<name>/`, builds its panel
 with `createShell` (shared/game/shell.js), mixes `SceneKit` into its Phaser
-scene, exposes `open(node, onFinish)` and is registered with a title in that
-galaxy's `planets.js`.
+scene, exposes `open(island, onFinish)` and is registered with a title in that
+galaxy's `islands.js`.
 
 ## Embedding
 
@@ -106,7 +133,7 @@ The game reports to the host page with `postMessage`; every message has
 | `type`            | payload                         | when                          |
 |-------------------|---------------------------------|-------------------------------|
 | `ready`           | —                               | the map has booted            |
-| `node-completed`  | `nodeId`, `score` (failed tries)| a planet's game was finished  |
+| `node-completed`  | `nodeId`, `score` (failed tries)| an island's game was finished |
 | `progress-reset`  | —                               | the player reset progress     |
 
 ```js

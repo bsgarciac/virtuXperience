@@ -17,38 +17,32 @@
 }
 .galaxy-select-sub{font-size:14px;color:var(--text-dim);max-width:520px;margin:0 auto;line-height:1.55;}
 .galaxy-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:28px 20px;
-  max-width:820px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:28px 12px;
+  max-width:860px;margin:0 auto;
 }
 .galaxy-card{
   appearance:none;border:none;background:none;cursor:pointer;color:inherit;
   display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px;font-family:inherit;
 }
-.galaxy-orb{
-  display:block;width:min(22vw,120px);height:min(22vw,120px);border-radius:50%;position:relative;flex:none;
-  background:conic-gradient(from 0deg, var(--g1), var(--g2), var(--g3,var(--g1)), var(--g1));
-  box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 0 34px -6px var(--g1);
+.galaxy-art{
+  display:block;width:min(40vw,176px);height:min(40vw,176px);overflow:visible;
+  filter:drop-shadow(0 0 14px color-mix(in srgb, var(--g1) 45%, transparent));
+  transition:transform .25s ease, filter .25s ease;
 }
-@media (prefers-reduced-motion: no-preference){
-  .galaxy-card:not(.locked) .galaxy-orb{animation:galaxy-spin 14s linear infinite;}
+.galaxy-card:hover:not(.locked) .galaxy-art{
+  transform:scale(1.06);
+  filter:drop-shadow(0 0 24px color-mix(in srgb, var(--g1) 70%, transparent));
 }
-@keyframes galaxy-spin{to{transform:rotate(360deg);}}
-.galaxy-orb::after{
-  content:'';position:absolute;inset:18%;border-radius:50%;
-  background:radial-gradient(circle at 38% 34%, rgba(255,255,255,.55), rgba(11,18,38,.92) 68%);
-}
-.galaxy-card.locked .galaxy-orb{filter:grayscale(.75) brightness(.55);}
-.galaxy-card.locked .galaxy-orb::after{background:radial-gradient(circle at 38% 34%, rgba(255,255,255,.18), rgba(11,18,38,.95) 68%);}
+.galaxy-card.locked .galaxy-art{filter:saturate(.85) brightness(.72);}
 .galaxy-lock{
-  position:absolute;bottom:2px;right:2px;width:26px;height:26px;border-radius:50%;
+  position:absolute;bottom:14%;right:14%;width:26px;height:26px;border-radius:50%;
   background:#0f1530;border:1px solid #3a447c;display:flex;align-items:center;justify-content:center;font-size:12px;
 }
 .galaxy-orb-wrap{position:relative;display:block;}
 .galaxy-name{font-family:'Cinzel',serif;font-weight:600;font-size:14.5px;color:var(--text);}
 .galaxy-card.locked .galaxy-name{color:var(--text-faint);}
 .galaxy-sub{font-size:11.5px;color:var(--text-dim);}
-.galaxy-card:hover:not(.locked) .galaxy-orb{box-shadow:0 0 0 1px rgba(255,255,255,.12) inset, 0 0 46px -4px var(--g1);}
-.galaxy-card:focus-visible .galaxy-orb{outline:2px solid var(--cyan);outline-offset:4px;}
+.galaxy-card:focus-visible{outline:2px solid var(--cyan);outline-offset:4px;border-radius:14px;}
 
 @media (max-width:640px){
   .galaxy-grid{grid-template-columns:repeat(2,1fr);row-gap:30px;}
