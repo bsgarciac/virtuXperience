@@ -39,6 +39,7 @@
 @media (prefers-reduced-motion: no-preference){
   .galaxy-spin{animation:galaxy-spin var(--spin,40s) linear infinite;}
 }
+@keyframes galaxy-spin{to{transform:rotate(360deg);}}
 .galaxy-card.locked .galaxy-art{filter:saturate(.85) brightness(.72);}
 .galaxy-lock{
   position:absolute;bottom:14%;right:14%;width:26px;height:26px;border-radius:50%;

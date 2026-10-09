@@ -19,7 +19,7 @@ export var alianzasCtl = {
   input: { left: false, right: false, jump: false, act: false } // touch buttons
 };
 
-var ASSETS = 'assets/creagenesis/';
+var ASSETS = 'assets/activa-tu-idea/';
 var BG_W = 1400, BG_H = 781; // the coordinates below are on this frame
 
 // Rocks you can stand on: [left, top, right] on the background art. The

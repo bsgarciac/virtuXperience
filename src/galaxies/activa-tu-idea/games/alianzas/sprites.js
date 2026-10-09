@@ -1,5 +1,5 @@
 // The Sintonizador's poses come from the team's concept sheet
-// (public/assets/creagenesis/sintonizador.jpg): three figures on a flat grey
+// (public/assets/activa-tu-idea/sintonizador.jpg): three figures on a flat grey
 // background, no transparency. At load time each pose is cut out of the
 // sheet, the grey (and the sheet's guide lines) is keyed out, and only the
 // figure itself — the largest connected shape — is kept, so bits of the

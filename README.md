@@ -61,7 +61,7 @@ src/
         controller.js         tiles, drag & drop, panel, flow
         scene.js              Phaser scene: abyss, planks, rover, effects
       games/cannon/           "Cañón parabólico", same layout
-    creagenesis/
+    activa-tu-idea/
       index.js                Distrito Cristalino, its game, intro
       lessons/                lesson for each island
       games/alianzas/         "El Vacío de Alianzas"
@@ -74,7 +74,7 @@ public/assets/                images served as-is (art, Aura's portrait)
 
 ## Galaxias → planetas → islas
 
-A galaxy is an area (Neuromath, CreaGenesis). Entering it shows a solar
+A galaxy is an area (Neuromath, Activa tu idea). Entering it shows a solar
 system: its hack as the sun (the *Matriz Lógica*, the *Nanocatalizador
 Creativo*) and one planet per subarea (Cálculo, Fundamentos
 de matemáticas, Álgebra, Estadística), which the player can visit in any
@@ -83,15 +83,15 @@ Avanzado). Inside a planet the islands suggest an order: jumping past an
 unfinished built island asks first; unbuilt islands don't block.
 
 Each galaxy has its own way of playing an island: in Neuromath you fly the
-map and the challenge is a mini-game; in CreaGenesis you land and **walk**
+map and the challenge is a mini-game; in Activa tu idea you land and **walk**
 the Sintonizador to the island's Nodo before the challenge opens.
 
 Islands pay **Células Lógicas** the first time they're restored (and
-CreaGenesis adds the ones picked up while walking); some also award an Open
+Activa tu idea adds the ones picked up while walking); some also award an Open
 Badge. The HUD shows the wallet and the current galaxy's *Índice de
 Equilibrio* (islands restored).
 
-## CreaGenesis · El Vacío de Alianzas
+## Activa tu idea · El Vacío de Alianzas
 
 Content and art come from the team's prototype proposal (AI-generated
 mockups, adapted). The player walks and jumps across the Distrito Cristalino
