@@ -15,14 +15,14 @@ import { createShell } from '../../../../shared/game/shell.js';
 /* ---- controller (DOM: slots, tiles, drag & drop) ---- */
 var shell = createShell({
   id: 'bridge-game', emblem: '±', title: 'Puente de operaciones',
-  pipsLabel: 'Progreso de abismos', hintThinking: 'Aura analiza tu puente',
+  pipsLabel: 'Progreso de abismos', hintThinking: 'Luma analiza tu puente',
   panelHtml:
     '<div class="gm-goal"></div>' +
     '<div class="bg-expr"></div>' +
     '<div class="gm-feedback" role="status" aria-live="polite"></div>' +
     '<div class="bg-tray"></div>' +
     '<div class="gm-actions">' +
-      '<button type="button" class="ai-btn gm-hint-btn">◈ Pregúntale a Aura</button>' +
+      '<button type="button" class="ai-btn gm-hint-btn">◈ Pregúntale a Luma</button>' +
       '<button type="button" class="btn-secondary bg-clear">Limpiar</button>' +
       '<button type="button" class="btn-primary gm-build" disabled>🌉 Construir puente</button>' +
     '</div>'

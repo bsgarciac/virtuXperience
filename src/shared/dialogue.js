@@ -1,7 +1,7 @@
 import { GUIDES, guidePortraitHtml } from './guides.js';
 
-// A short conversation between the guides, one line at a time.
-// lines: [{ who: 'luma'|'aura', text }]. opts: { eyebrow, doneLabel, onDone }.
+// A short story scene told by the guide, one line at a time.
+// lines: [{ who: 'luma', text }]. opts: { eyebrow, doneLabel, onDone }.
 // onDone runs whether the player reads to the end or skips.
 var root = document.createElement('div');
 root.id = 'dialogue';

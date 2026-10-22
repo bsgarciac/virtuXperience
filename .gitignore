@@ -4,3 +4,6 @@ dist/
 *.log
 .env
 .dev-code
+
+# designer mockups (source art; the logos used in the game live in public/assets/activa/entities)
+mockups/

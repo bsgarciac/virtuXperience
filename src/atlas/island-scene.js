@@ -356,7 +356,7 @@ IslandScene.prototype.drawFog = function(fromTop){
   }
 };
 
-// A ring of light and a spray of gold (Luma) and blue (Aura) sparks where an
+// A ring of light and a spray of gold and blue sparks where an
 // island gets its colour back.
 IslandScene.prototype.restoreBurst = function(idx){
   if(idx < 0) return;

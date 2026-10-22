@@ -40,7 +40,7 @@ export function createShell(opts){
       '<div class="gm-panel">' + opts.panelHtml + '</div>' +
       '<div class="gm-final"><div class="gm-final-card"></div></div>' +
       '<div class="gm-lesson"><div class="gm-lesson-card">' +
-        '<div class="gm-lesson-head">' + guideAvatarHtml('aura') + '<span><b>Aura</b> Antes de empezar, repasemos el tema.</span></div>' +
+        '<div class="gm-lesson-head">' + guideAvatarHtml('luma') + '<span><b>Luma</b> Antes de empezar, repasemos el tema.</span></div>' +
         '<div class="gm-lesson-body"></div>' +
         '<div class="result-actions"><button type="button" class="btn-primary">¡A la misión!</button></div>' +
       '</div></div>' +
@@ -208,6 +208,8 @@ export function createShell(opts){
     renderFeedback: function(fb, idleHtml){
       el.feedback.className = 'gm-feedback' + (fb ? ' ' + fb.kind + (fb.stale ? ' stale' : '') : '');
       el.feedback.innerHTML = fb ? '<div class="fb-title">' + fb.title + '</div>' + fb.html : idleHtml;
+      // on short screens the panel scrolls: bring the new feedback into view
+      if(fb && el.panel.scrollHeight > el.panel.clientHeight) el.feedback.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
 
     // o: { icon, title, total, unit ('abismos'), article ('los' | 'las'), fails, luma, recap, rewardsHtml, onContinue }
@@ -224,8 +226,7 @@ export function createShell(opts){
         '<div class="gm-stars" aria-label="' + stars + ' de 3 estrellas">' + starsHtml + '</div>' +
         '<div class="result-msg" style="margin-bottom:12px;">' + msg + '</div>' +
         (o.rewardsHtml ? '<div class="gm-rewards">' + o.rewardsHtml + '</div>' : '') +
-        (o.luma ? '<div class="gm-say luma">' + guideAvatarHtml('luma') + '<span><b>Luma</b> ' + o.luma + '</span></div>' : '') +
-        '<div class="gm-say aura">' + guideAvatarHtml('aura') + '<span><b>Aura</b> Recuerda: ' + o.recap + '</span></div>' +
+        '<div class="gm-say luma">' + guideAvatarHtml('luma') + '<span><b>Luma</b> ' + (o.luma ? o.luma + ' ' : '') + 'Recuerda: ' + o.recap + '</span></div>' +
         '<div class="result-actions"><button type="button" class="btn-primary">Continuar</button></div>';
       el.final.classList.add('show');
       el.finalCard.querySelector('.btn-primary').addEventListener('click', o.onContinue);

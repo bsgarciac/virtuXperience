@@ -1,12 +1,11 @@
-// The two guides of the BIOSA narrative. Luma (gold) is the humanist voice:
-// why a challenge matters to the people of the sector. Aura (blue) is the
-// logical one: she explains the mechanics and gives the hints. Aura is the
-// crystal fox from the team's art; Luma keeps a glyph until hers is drawn.
+// The guide of the BIOSA narrative: Luma (blue), the crystal fox from the
+// team's art. She explains the mechanics, gives the hints and says why a
+// challenge matters to the people of the sector. (There used to be a second,
+// gold guide; the team dropped her, so every line is Luma's.)
 // img: the head, for small avatars; portrait: the bust, for the dialogue.
 // Paths are relative to index.html (files in public/).
 export var GUIDES = {
-  luma: { name: 'Luma', role: 'Conciencia ética', glyph: '✦' },
-  aura: { name: 'Aura', role: 'Mentora lógica',   glyph: '◈', img: 'assets/guides/aura.jpg', portrait: 'assets/guides/aura-bust.jpg' }
+  luma: { name: 'Luma', role: 'Mentora del Sintonizador', glyph: '◈', img: 'assets/guides/luma.jpg', portrait: 'assets/guides/luma-bust.jpg' }
 };
 
 // The large picture beside the dialogue bubble (the glyph, big, when the

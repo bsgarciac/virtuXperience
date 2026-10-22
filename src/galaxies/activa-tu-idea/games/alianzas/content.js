@@ -15,59 +15,76 @@ export var ORBITS = [
 ];
 
 // does: what the entity does, used to explain a misplaced card without
-// giving the orbit away outright.
+// giving the orbit away outright. icon: its logo in
+// public/assets/activa/entities/ (cut from the designer's mockups); cards
+// without one show short (or the name) instead. logoText: the logo already
+// spells the name, so the card doesn't repeat it.
 export var ENTITIES = [
-  { id: 'sena', name: 'SENA', orbit: 'form', does: 'ofrece cursos, talleres y acompañamiento para estructurar un negocio' },
-  { id: 'rutan', name: 'Ruta N', orbit: 'form', does: 'es un centro de innovación que asesora proyectos de base tecnológica' },
-  { id: 'parquee', name: 'Parque E', orbit: 'form', does: 'es la incubadora y aceleradora de la Universidad de Antioquia' },
-  { id: 'cemprende', name: 'C-emprende', orbit: 'form', does: 'es la red de nodos de emprendimiento e innovación de iNNpulsa' },
-  { id: 'cedezo', name: 'CEDEZO', orbit: 'form', does: 'son los centros de desarrollo empresarial zonal de la Alcaldía, con asesoría gratuita' },
-  { id: 'endeavor', name: 'Endeavor', orbit: 'form', does: 'da mentoría a emprendedores de alto impacto' },
-  { id: 'incubadoras', name: 'Incubadoras universitarias', orbit: 'form', does: 'acompañan a validar y prototipar ideas desde la universidad' },
+  { id: 'sena', name: 'SENA', icon: 'sena', orbit: 'form', does: 'ofrece cursos, talleres y acompañamiento para estructurar un negocio' },
+  { id: 'rutan', name: 'Ruta N', icon: 'rutan', orbit: 'form', does: 'es un centro de innovación que asesora proyectos de base tecnológica' },
+  { id: 'parquee', name: 'Parque E', icon: 'parquee', orbit: 'form', does: 'es la incubadora y aceleradora de la Universidad de Antioquia' },
+  { id: 'cemprende', name: 'C-emprende', icon: 'cemprende', orbit: 'form', does: 'es la red de nodos de emprendimiento e innovación de iNNpulsa' },
+  { id: 'cedezo', name: 'CEDEZO', icon: 'cedezo', orbit: 'form', does: 'son los centros de desarrollo empresarial zonal de la Alcaldía, con asesoría gratuita' },
+  { id: 'endeavor', name: 'Endeavor', icon: 'endeavor', orbit: 'form', does: 'da mentoría a emprendedores de alto impacto' },
+  { id: 'incubadoras', name: 'Incubadoras universitarias', icon: 'universidades', orbit: 'form', does: 'acompañan a validar y prototipar ideas desde la universidad' },
+  { id: 'uniminuto', name: 'UNIMINUTO', icon: 'uniminuto', orbit: 'form', does: 'es una universidad que forma a sus estudiantes y egresados y los acompaña a estructurar sus emprendimientos' },
 
-  { id: 'camara', name: 'Cámara de Comercio', orbit: 'legal', does: 'lleva el registro mercantil y la constitución legal de las empresas' },
-  { id: 'dian', name: 'DIAN', orbit: 'legal', does: 'gestiona el RUT y las obligaciones tributarias' },
+  { id: 'camara', name: 'Cámara de Comercio', icon: 'camara', orbit: 'legal', does: 'lleva el registro mercantil y la constitución legal de las empresas' },
+  { id: 'dian', name: 'DIAN', icon: 'dian', logoText: true, orbit: 'legal', does: 'gestiona el RUT y las obligaciones tributarias' },
   { id: 'mincomercio', name: 'MinComercio', orbit: 'legal', does: 'define la política de comercio, industria y turismo del país' },
   { id: 'confecamaras', name: 'Confecámaras', orbit: 'legal', does: 'es la red nacional de cámaras de comercio' },
-  { id: 'andi', name: 'ANDI del Futuro', orbit: 'legal', does: 'reúne a jóvenes empresarios para hacer networking y gremio' },
+  { id: 'andi', name: 'ANDI del Futuro', short: 'ANDI del Futuro', orbit: 'legal', does: 'reúne a jóvenes empresarios para hacer networking y gremio' },
   { id: 'fenalco', name: 'FENALCO', orbit: 'legal', does: 'es el gremio de los comerciantes: redes y ruedas de negocios' },
-  { id: 'sic', name: 'Superintendencia de Industria y Comercio', orbit: 'legal', does: 'registra marcas, lemas y patentes' },
+  { id: 'sic', name: 'Superintendencia de Industria y Comercio', short: 'SIC', orbit: 'legal', does: 'registra marcas, lemas y patentes' },
   { id: 'icontec', name: 'Icontec', orbit: 'legal', does: 'certifica calidad y define normas técnicas' },
 
-  { id: 'fondoemprender', name: 'Fondo Emprender', orbit: 'fin', does: 'entrega capital semilla condonable a través del SENA' },
+  { id: 'fondoemprender', name: 'Fondo Emprender', icon: 'fondoemprender', orbit: 'fin', does: 'entrega capital semilla condonable a través del SENA' },
+  { id: 'innpulsa', name: 'iNNpulsa Colombia', icon: 'innpulsa', orbit: 'fin', does: 'es la agencia del Gobierno que abre convocatorias de cofinanciación y capital para emprendimientos de alto impacto' },
   { id: 'bancoldex', name: 'Bancóldex', orbit: 'fin', does: 'presta con tasas preferenciales a las mipymes' },
   { id: 'angeles', name: 'Ángeles inversores', orbit: 'fin', does: 'son personas que invierten su dinero a cambio de participación en la empresa' },
-  { id: 'vc', name: 'Fondos de Venture Capital', orbit: 'fin', does: 'invierten en empresas de alto crecimiento a cambio de acciones' },
-  { id: 'vaki', name: 'Vaki (crowdfunding)', orbit: 'fin', does: 'recauda dinero con aportes y preventas del público' },
+  { id: 'vc', name: 'Fondos de Venture Capital', short: 'Venture Capital', orbit: 'fin', does: 'invierten en empresas de alto crecimiento a cambio de acciones' },
+  { id: 'vaki', name: 'Vaki (crowdfunding)', short: 'Vaki', orbit: 'fin', does: 'recauda dinero con aportes y preventas del público' },
   { id: 'banca', name: 'Banca tradicional', orbit: 'fin', does: 'ofrece créditos comerciales a pymes y emprendedores' },
   { id: 'cooperacion', name: 'Cooperación internacional', orbit: 'fin', does: 'abre convocatorias con recursos para el desarrollo económico local' }
 ];
 
 // Directorio de Contactos: each need has one right contact.
 export var CONTACTS = [
-  { id: 'camara', name: 'Cámara de Comercio', does: 'hace el registro mercantil y la constitución de la empresa' },
-  { id: 'fondoemprender', name: 'Fondo Emprender (SENA)', does: 'da capital semilla condonable' },
-  { id: 'cdes', name: 'Cursos SENA / CEDEZO', does: 'dan talleres, mentoría y consultoría empresarial básica' },
-  { id: 'sic', name: 'Superintendencia de Industria y Comercio', does: 'registra marcas y patentes' },
-  { id: 'rutan', name: 'Ruta N', does: 'asesora escalamiento tecnológico e innovación' },
+  { id: 'camara', name: 'Cámara de Comercio', icon: 'camara', does: 'hace el registro mercantil y la constitución de la empresa' },
+  { id: 'fondoemprender', name: 'Fondo Emprender (SENA)', icon: 'fondoemprender', short: 'Fondo Emprender', does: 'da capital semilla condonable' },
+  { id: 'cdes', name: 'Cursos SENA / CEDEZO', icon: 'sena', short: 'SENA / CEDEZO', does: 'dan talleres, mentoría y consultoría empresarial básica' },
+  { id: 'sic', name: 'Superintendencia de Industria y Comercio', short: 'SIC', does: 'registra marcas y patentes' },
+  { id: 'rutan', name: 'Ruta N', icon: 'rutan', does: 'asesora escalamiento tecnológico e innovación' },
   { id: 'bancoldex', name: 'Bancóldex', does: 'presta con tasas preferenciales a mipymes' },
-  { id: 'gremios', name: 'FENALCO / ANDI del Futuro', does: 'son gremios para networking y ruedas de negocios' },
-  { id: 'inversores', name: 'Ángeles inversores / Venture Capital', does: 'invierten a cambio de participación (equity)' },
-  { id: 'dian', name: 'DIAN', does: 'maneja el RUT y los impuestos' },
-  { id: 'vaki', name: 'Vaki (crowdfunding)', does: 'recauda con donaciones o preventas del público' }
+  { id: 'gremios', name: 'FENALCO / ANDI del Futuro', short: 'FENALCO / ANDI', does: 'son gremios para networking y ruedas de negocios' },
+  { id: 'inversores', name: 'Ángeles inversores / Venture Capital', short: 'Inversores privados', does: 'invierten a cambio de participación (equity)' },
+  { id: 'dian', name: 'DIAN', icon: 'dian', logoText: true, does: 'maneja el RUT y los impuestos' },
+  { id: 'vaki', name: 'Vaki (crowdfunding)', short: 'Vaki', does: 'recauda con donaciones o preventas del público' }
 ];
 
+// clue: where to look when the wrong contact was picked — it points at the
+// kind of entity without naming it.
 export var NEEDS = [
-  { text: 'Registrar formalmente la empresa y obtener el NIT y el Registro Mercantil.', contact: 'camara' },
-  { text: 'Conseguir capital semilla no reembolsable para lanzar un prototipo.', contact: 'fondoemprender' },
-  { text: 'Recibir mentoría, talleres de modelo de negocio y consultoría empresarial básica.', contact: 'cdes' },
-  { text: 'Registrar una marca o un lema comercial, o tramitar una patente.', contact: 'sic' },
-  { text: 'Asesoría para escalar tecnológicamente e innovar con la industria local.', contact: 'rutan' },
-  { text: 'Un crédito de fomento con tasas preferenciales para mipymes.', contact: 'bancoldex' },
-  { text: 'Hacer networking, participar en ruedas de negocios y ganar visibilidad comercial.', contact: 'gremios' },
-  { text: 'Inversión privada para un proyecto de alto impacto a cambio de participación.', contact: 'inversores' },
-  { text: 'Gestionar el RUT y resolver dudas sobre la declaración de impuestos.', contact: 'dian' },
-  { text: 'Levantar capital con donaciones o preventas apoyadas por el público.', contact: 'vaki' }
+  { text: 'Registrar formalmente la empresa y obtener el NIT y el Registro Mercantil.', contact: 'camara',
+    clue: 'revisa qué entidad lleva el registro legal de las empresas del territorio' },
+  { text: 'Conseguir capital semilla no reembolsable para lanzar un prototipo.', contact: 'fondoemprender',
+    clue: 'recuerda qué fondo público entrega capital semilla que no se devuelve' },
+  { text: 'Recibir mentoría, talleres de modelo de negocio y consultoría empresarial básica.', contact: 'cdes',
+    clue: 'revisa qué entidades se dedican a formar y asesorar a quienes empiezan' },
+  { text: 'Registrar una marca o un lema comercial, o tramitar una patente.', contact: 'sic',
+    clue: 'recuerda qué entidad protege la propiedad industrial' },
+  { text: 'Asesoría para escalar tecnológicamente e innovar con la industria local.', contact: 'rutan',
+    clue: 'revisa cuál entidad se especializa realmente en centros de innovación y tecnología' },
+  { text: 'Un crédito de fomento con tasas preferenciales para mipymes.', contact: 'bancoldex',
+    clue: 'recuerda qué entidad es un banco de desarrollo para las empresas' },
+  { text: 'Hacer networking, participar en ruedas de negocios y ganar visibilidad comercial.', contact: 'gremios',
+    clue: 'recuerda qué entidades representan a los gremios y sectores comerciales' },
+  { text: 'Inversión privada para un proyecto de alto impacto a cambio de participación.', contact: 'inversores',
+    clue: 'revisa quiénes ponen capital privado a cambio de una parte de la empresa' },
+  { text: 'Gestionar el RUT y resolver dudas sobre la declaración de impuestos.', contact: 'dian',
+    clue: 'recuerda qué entidad administra los impuestos nacionales' },
+  { text: 'Levantar capital con donaciones o preventas apoyadas por el público.', contact: 'vaki',
+    clue: 'revisa qué opción reúne aportes de muchas personas a través de una plataforma' }
 ];
 
 // Ruta de Convocatorias, in the right order.

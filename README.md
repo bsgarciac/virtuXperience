@@ -27,7 +27,7 @@ src/
   styles/                     CSS split by area; tokens live in base.css
   shared/                     toast, tooltip, confirm dialog, AI hint bubbles,
                               random helpers, host (iframe) messaging
-    guides.js                 Luma and Aura, the two narrative guides
+    guides.js                 Luma, the narrative guide
     dialogue.js               the guides' one-line-at-a-time conversation box
     markdown.js               Markdown + KaTeX renderer for the lessons
     game/shell.js             mini-game frame: overlay, pips, banner, hint,
@@ -69,7 +69,7 @@ src/
         sprites.js            cuts the Sintonizador's poses out of the sheet
         scene.js              Phaser scene: the walkable district, the Nodo
         controller.js         the four phases, panel, flow
-public/assets/                images served as-is (art, Aura's portrait)
+public/assets/                images served as-is (art, Luma's portrait, entity logos)
 ```
 
 ## Galaxias → planetas → islas
@@ -98,9 +98,10 @@ mockups, adapted). The player walks and jumps across the Distrito Cristalino
 (← → / A D, ↑ / W to jump, touch buttons on phones) and picks up the five
 Células: a force field seals the corrupted Nodo until all of them are in,
 then E / Espacio activates it. Luma frames the problem, the
-lesson follows, and four phases run in the panel: **Mapa de Actores** (sort
-entities into three orbits), **Directorio de Contactos** (match needs to
-contacts), **Ruta de Convocatorias** (drag six steps into a column; on
+lesson follows, and four phases run: **Mapa de Actores** (drag the
+entities' cards onto a radar of three orbits drawn over the stage),
+**Directorio de Contactos** (drag a contact card onto each need's socket;
+wrong ones get a clue about the kind of entity, never the answer), **Ruta de Convocatorias** (drag six steps into a column; on
 "Postular" the application walks down it, lighting each step green, and stops
 in red at the first misplaced one with the proposal's feedback) and **Lienzo de
 Decisión** (three strategies, only one clears the fog). Each phase blends the
@@ -127,8 +128,8 @@ every island past the first unfinished one; it drifts, its edge creeps
 forward, and it rolls back when an island is restored. In the solar system
 it drains the planets' colour, which comes back island by island. Inside a game the stage
 starts grey and regains its colour exercise by exercise.
-**Aura** (blue, logic; drawn as the crystal fox) gives the hints and the closing recap; **Luma** (gold,
-ethics) says why the island matters. The intro plays the first time the
+**Luma** (blue, drawn as the crystal fox) is the only guide: she tells the
+story, gives the hints and the closing recap, and says why the island matters. The intro plays the first time the
 player enters Neuromath (📜 Historia replays it), and each island has a
 short briefing the first time it is opened.
 

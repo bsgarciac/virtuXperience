@@ -1,7 +1,7 @@
 import { showDialogue } from '../shared/dialogue.js';
 import { MOVED_IDS } from './progress.js';
 
-// Luma and Aura tell each galaxy's story (its def.intro and def.briefings):
+// Luma tells each galaxy's story (its def.intro and def.briefings):
 // an intro the first time the player enters that galaxy, and a short
 // briefing the first time each island is opened.
 

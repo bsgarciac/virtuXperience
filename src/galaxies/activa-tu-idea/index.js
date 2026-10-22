@@ -25,9 +25,7 @@ export default defineGalaxy({
   lessons: { 'dc-inicial': dcInicial },
 
   intro: [
-    { who: 'aura', text: 'Sintonizador, aquí Aura. Bienvenido a <b>Activa tu idea</b>, el sector donde las ideas se vuelven proyectos.' },
-    { who: 'luma', text: 'Aquí la Neblina Gris no congela números: congela a las personas. Emprendedores trabajando solos, sin saber a quién acudir.' },
-    { who: 'aura', text: 'En cada distrito hay un <b>Nodo de Pregunta</b>. Aterriza, camina hasta él y actívalo con tu <b>Nanocatalizador Creativo</b>.' },
-    { who: 'luma', text: 'Y recoge las <b>Células Lógicas</b> que encuentres en el camino. Cada una cuenta.' }
+    { who: 'luma', text: 'Saludos, Sintonizador. Soy Luma, guardiana de los ecosistemas latentes y tejedora de redes invisibles. Te doy la bienvenida a <b>Activa tu idea</b> en el <b>Distrito Cristalino</b>. Aquí, las chispas del pensamiento se cristalizan en proyectos reales. Calibra tu frecuencia y preparemos el camino.' },
+    { who: 'luma', text: 'El entorno está cubierto de <b>Neblina Gris</b> debido al aislamiento de los emprendedores. Avanza por las plataformas de cristal mientras recolectas <b>Células Lógicas</b> hasta llegar al <b>Nodo de Pregunta</b> sumido en la inacción; actívalo con tu <b>Nanocatalizador Creativo</b>, supera los retos para obtener tu insignia y ayudar a restaurar el flujo del distrito.' }
   ]
 });

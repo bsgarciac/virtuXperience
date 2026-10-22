@@ -15,37 +15,116 @@
   pointer-events:auto;width:52px;height:52px;border-radius:14px;touch-action:none;user-select:none;
   background:rgba(13,21,48,.8);border:1px solid #4a5697;color:var(--text);font-size:20px;font-weight:700;
 }
-.ag-touch button:active{background:#1d285a;border-color:var(--aura);}
+.ag-touch button:active{background:#1d285a;border-color:var(--luma);}
 .ag-touch[hidden]{display:none;}
 @media (hover:hover) and (pointer:fine){ .ag-touch{display:none;} }
 
-/* Cards you place into slots (phases 1–2) */
-.ag-work{display:flex;flex-direction:column;gap:10px;}
-.ag-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.ag-slots.single{grid-template-columns:repeat(2,1fr);}
-.ag-slot{
-  border:1.5px dashed color-mix(in srgb, var(--slot) 60%, transparent);border-radius:12px;padding:8px;
-  background:color-mix(in srgb, var(--slot) 7%, #0d1530);cursor:pointer;min-height:74px;
-  transition:background .15s, border-color .15s;
+/* Phases 1–2: a board over the stage (radar / sockets) and the cards'
+   tray in the panel. The board fades out when the phase is won so the
+   restored Nodo shows through. */
+#alianzas-game.ag-board-mode .gm-stage{min-height:min(300px,46vh);}
+.ag-board{
+  position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:10px 14px;
+  container-type:size;
+  background:
+    linear-gradient(rgba(87,217,240,.06) 1px, transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg, rgba(87,217,240,.06) 1px, transparent 1px) 0 0/28px 28px,
+    radial-gradient(ellipse at 50% 55%, rgba(14,28,58,.9), rgba(7,11,26,.96));
+  transition:opacity .9s ease;
 }
-.ag-slot.over,.ag-slot:hover{background:color-mix(in srgb, var(--slot) 16%, #0d1530);border-style:solid;}
-.ag-slot-label{font-size:11.5px;font-weight:700;color:var(--slot);margin-bottom:6px;line-height:1.35;}
-.ag-slots.single .ag-slot-label{color:var(--text);font-weight:600;font-size:12.5px;}
-.ag-slot-items{display:flex;flex-wrap:wrap;gap:6px;}
-.ag-drop{font-size:11px;color:var(--text-faint);font-style:italic;}
-.ag-tray{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:36px;align-items:center;}
-.ag-tray-empty{font-size:12px;color:var(--text-faint);}
-.ag-chip{
-  appearance:none;border:1px solid #4a5697;background:#1a2350;color:var(--text);
-  font-family:'Manrope',sans-serif;font-weight:700;font-size:12.5px;padding:7px 11px;border-radius:9px;cursor:grab;
-  transition:transform .1s, border-color .15s, background .15s;
+.ag-board[hidden]{display:none;}
+.ag-board.cleared{opacity:0;pointer-events:none;}
+
+/* the entity card: a hologram panel with the logo (or the name) */
+.ag-ent{
+  --w:clamp(54px, 7.6cqw, 78px);
+  appearance:none;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  width:var(--w);height:calc(var(--w) * 1.18);padding:12px 4px 6px;border-radius:9px;cursor:grab;touch-action:none;user-select:none;
+  background:linear-gradient(180deg, rgba(64,214,224,.16), rgba(24,74,96,.38));
+  border:1.5px solid rgba(110,235,240,.75);
+  box-shadow:0 0 14px -3px rgba(87,217,240,.75), inset 0 0 14px -4px rgba(120,240,245,.55);
+  color:#c9fbff;font-family:'Manrope',sans-serif;transition:transform .12s, box-shadow .15s, border-color .15s, opacity .15s;
 }
-.ag-chip:hover{border-color:var(--aura);}
-.ag-chip.selected{border-color:var(--gold);background:#2a2c4a;box-shadow:0 0 12px -2px var(--gold);transform:translateY(-2px);}
-.ag-chip.locked{cursor:default;border-color:#4fbf8b;background:rgba(79,191,139,.16);color:#d8ffe9;}
-.ag-chip.locked::before{content:'✓ ';color:#6fe39a;}
-.ag-chip.wrong{border-color:var(--ember);animation:ag-shake .4s;}
+.ag-tray .ag-ent{--w:clamp(60px, 9vh, 76px);}
+.ag-ent:hover{transform:translateY(-2px);box-shadow:0 0 20px -2px rgba(87,217,240,.95), inset 0 0 16px -4px rgba(120,240,245,.65);}
+.ag-ent-tag{position:absolute;top:2px;left:0;right:0;text-align:center;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(170,245,250,.65);}
+.ag-ent-art{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
+.ag-ent-art img{display:block;max-width:86%;max-height:100%;object-fit:contain;filter:drop-shadow(0 0 5px rgba(120,240,245,.55));pointer-events:none;}
+.ag-ent-art b{font-size:calc(var(--w) * .15);line-height:1.15;font-weight:800;text-align:center;text-transform:uppercase;letter-spacing:.02em;color:#d9fdff;text-shadow:0 0 8px rgba(120,240,245,.7);hyphens:auto;}
+.ag-ent-art b.long{font-size:calc(var(--w) * .12);}
+.ag-ent-name{font-size:calc(var(--w) * .118);font-weight:800;line-height:1.1;text-align:center;text-transform:uppercase;color:#d9fdff;text-shadow:0 0 6px rgba(120,240,245,.6);}
+.ag-ent.selected{border-color:var(--gold);box-shadow:0 0 20px -2px var(--gold), inset 0 0 14px -4px rgba(232,184,75,.5);transform:translateY(-4px);}
+.ag-ent.lifted{opacity:.3;}
+.ag-ent.locked{cursor:default;border-color:#6fe39a;box-shadow:0 0 16px -3px #6fe39a, inset 0 0 14px -4px rgba(111,227,154,.5);}
+.ag-ent.locked .ag-ent-tag{color:#9ff0bf;}
+.ag-ent.wrong{border-color:var(--ember);animation:ag-shake .4s;}
 @keyframes ag-shake{20%,60%{transform:translateX(-4px);}40%,80%{transform:translateX(4px);}}
+
+/* the card while dragged, carried by the hand */
+.ag-ghost{position:fixed;left:0;top:0;z-index:80;pointer-events:none;margin:0;--w:auto;
+  box-shadow:0 18px 30px -10px rgba(0,0,0,.7), 0 0 24px -2px rgba(87,217,240,.9);}
+.ag-ghost-hand,.ag-hand{color:#bff8ff;filter:drop-shadow(0 0 6px rgba(87,217,240,.9)) drop-shadow(0 4px 6px rgba(0,0,0,.6));}
+.ag-ghost-hand{position:absolute;right:-22px;bottom:-26px;width:42px;height:42px;}
+.ag-ghost-hand svg,.ag-hand svg{display:block;width:100%;height:100%;fill:currentColor;}
+.ag-hand{position:fixed;left:-20px;top:-6px;z-index:80;width:46px;height:46px;pointer-events:none;}
+.ag-hand[hidden]{display:none;}
+body.ag-grabbing,body.ag-grabbing *{cursor:grabbing !important;}
+
+/* the tray: pedestals under the cards */
+.ag-tray-head{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);}
+.ag-tray{display:flex;gap:14px;justify-content:safe center;align-items:flex-end;min-height:calc(clamp(60px, 9vh, 76px) * 1.18 + 26px);overflow-x:auto;padding:8px 6px 4px;scrollbar-width:thin;}
+.ag-ped{position:relative;isolation:isolate;flex:none;display:flex;flex-direction:column;align-items:center;padding-bottom:12px;}
+.ag-ped::after{
+  content:'';position:absolute;bottom:0;left:50%;width:120%;height:16px;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(ellipse, rgba(87,217,240,.35), rgba(87,217,240,0) 70%);border:2px solid rgba(110,235,240,.6);
+  box-shadow:0 0 12px -2px rgba(87,217,240,.8);z-index:-1;
+}
+.ag-tray-empty{font-size:12px;color:var(--text-faint);align-self:center;}
+
+/* Phase 1: the radar */
+.ag-radar{position:relative;width:min(100cqw - 8px, (100cqh - 8px) * 1000 / 540);aspect-ratio:1000/540;}
+.ag-radar-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.ag-ring{fill:color-mix(in srgb, var(--ring) 11%, transparent);stroke:var(--ring);stroke-width:3.5;
+  filter:drop-shadow(0 0 6px var(--ring));transition:fill .15s;}
+.ag-ring.over{fill:color-mix(in srgb, var(--ring) 30%, transparent);}
+.ag-radar-grid circle,.ag-radar-grid line{fill:none;stroke:rgba(87,217,240,.35);stroke-width:1.5;}
+.ag-sweep path{fill:rgba(87,217,240,.32);}
+@media (prefers-reduced-motion: no-preference){
+  .ag-sweep{animation:ag-sweep 4s linear infinite;}
+}
+@keyframes ag-sweep{to{transform:rotate(360deg);}}
+.ag-orbit-label{
+  position:absolute;left:50%;transform:translate(-50%,-50%);z-index:1;max-width:min(60%, 100cqw - 16px);
+  appearance:none;border:1px solid color-mix(in srgb, var(--ring) 55%, transparent);border-radius:999px;cursor:pointer;
+  padding:2px 10px;background:rgba(8,14,32,.82);color:var(--ring);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(9px, 1.35cqw, 13px);letter-spacing:.06em;text-transform:uppercase;
+  text-shadow:0 0 8px color-mix(in srgb, var(--ring) 70%, transparent);
+}
+.ag-orbit-label.over{background:color-mix(in srgb, var(--ring) 25%, #08101f);}
+@container (max-width:560px){
+  .ag-orbit-label{max-width:none;letter-spacing:0;padding:1px 7px;font-size:8.5px;}
+}
+.ag-placed{position:absolute;z-index:2;transform:translate(-50%,-50%);}
+.ag-placed .ag-ent{--w:clamp(44px, 6.6cqw, 70px);}
+.ag-hand-target{position:absolute;width:1px;height:1px;}
+.ag-socket .ag-hand-target{left:50%;top:50%;}
+
+/* Phase 2: the needs, each with a socket for its contact */
+.ag-needs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:min(860px,100%);max-height:100%;}
+.ag-need{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;
+  background:rgba(14,26,56,.85);border:1.5px solid rgba(232,184,75,.35);transition:background .15s, border-color .15s;
+}
+.ag-need.over{background:rgba(232,184,75,.12);border-color:var(--gold);}
+.ag-need.linked{border-color:#6fe39a;}
+.ag-need p{flex:1;margin:0;font-size:clamp(11.5px, 1.5cqw, 13.5px);line-height:1.4;color:var(--text);}
+.ag-socket{
+  --w:clamp(54px, min(7.6cqw, 19cqh), 80px);
+  position:relative;flex:none;width:calc(var(--w) + 10px);height:calc(var(--w) * 1.18 + 10px);border-radius:11px;
+  display:flex;align-items:center;justify-content:center;border:1.5px dashed rgba(110,235,240,.5);background:rgba(87,217,240,.05);
+}
+.ag-socket > span{font-size:10px;color:var(--text-faint);text-align:center;padding:0 4px;}
+.ag-socket .ag-ent{--w:inherit;width:var(--w);}
 
 .ag-why{margin:0;padding-left:18px;}
 .ag-why li{margin-bottom:5px;}
@@ -59,7 +138,7 @@
   transition:transform .18s ease, background .25s, border-color .25s, box-shadow .25s;
 }
 .ag-step:hover{border-color:#4a5697;}
-.ag-step:focus-visible{outline:2px solid var(--aura);outline-offset:2px;}
+.ag-step:focus-visible{outline:2px solid var(--luma);outline-offset:2px;}
 .ag-step.dragging{
   cursor:grabbing;transition:none;position:relative;z-index:2;
   background:#1d285a;border-color:var(--gold);box-shadow:0 12px 26px -8px rgba(0,0,0,.7), 0 0 16px -4px var(--gold);
@@ -102,8 +181,16 @@
 .ag-card.chosen{border-color:#6fe39a;box-shadow:0 0 26px -4px #6fe39a;}
 .ag-card:disabled{cursor:default;}
 
+.ag-board.sockets{overflow-y:auto;align-items:safe center;}
 @media (max-width:640px){
-  .ag-slots,.ag-slots.single,.ag-cards{grid-template-columns:1fr;}
+  .ag-cards{grid-template-columns:1fr;}
+  .ag-needs{gap:6px;}
+  .ag-need{flex-direction:column;align-items:stretch;gap:6px;padding:6px 8px;}
+  .ag-need p{font-size:11px;line-height:1.3;}
+  .ag-socket{align-self:center;--w:54px;}
+  .ag-step-t i{display:none;}
+}
+@media (max-height:680px){
   .ag-step-t i{display:none;}
 }
 /* the shared feedback card sets <b> in monospace for numbers; here it's prose */

@@ -15,14 +15,14 @@ import { createShell } from '../../../../shared/game/shell.js';
 /* ---- controller (DOM: formula, steppers, fire) ---- */
 var shell = createShell({
   id: 'cannon-game', emblem: 'x²', title: 'Cañón parabólico',
-  pipsLabel: 'Progreso de muros', hintThinking: 'Aura analiza tu disparo',
+  pipsLabel: 'Progreso de muros', hintThinking: 'Luma analiza tu disparo',
   panelHtml:
     '<div class="gm-goal"></div>' +
     '<div class="cn-formula" aria-live="polite"></div>' +
     '<div class="cn-params"></div>' +
     '<div class="gm-feedback" role="status" aria-live="polite"></div>' +
     '<div class="gm-actions">' +
-      '<button type="button" class="ai-btn gm-hint-btn">◈ Pregúntale a Aura</button>' +
+      '<button type="button" class="ai-btn gm-hint-btn">◈ Pregúntale a Luma</button>' +
       '<button type="button" class="btn-primary gm-build">🎯 Disparar</button>' +
     '</div>'
 });
