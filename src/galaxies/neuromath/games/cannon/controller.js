@@ -41,10 +41,10 @@ shell.setHint(
 var FEEDBACK_IDLE = '<p class="fb-idle"><b>Recuerda:</b> f(0) = c es la altura de salida, f\'(0) = b la pendiente de salida, y el vértice está en x = −b / 2a.</p>';
 
 // onFinish(score, close) runs when the player breaks every wall.
-export function openCannon(node, onFinish){
-  game = { node: node, onFinish: onFinish, round: pickRound(), level: 0, fails: 0, levelFails: 0,
+export function openCannon(node, onFinish, reward){
+  game = { node: node, onFinish: onFinish, reward: reward || {}, round: pickRound(), level: 0, fails: 0, levelFails: 0,
            busy: false, won: false, feedback: null, params: null };
-  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeCannon);
+  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeCannon, (reward || {}).wallet);
   setupLevel();
   try{
     shell.startScene(CannonScene);
@@ -188,10 +188,12 @@ function nextLevel(){
 
 function showFinal(){
   var g = game;
+  if(g.reward.cells) shell.setWallet((g.reward.wallet || 0) + g.reward.cells, g.reward.cells);
   shell.showFinal({
     icon: '🎯', title: '¡Muros derribados!', total: g.round.length, unit: 'muros', fails: g.fails,
     luma: 'Los muros cayeron y los rovers vuelven a moverse entre colonias. La neblina ya no los detiene.',
     recap: 'f(0) = c es la altura de salida, f\'(0) = b la pendiente, las raíces dicen dónde cae la bala y el vértice está en x = −b / 2a.',
+    rewardsHtml: shell.rewardsHtml(g.reward),
     onContinue: function(){ g.onFinish(g.fails, closeCannon); }
   });
 }

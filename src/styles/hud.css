@@ -65,7 +65,7 @@
 
 /* Células Lógicas wallet */
 .hud-cells{
-  display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;
+  position:relative;display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;
   background:#161f42;border:1px solid rgba(232,184,75,.45);
   font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;
 }
@@ -74,3 +74,6 @@
 .hud-cells.bump{animation:hud-bump .6s ease;}
 @keyframes hud-bump{0%{transform:scale(1);}35%{transform:scale(1.15);}100%{transform:scale(1);}}
 @media (max-width:560px){ .hud-cells-label{display:none;} }
+.hud-cells-plus{position:absolute;right:4px;top:100%;margin-top:4px;padding:2px 8px;border-radius:999px;background:#101a3a;border:1px solid rgba(232,184,75,.5);
+  font-size:13px;color:#9ff7ff;white-space:nowrap;pointer-events:none;animation:hud-cells-plus 1.5s ease-out forwards;}
+@keyframes hud-cells-plus{0%{opacity:0;transform:translateY(-6px);}20%{opacity:1;transform:none;}75%{opacity:1;}100%{opacity:0;transform:translateY(8px);}}

@@ -29,7 +29,9 @@ src/
                               random helpers, host (iframe) messaging
     guides.js                 Luma, the narrative guide
     dialogue.js               the guides' one-line-at-a-time conversation box
-    markdown.js               Markdown + KaTeX renderer for the lessons
+    infographic.js            renders a lesson as an infographic (cards,
+                              steps, formula, ✗/✓, Luma's tip; $math$ via KaTeX)
+    markdown.js               Markdown + KaTeX (still accepted for a lesson)
     game/shell.js             mini-game frame: overlay, pips, banner, hint,
                               feedback card, final stars card
     game/scene-kit.js         Phaser pieces every game reuses (backdrop, rover,
@@ -53,7 +55,7 @@ src/
     neuromath/
       index.js                planets, games, intro and briefings
       lessons/                the topic lesson shown when each island opens
-                              (one Markdown file per island, $math$ via KaTeX)
+                              (one infographic object per island)
       games/bridge/           "Puente de operaciones"
         levels.js             exercise bank: 20 abysses in 5 tiers
         math.js               evaluation (right and left-to-right) + steps
@@ -62,10 +64,11 @@ src/
         scene.js              Phaser scene: abyss, planks, rover, effects
       games/cannon/           "Cañón parabólico", same layout
     activa-tu-idea/
-      index.js                Distrito Cristalino, its game, intro
+      index.js                Distrito Cristalino, its three islands, intro
       lessons/                lesson for each island
-      games/alianzas/         "El Vacío de Alianzas"
-        content.js            entities, needs, call steps, decision cards
+      games/alianzas/         the Distrito Cristalino's islands (one game)
+        content.js            entities, needs, call steps, decision cards,
+                              and ISLANDS: each island's phases, gems, lines
         sprites.js            cuts the Sintonizador's poses out of the sheet
         scene.js              Phaser scene: the walkable district, the Nodo
         controller.js         the four phases, panel, flow
@@ -91,14 +94,21 @@ Activa tu idea adds the ones picked up while walking); some also award an Open
 Badge. The HUD shows the wallet and the current galaxy's *Índice de
 Equilibrio* (islands restored).
 
-## Activa tu idea · El Vacío de Alianzas
+## Activa tu idea · Distrito Cristalino
 
 Content and art come from the team's prototype proposal (AI-generated
-mockups, adapted). The player walks and jumps across the Distrito Cristalino
-(← → / A D, ↑ / W to jump, touch buttons on phones) and picks up the five
-Células: a force field seals the corrupted Nodo until all of them are in,
-then E / Espacio activates it. Luma frames the problem, the
-lesson follows, and four phases run: **Mapa de Actores** (drag the
+mockups, adapted). The planet has three islands — **Instituciones**
+(Inicial), **Cómo montar un emprendimiento** (Intermedio) and **la
+Estrategia** (Avanzado, with the *Tejedor de Alianzas* badge) — and on each
+one the player walks and jumps across the district (← → / A D, ↑ / W to
+jump, touch buttons on phones) and picks up six Células. Luma explains each
+one as it's picked up: on Instituciones they are the entities the player
+will sort next; on the others, the key terms of the topic. A force field
+seals the corrupted Nodo until all of them are in, then E / Espacio
+activates it. Luma frames the problem, the lesson follows, and the island's
+phases run (Instituciones: Mapa de Actores and Directorio de Contactos;
+Cómo montar…: Ruta de Convocatorias; Estrategia: Lienzo de Decisión):
+**Mapa de Actores** (drag the
 entities' cards onto a radar of three orbits drawn over the stage),
 **Directorio de Contactos** (drag a contact card onto each need's socket;
 wrong ones get a clue about the kind of entity, never the answer), **Ruta de Convocatorias** (drag six steps into a column; on
@@ -170,9 +180,10 @@ numbered steps. It never gives the value. The previous shot's trail stays on
 the plane, dimmed, for comparison.
 
 Each island opens with a short lesson on its topic before the game starts
-(📖 Tema reopens it). To add or edit one, write `lessons/<island-id>.md` and
-register it in `lessons/index.js`; formulas go between `$…$` (inline) or
-`$$…$$` (on their own line).
+(📖 Tema reopens it). It's an infographic — a title with a big icon and a
+few visual blocks with very little text — written as an object in
+`lessons/<island-id>.js` (block types in `shared/infographic.js`) and
+registered in the galaxy's lessons; formulas go between `$…$`.
 
 A new mini-game goes in `galaxies/<galaxy>/games/<name>/`, builds its panel
 with `createShell` (shared/game/shell.js), mixes `SceneKit` into its Phaser

@@ -164,24 +164,63 @@ body.ag-grabbing,body.ag-grabbing *{cursor:grabbing !important;}
 }
 @keyframes ag-pop{0%{transform:scale(.97);}60%{transform:scale(1.02);}100%{transform:scale(1);}}
 
-/* Phase 4: the decision cards */
-.ag-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+/* Phase 4: the decision cards — hologram cards, all the same colour until
+   one is chosen, so none looks like the answer */
+.ag-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 .ag-card{
-  --tone:#e8b84b;
-  appearance:none;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:8px;
-  padding:12px;border-radius:14px;background:#111a3a;border:1.5px solid color-mix(in srgb, var(--tone) 55%, transparent);
-  color:var(--text);font-family:'Manrope',sans-serif;transition:transform .12s, box-shadow .15s;
+  --tone:#57d9f0;
+  appearance:none;position:relative;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:7px;
+  padding:12px 14px 14px;border-radius:16px;overflow:hidden;color:var(--text);font-family:'Manrope',sans-serif;
+  background:
+    linear-gradient(rgba(87,217,240,.05) 1px, transparent 1px) 0 0/100% 22px,
+    linear-gradient(180deg, rgba(64,214,224,.12), rgba(16,26,58,.92) 60%);
+  border:1.5px solid color-mix(in srgb, var(--tone) 60%, transparent);
+  box-shadow:0 0 18px -8px var(--tone), inset 0 0 20px -12px var(--tone);
+  transition:transform .15s, box-shadow .2s, border-color .2s, opacity .2s;
 }
-.ag-card.tone-teal{--tone:#57d9c9;}
-.ag-card.tone-rose{--tone:#e2708f;}
-.ag-card:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 0 22px -6px var(--tone);}
-.ag-card-tag{font-family:'Cinzel',serif;font-weight:700;font-size:14px;color:var(--tone);}
-.ag-card-text{font-size:12.5px;line-height:1.5;color:var(--text-dim);}
-.ag-card.tried{opacity:.45;}
-.ag-card.chosen{border-color:#6fe39a;box-shadow:0 0 26px -4px #6fe39a;}
+.ag-card:not(:disabled):hover{transform:translateY(-4px);box-shadow:0 14px 28px -14px rgba(0,0,0,.8), 0 0 26px -6px var(--tone), inset 0 0 22px -10px var(--tone);}
+.ag-card:not(:disabled):focus-visible{outline:2px solid var(--luma);outline-offset:3px;}
+.ag-card-top{display:flex;align-items:center;}
+.ag-card-letter{
+  width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-weight:700;font-size:17px;color:#0b1226;background:var(--tone);box-shadow:0 0 14px -2px var(--tone);
+}
+.ag-card-icon{font-size:30px;line-height:1;filter:drop-shadow(0 0 8px color-mix(in srgb, var(--tone) 60%, transparent));}
+.ag-card-title{font-family:'Cinzel',serif;font-size:15.5px;font-weight:700;color:var(--tone);line-height:1.25;}
+.ag-card-text{font-size:12.5px;line-height:1.5;color:var(--text-dim);flex:1;}
+.ag-card-pick{
+  align-self:flex-start;margin-top:2px;padding:5px 12px;border-radius:999px;font-size:11.5px;font-weight:700;
+  color:var(--tone);border:1px solid color-mix(in srgb, var(--tone) 55%, transparent);background:rgba(87,217,240,.08);
+}
+.ag-card:not(:disabled):hover .ag-card-pick{background:var(--tone);color:#0b1226;}
+.ag-card-covers{display:flex;flex-wrap:wrap;gap:5px;}
+.ag-card-covers span{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;}
+.ag-card-covers .yes{color:#9ff0bf;background:rgba(79,191,139,.14);border:1px solid rgba(79,191,139,.55);}
+.ag-card-covers .no{color:#ff9d90;background:rgba(226,96,79,.1);border:1px solid rgba(226,96,79,.45);}
+.ag-card-top{gap:8px;}
+.ag-card-icon{margin-left:auto;}
+.ag-card-stamp{
+  padding:3px 10px;border-radius:999px;white-space:nowrap;
+  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#0b1226;
+}
+.ag-card.tried{--tone:#e2604f;opacity:.75;}
+.ag-card.tried .ag-card-stamp{background:#e2604f;}
+.ag-card.tried .ag-card-icon{filter:grayscale(.7);}
+.ag-card.chosen{--tone:#6fe39a;box-shadow:0 0 30px -4px #6fe39a, inset 0 0 24px -10px #6fe39a;}
+.ag-card.chosen .ag-card-stamp{background:#6fe39a;}
 .ag-card:disabled{cursor:default;}
+.ag-cards.won .ag-card:not(.chosen):not(.tried){opacity:.45;}
+@media (prefers-reduced-motion: no-preference){
+  .ag-card.chosen,.ag-card.tried{animation:ag-flip .45s ease-out;}
+}
+@keyframes ag-flip{0%{transform:rotateY(90deg);}100%{transform:none;}}
+@media (max-width:640px){
+  .ag-card{padding:10px 12px;gap:5px;}
+  .ag-card-letter{width:28px;height:28px;font-size:15px;}
+  .ag-card-icon{font-size:24px;}
+  .ag-card-pick{display:none;} /* the whole card is the button */
+}
 
-.ag-board.sockets{overflow-y:auto;align-items:safe center;}
 @media (max-width:640px){
   .ag-cards{grid-template-columns:1fr;}
   .ag-needs{gap:6px;}
@@ -211,3 +250,45 @@ body.ag-grabbing,body.ag-grabbing *{cursor:grabbing !important;}
 .ag-room-hud.done{border-color:#6fe39a;}
 .ag-room-hud.done i{color:#b8f5cf;}
 .ag-room-hud[hidden]{display:none;}
+
+/* Luma's note on each Célula picked up during the walk: her portrait and a
+   speech bubble along the bottom of the stage, like the story dialogue */
+.ag-gem-card{
+  --who:var(--luma);
+  position:absolute;left:50%;bottom:14px;z-index:4;transform:translateX(-50%);width:min(760px,calc(100% - 24px));
+  display:flex;align-items:flex-end;gap:14px;padding:12px 14px;border-radius:18px;cursor:pointer;
+  background:linear-gradient(180deg,rgba(22,31,66,.96),rgba(15,21,48,.96));border:1px solid var(--luma);
+  box-shadow:0 24px 50px -16px rgba(0,0,0,.8), 0 0 40px -14px var(--luma);
+}
+.ag-gem-card[hidden]{display:none;}
+.ag-gem-card .guide-portrait{flex:none;width:112px;height:136px;}
+.ag-gem-bubble{
+  position:relative;flex:1;align-self:stretch;display:flex;flex-direction:column;justify-content:center;
+  padding:12px 16px;border-radius:14px;background:#0f1838;border:1px solid rgba(108,196,255,.45);
+}
+.ag-gem-bubble::before{
+  content:'';position:absolute;left:-8px;bottom:26px;width:14px;height:14px;transform:rotate(45deg);
+  background:#0f1838;border-left:1px solid rgba(108,196,255,.45);border-bottom:1px solid rgba(108,196,255,.45);
+}
+.ag-gem-who{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
+.ag-gem-who b{font-family:'Cinzel',serif;font-size:18px;color:var(--luma);}
+.ag-gem-who i{font-style:normal;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9ff7ff;}
+.ag-gem-bubble p{margin:0;font-size:16px;line-height:1.55;color:var(--text);text-wrap:pretty;}
+.ag-gem-bubble p b{color:var(--luma);}
+.ag-gem-logo{float:right;width:64px;height:64px;margin:0 0 4px 12px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(120,240,245,.6));}
+@media (prefers-reduced-motion: no-preference){
+  .ag-gem-card.show{animation:ag-gem-in .35s ease-out;}
+}
+@keyframes ag-gem-in{0%{opacity:0;transform:translate(-50%,8px);}100%{opacity:1;transform:translate(-50%,0);}}
+/* phones: above the touch controls, smaller portrait */
+@media (hover:none), (pointer:coarse){ .ag-gem-card{bottom:74px;} }
+/* on phones the art is a strip at the bottom of a tall stage: the note goes
+   in the empty space above it, under the counter */
+@media (max-width:640px){
+  .ag-gem-card{gap:10px;padding:8px 10px;top:60px;bottom:auto;}
+  .ag-gem-card .guide-portrait{width:70px;height:86px;}
+  .ag-gem-bubble{padding:8px 10px;}
+  .ag-gem-who b{font-size:15px;}
+  .ag-gem-bubble p{font-size:13px;line-height:1.45;}
+  .ag-gem-logo{width:40px;height:40px;}
+}

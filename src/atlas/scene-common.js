@@ -15,6 +15,37 @@ export function blendColor(a, b, t){
   );
 }
 
+/* ---- Surface texture: craters, bands, rock strata ---- */
+// Random but stable per planet (seeded by its id), so a planet always looks
+// the same. Light comes from the top left, like the shine on the bodies.
+export function seeded(seed){ return new Phaser.Math.RandomDataGenerator([String(seed)]); }
+
+// One crater at (x, y), radius cr; squash < 1 flattens it (seen at an angle,
+// on an island's surface).
+export function drawCrater(g, x, y, cr, squash){
+  var k = squash || 1;
+  g.fillStyle(0xffffff, 0.13); g.fillEllipse(x + cr * 0.14, y + cr * 0.14 * k, cr * 2, cr * 2 * k);  // lit rim
+  g.fillStyle(0x05070a, 0.3);  g.fillEllipse(x, y, cr * 1.84, cr * 1.84 * k);                         // bowl
+  g.fillStyle(0x05070a, 0.2);  g.fillEllipse(x - cr * 0.16, y - cr * 0.16 * k, cr * 1.2, cr * 1.2 * k); // inner shade
+}
+
+// Craters and soft patches over a round body of radius r centred at (0, 0).
+export function drawPlanetTexture(scene, r, seed){
+  var g = scene.add.graphics(), rnd = seeded(seed);
+  for(var m = 0; m < 3; m++){ // darker "seas" and lighter highlands
+    var mr = r * rnd.realInRange(0.25, 0.45), ma = rnd.angle() * Math.PI / 180, md = rnd.realInRange(0, (r - mr) * 0.9);
+    g.fillStyle(m % 2 ? 0xffffff : 0x05070a, m % 2 ? 0.06 : 0.12);
+    g.fillEllipse(Math.cos(ma) * md, Math.sin(ma) * md, mr * 2, mr * 1.5);
+  }
+  var n = Math.max(4, Math.round(r / 6));
+  for(var i = 0; i < n; i++){
+    var cr = r * rnd.realInRange(0.07, i < 2 ? 0.2 : 0.12);
+    var a = rnd.angle() * Math.PI / 180, d = rnd.realInRange(0, (r - cr) * 0.92);
+    drawCrater(g, Math.cos(a) * d, Math.sin(a) * d, cr, 1);
+  }
+  return g;
+}
+
 /* ---- Rocket cursors ---- */
 // The player's cursor over the map is a little rocket instead of the
 // default arrow — idle while floating, tilted while flying (panning), and

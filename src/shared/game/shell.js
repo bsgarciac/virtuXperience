@@ -3,6 +3,7 @@ import { isConfirmOpen } from '../confirm.js';
 import { aiThinkingHtml, aiBubbleHtml } from '../ai.js';
 import { guideAvatarHtml } from '../guides.js';
 import { renderMarkdown } from '../markdown.js';
+import { renderInfographic } from '../infographic.js';
 
 // The frame every mini-game shares: a full-screen overlay with a top bar
 // (emblem, title, progress pips, close), a stage where the Phaser scene lives
@@ -28,6 +29,7 @@ export function createShell(opts){
       '<div class="gm-top">' +
         '<div class="gm-emblem">' + opts.emblem + '</div>' +
         '<div class="gm-titles"><span class="hud-eyebrow"></span><span class="gm-title">' + opts.title + '</span></div>' +
+        '<div class="gm-wallet" title="Células Lógicas" hidden><span class="gm-wallet-gem" aria-hidden="true">◆</span><b>0</b><i>Células</i></div>' +
         '<div class="gm-pips" aria-label="' + opts.pipsLabel + '"></div>' +
         '<button class="hud-btn gm-lesson-btn" type="button" hidden>📖 Tema</button>' +
         '<button class="hud-btn gm-close-btn" type="button" aria-label="Cerrar juego">✕ Cerrar</button>' +
@@ -49,7 +51,8 @@ export function createShell(opts){
 
   function q(sel){ return root.querySelector(sel); }
   var el = {
-    root: root, eyebrow: q('.gm-titles .hud-eyebrow'), pips: q('.gm-pips'), close: q('.gm-close-btn'),
+    root: root, eyebrow: q('.gm-titles .hud-eyebrow'), title: q('.gm-title'), pips: q('.gm-pips'), close: q('.gm-close-btn'),
+    wallet: q('.gm-wallet'), walletN: q('.gm-wallet b'),
     lessonBtn: q('.gm-lesson-btn'), lesson: q('.gm-lesson'), lessonBody: q('.gm-lesson-body'), lessonGo: q('.gm-lesson .btn-primary'),
     stage: q('.gm-stage'), banner: q('.gm-banner'), hintPanel: q('.gm-hint'), panel: q('.gm-panel'),
     goal: q('.gm-goal'), feedback: q('.gm-feedback'), hintBtn: q('.gm-hint-btn'), build: q('.gm-build'),
@@ -85,19 +88,28 @@ export function createShell(opts){
     setTimeout(function(){
       if(!isOpen || el.hintPanel.dataset.token !== token) return;
       el.hintPanel.classList.remove('ai-loading');
-      el.hintPanel.innerHTML = aiBubbleHtml(hintSource());
+      el.hintPanel.innerHTML = aiBubbleHtml(hintSource()) +
+        '<button type="button" class="gm-hint-close" aria-label="Cerrar pista">✕</button>';
       el.hintPanel.dataset.loaded = '1';
       el.hintBtn.disabled = false;
       el.hintBtn.classList.remove('pulse');
     }, 650 + Math.random() * 350);
   });
 
+  // The hint covers part of the stage: a tap on it (or its ✕) puts it away;
+  // the hint button brings it back.
+  el.hintPanel.addEventListener('click', function(){
+    if(el.hintPanel.dataset.loaded === '1') el.hintPanel.hidden = true;
+  });
+
   var shell = {
     el: el,
 
     // eyebrow: e.g. "Fundamentos · Inicial". closeFn runs on ✕ / Escape.
-    open: function(eyebrow, closeFn){
+    // wallet: the Células Lógicas the player has, shown in the top bar.
+    open: function(eyebrow, closeFn, wallet){
       el.eyebrow.textContent = eyebrow;
+      shell.setWallet(wallet || 0);
       onClose = closeFn;
       isOpen = true;
       el.final.classList.remove('show');
@@ -127,9 +139,9 @@ export function createShell(opts){
     // The topic's short lesson (Markdown with $math$), shown over the game
     // before it starts; onStart runs when the player dismisses it. Without a
     // lesson, onStart runs right away. 📖 Tema reopens it later.
-    showLesson: function(md, onStart){
-      if(!md){ onStart(); return; }
-      el.lessonBody.innerHTML = renderMarkdown(md);
+    showLesson: function(lesson, onStart){
+      if(!lesson){ onStart(); return; }
+      el.lessonBody.innerHTML = typeof lesson === 'string' ? renderMarkdown(lesson) : renderInfographic(lesson);
       el.lessonBody.scrollTop = 0;
       el.lessonBtn.hidden = false;
       lessonDone = onStart;
@@ -212,14 +224,41 @@ export function createShell(opts){
       if(fb && el.panel.scrollHeight > el.panel.clientHeight) el.feedback.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
 
+    setTitle: function(text){ el.title.textContent = text; },
+
+    // The Células counter in the top bar. gained > 0 makes it pop and shows
+    // a floating "+gained".
+    setWallet: function(n, gained){
+      el.wallet.hidden = false;
+      el.walletN.textContent = n;
+      if(!gained) return;
+      el.wallet.classList.remove('bump'); void el.wallet.offsetWidth; el.wallet.classList.add('bump');
+      var plus = document.createElement('span');
+      plus.className = 'gm-wallet-plus';
+      plus.textContent = '+' + gained;
+      el.wallet.appendChild(plus);
+      setTimeout(function(){ plus.remove(); }, 1400);
+    },
+
+    // What an island pays out, for the final card: reward is the atlas's
+    // { cells, badge }; extra: Células picked up while playing.
+    rewardsHtml: function(reward, extra){
+      reward = reward || {};
+      var html = '', n = (reward.cells || 0) + (extra || 0);
+      if(n) html += '<span class="gm-reward"><b>◆ +' + n + '</b> Células Lógicas</span>';
+      if(reward.badge) html += '<span class="gm-reward badge">🏅 Insignia <b>' + reward.badge.name + '</b></span>';
+      return html;
+    },
+
     // o: { icon, title, total, unit ('abismos'), article ('los' | 'las'), fails, luma, recap, rewardsHtml, onContinue }
     showFinal: function(o){
       var stars = starsFor(o.fails);
       var starsHtml = '';
       for(var i = 0; i < 3; i++) starsHtml += i < stars ? '★' : '<span class="off">★</span>';
+      var what = o.total === 1 ? 'el reto' : (o.article || 'los') + ' ' + o.total + ' ' + o.unit;
       var msg = o.fails === 0
-        ? 'Superaste ' + (o.article || 'los') + ' ' + o.total + ' ' + o.unit + ' sin un solo intento fallido. ¡Impecable!'
-        : 'Superaste ' + (o.article || 'los') + ' ' + o.total + ' ' + o.unit + ' tras ' + o.fails + ' ' + (o.fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
+        ? 'Superaste ' + what + ' sin un solo intento fallido. ¡Impecable!'
+        : 'Superaste ' + what + ' tras ' + o.fails + ' ' + (o.fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
       el.finalCard.innerHTML =
         '<div class="result-icon">' + o.icon + '</div>' +
         '<div class="result-title">' + o.title + '</div>' +

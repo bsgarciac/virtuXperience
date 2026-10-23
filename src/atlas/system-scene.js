@@ -4,7 +4,7 @@ import { doneCount, planetFullyDone, galaxyDone } from './progress.js';
 import { playableCount } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
-import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor } from './scene-common.js';
+import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, drawPlanetTexture } from './scene-common.js';
 
 /* ---- System scene: a galaxy's sun and its planets ---- */
 // The current galaxy seen from above: its hack (the Matriz Lógica, the
@@ -125,6 +125,7 @@ SystemScene.prototype.drawPlanets = function(){
     }
     var body = self.add.circle(0, 0, r, tint, 1);
     body.setStrokeStyle(2.4, accent, built ? 1 : 0.5);
+    var texture = drawPlanetTexture(self, r, planet.id);
     var shade = self.add.circle(r * 0.3, r * 0.34, r * 0.78, 0x05070a, 0.32);
     var shine = self.add.circle(-r * 0.32, -r * 0.36, r * 0.38, 0xffffff, 0.2);
     var glyph = self.add.text(0, -1, planet.glyph, {
@@ -141,7 +142,7 @@ SystemScene.prototype.drawPlanets = function(){
 
     var layers = [glow];
     if(ring) layers.push(ring);
-    layers.push(body, shade, shine, glyph, name, sub);
+    layers.push(body, texture, shade, shine, glyph, name, sub);
     c.add(layers);
 
     if(built && !mastered){

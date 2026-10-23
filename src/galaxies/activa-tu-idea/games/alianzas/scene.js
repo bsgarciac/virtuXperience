@@ -3,10 +3,11 @@ import { makeSintonizadorTextures } from './sprites.js';
 
 // Two moments on the same stage:
 //  - 'room': the Distrito Cristalino as a small platformer. The Sintonizador
-//    walks and jumps across the rocks, picks up Células Lógicas, and reaches
-//    the corrupted Nodo up on the right; E / Espacio activates it.
-//  - 'node': a close-up of the Nodo while the four phases are played in the
-//    panel below. Each phase cleared blends the corrupted art towards the
+//    walks and jumps across the rocks, picks up Células Lógicas (Luma
+//    explains each one), and reaches the corrupted Nodo up on the right;
+//    E / Espacio activates it.
+//  - 'node': a close-up of the Nodo while the island's phases are played in
+//    the panel below. Each phase cleared blends the corrupted art towards the
 //    purified one (setRestored) and leaves a mark: satellites on the orbits,
 //    threads of light, a burst.
 // The controller talks to the scene through alianzasCtl.
@@ -29,7 +30,7 @@ var PLATFORMS = [
   [1036, 452, 1104], [945, 302, 1400]
 ];
 var GROUND_Y = 612;
-var CELLS = [[300, 540], [585, 470], [870, 400], [1070, 385], [1010, 240]];
+var CELLS = [[300, 540], [440, 548], [585, 470], [870, 400], [1070, 385], [1010, 240]];
 export var CELL_COUNT = CELLS.length;
 var NODE = { x: 1272, y: 225 };  // the Nodo on the room art
 var NODE_CLOSE = { x: 700, y: 250 }; // the Nodo on the close-up art

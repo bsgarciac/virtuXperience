@@ -1,10 +1,14 @@
 import { defineGalaxy } from '../../atlas/define.js';
-import dcInicial from './lessons/dc-inicial.md?raw';
+import dcInicial from './lessons/dc-inicial.js';
+import dcIntermedio from './lessons/dc-intermedio.js';
+import dcAvanzado from './lessons/dc-avanzado.js';
 import { openAlianzas } from './games/alianzas/controller.js';
 
 // Activa tu idea: the entrepreneurship sector, around the Nanocatalizador
 // Creativo. Here the Sintonizador lands on each island and walks to its
 // Nodo (see games/alianzas) instead of flying the map like in Neuromath.
+// The Distrito Cristalino's three islands were one ("El Vacío de
+// Alianzas") until the team split its phases by topic.
 export default defineGalaxy({
   id: 'activa', name: 'Activa tu idea', emblem: '✧',
   sun: { label: 'NANOCATALIZADOR CREATIVO', glyph: '✧' },
@@ -18,11 +22,15 @@ export default defineGalaxy({
     { id: 'avanzado',   label: 'Avanzado' }
   ],
 
+  // One island per level, each with its own walk and Nodo (see
+  // games/alianzas/content.js ISLANDS); the badge comes with the last one.
   games: {
-    'dc-inicial': { title: 'El Vacío de Alianzas', open: openAlianzas, cells: 150,
-                    badge: { id: 'tejedor-alianzas', name: 'Tejedor de Alianzas' } }
+    'dc-inicial':    { title: 'Isla de Instituciones', open: openAlianzas, cells: 50 },
+    'dc-intermedio': { title: 'Isla de Cómo montar un emprendimiento', open: openAlianzas, cells: 50 },
+    'dc-avanzado':   { title: 'Isla de la Estrategia', open: openAlianzas, cells: 50,
+                       badge: { id: 'tejedor-alianzas', name: 'Tejedor de Alianzas' } }
   },
-  lessons: { 'dc-inicial': dcInicial },
+  lessons: { 'dc-inicial': dcInicial, 'dc-intermedio': dcIntermedio, 'dc-avanzado': dcAvanzado },
 
   intro: [
     { who: 'luma', text: 'Saludos, Sintonizador. Soy Luma, guardiana de los ecosistemas latentes y tejedora de redes invisibles. Te doy la bienvenida a <b>Activa tu idea</b> en el <b>Distrito Cristalino</b>. Aquí, las chispas del pensamiento se cristalizan en proyectos reales. Calibra tu frecuencia y preparemos el camino.' },

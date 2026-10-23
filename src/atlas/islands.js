@@ -1,5 +1,5 @@
 import { islandsOf } from './world.js';
-import { isDone, markDone, planetFullyDone, galaxyDone, addCells, awardBadge } from './progress.js';
+import { isDone, markDone, planetFullyDone, galaxyDone, addCells, awardBadge, cells } from './progress.js';
 import { refreshHud } from './hud.js';
 import { mapRef } from './map-ref.js';
 import { showToast } from '../shared/toast.js';
@@ -29,10 +29,11 @@ export function isUnlocked(island){
 export function playableCount(planetId){ return islandsOf(planetId).filter(isPlayable).length; }
 
 // What the island pays out the first time it's restored, so the game can
-// show it on its final card: { cells, badge: { id, name } | null, firstTime }.
+// show it on its final card: { cells, badge: { id, name } | null, firstTime,
+// wallet } — wallet: the Células the player already has, for the game's counter.
 function rewardOf(island){
   var g = gameOf(island), first = !isDone(island.id);
-  return { cells: first ? (g.cells || 0) : 0, badge: first ? (g.badge || null) : null, firstTime: first };
+  return { cells: first ? (g.cells || 0) : 0, badge: first ? (g.badge || null) : null, firstTime: first, wallet: cells() };
 }
 
 function openIsland(island){

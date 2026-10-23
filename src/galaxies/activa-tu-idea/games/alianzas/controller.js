@@ -1,18 +1,20 @@
-import { ORBITS, ENTITIES, CONTACTS, NEEDS, STEPS, CARDS } from './content.js';
+import { ORBITS, ENTITIES, CONTACTS, NEEDS, STEPS, CARDS, SUPPORTS, ISLANDS } from './content.js';
 import { AlianzasScene, alianzasCtl, CELL_COUNT } from './scene.js';
 import { shuffled } from '../../../../shared/random.js';
 import { showToast } from '../../../../shared/toast.js';
 import { showDialogue } from '../../../../shared/dialogue.js';
+import { guidePortraitHtml } from '../../../../shared/guides.js';
 import { createShell } from '../../../../shared/game/shell.js';
 import { setDevActions } from '../../../../shared/dev.js';
 
-// El Vacío de Alianzas. The player first walks through the Distrito
-// Cristalino to the corrupted Nodo (scene.js) and activates it; then the
-// Nodo's challenge runs in four phases in the panel:
-//   1. Mapa de Actores — sort entities into their orbit
-//   2. Directorio de Contactos — match each need to its contact
-//   3. Ruta de Convocatorias — put the steps of a call in order
-//   4. Lienzo de Decisión — choose the strategy
+// The Distrito Cristalino's three islands (see ISLANDS in content.js). On
+// each one the player first walks to the corrupted Nodo (scene.js),
+// picking up Células that Luma explains, and activates it; then the Nodo's
+// challenge runs in the panel with that island's phases:
+//   1. Mapa de Actores — sort entities into their orbit       (Instituciones)
+//   2. Directorio de Contactos — match each need to its contact (Instituciones)
+//   3. Ruta de Convocatorias — put the steps of a call in order (Cómo montar…)
+//   4. Lienzo de Decisión — choose the strategy                 (Estrategia)
 // Phases 1 and 2 are played on a board over the stage (a radar, then the
 // contact sockets) with the entities' cards waiting in the panel below.
 // Every check with a mistake counts as a failed try (for the stars); the
@@ -22,7 +24,7 @@ var CELL_VALUE = 10; // Células Lógicas per crystal picked up in the room
 var CELL_TOTAL = CELL_COUNT;
 
 var shell = createShell({
-  id: 'alianzas-game', emblem: '◇', title: 'El Vacío de Alianzas',
+  id: 'alianzas-game', emblem: '◇', title: 'Distrito Cristalino',
   pipsLabel: 'Fases del Nodo', hintThinking: 'Luma analiza tu red',
   panelHtml:
     '<div class="gm-goal"></div>' +
@@ -67,11 +69,35 @@ touch.querySelectorAll('button').forEach(function(btn){
   }
 });
 
+// What Luma says about each Célula as it's picked up, told like the story
+// dialogue (her portrait beside a speech bubble) along the bottom of the
+// stage. It doesn't stop the walk: it goes away on its own, on a tap, or
+// when the next one comes.
+var gemCard = document.createElement('div');
+gemCard.className = 'ag-gem-card';
+gemCard.setAttribute('role', 'status');
+gemCard.setAttribute('aria-live', 'polite');
+gemCard.hidden = true;
+shell.el.stage.appendChild(gemCard);
+gemCard.addEventListener('click', function(){ hideGemCard(); });
+var gemTimer = null;
+function showGemCard(gem, n, total){
+  clearTimeout(gemTimer);
+  gemCard.innerHTML = guidePortraitHtml('luma') +
+    '<div class="ag-gem-bubble"><div class="ag-gem-who"><b>Luma</b><i>◆ Gema ' + n + ' de ' + total + '</i></div>' +
+    '<p>' + (gem.icon ? '<img class="ag-gem-logo" src="' + ENT_IMG + gem.icon + '.webp" alt="">' : '') +
+    'Encontraste la gema de <b>' + gem.title + '</b>: ' + gem.text + '</p></div>';
+  gemCard.hidden = false;
+  gemCard.classList.remove('show'); void gemCard.offsetWidth; gemCard.classList.add('show');
+  gemTimer = setTimeout(hideGemCard, 10000);
+}
+function hideGemCard(){ clearTimeout(gemTimer); gemCard.classList.remove('show'); gemCard.hidden = true; }
+
 var HINTS = [
   'Por cada entidad, pregúntate qué hace por un emprendedor: ¿le <b>enseña y lo acompaña</b>, lo <b>formaliza y lo conecta</b>, o le <b>pone el dinero</b>?',
   'Busca el verbo de cada necesidad: <b>registrar</b>, <b>financiar</b>, <b>asesorar</b>, <b>proteger una marca</b>… Cada contacto hace una sola de esas cosas mejor que nadie.',
   'Piensa en qué necesitas tener listo antes de cada paso: no puedes cargar documentos que aún no redactaste, ni subsanar algo que no has radicado.',
-  '¿Cuál de las tres opciones usa todo lo que construiste en las fases anteriores: actores, contactos y ruta?'
+  '¿Cuál de las tres opciones usa todo lo que construiste en las islas anteriores: actores, contactos y ruta?'
 ];
 var PHASE_NAMES = ['Mapa de Actores', 'Directorio de Contactos', 'Ruta de Convocatorias', 'Lienzo de Decisión'];
 
@@ -82,26 +108,49 @@ shell.setHint(
   function(){ return !game || game.phase < 0 || game.busy; }
 );
 
+// Two entities per orbit for the Mapa de Actores, so every orbit gets used.
+function pickEntities(){
+  var picked = [];
+  ORBITS.forEach(function(o){ picked = picked.concat(shuffled(ENTITIES.filter(function(e){ return e.orbit === o.id; })).slice(0, 2)); });
+  return shuffled(picked);
+}
+
+// On Instituciones the gems are the Mapa de Actores' entities: what each
+// one does and which orbit it belongs to.
+function entityGems(list){
+  return list.map(function(e){
+    var orbit = ORBITS.find(function(o){ return o.id === e.orbit; });
+    return { title: e.name, icon: e.icon, text: e.does + '. Es un actor de <b>' + orbit.name.toLowerCase() + '</b>.' };
+  });
+}
+
 // onFinish(score, close, extraCells) runs when the Nodo is purified.
-// reward: { cells, badge, firstTime } from the atlas, shown on the final card.
+// reward: { cells, badge, firstTime, wallet } from the atlas, shown on the
+// final card and in the Células counter.
 export function openAlianzas(node, onFinish, reward){
-  game = { node: node, onFinish: onFinish, reward: reward || {}, phase: -1, fails: 0, won: false, cells: 0 };
-  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeAlianzas);
+  var cfg = ISLANDS[node.level.id];
+  var entities = cfg.phases.indexOf(0) !== -1 ? pickEntities() : null;
+  game = {
+    node: node, onFinish: onFinish, reward: reward || {}, cfg: cfg, entities: entities,
+    gems: shuffled(entities ? entityGems(entities) : cfg.gems).slice(0, CELL_TOTAL),
+    step: -1, phase: -1, fails: 0, won: false, cells: 0
+  };
+  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeAlianzas, game.reward.wallet);
+  shell.setTitle((node.galaxy.games[node.id] || {}).title || node.planet.name);
   shell.setPanelHidden(true);
-  shell.renderPips(PHASE_NAMES.length, 0, false);
+  shell.renderPips(cfg.phases.length, 0, false);
   shell.setRestored(0);
   touch.hidden = false;
   roomHud.hidden = false;
+  hideGemCard();
   renderRoomHud(0, CELL_TOTAL);
   alianzasCtl.input = { left: false, right: false, jump: false, act: false };
   alianzasCtl.onCell = function(n, total){
     game.cells = n * CELL_VALUE;
     renderRoomHud(n, total);
-    if(n >= total){
-      shell.showBanner('win', '¡El Nodo responde!', 'Reuniste todas las Células y el escudo cayó. Sube hasta el Nodo y actívalo con E / Espacio.', 6000);
-    } else {
-      showToast('◆ +' + CELL_VALUE + ' Células Lógicas · ' + n + '/' + total);
-    }
+    shell.setWallet((game.reward.wallet || 0) + game.cells, CELL_VALUE);
+    shell.hideBanner();
+    if(game.gems[n - 1]) showGemCard(game.gems[n - 1], n, total);
   };
   alianzasCtl.onInteract = onNodeActivated;
   setDevActions('game', [
@@ -120,12 +169,13 @@ export function openAlianzas(node, onFinish, reward){
     return;
   }
   shell.showBanner('info', 'Distrito Cristalino',
-    'Un escudo sella el Nodo: recoge las ' + CELL_TOTAL + ' Células Lógicas para abrirlo. Camina con ← → (o A / D) y salta con ↑ (o W).', 8000);
+    'Un escudo sella el Nodo: recoge las ' + CELL_TOTAL + ' Células Lógicas para abrirlo, y escucha lo que Luma te cuenta de cada una. Camina con ← → (o A / D) y salta con ↑ (o W).', 8000);
 }
 
 function closeAlianzas(){
   setDevActions('game', []);
   hideBoard();
+  hideGemCard();
   alianzasCtl.scene = null;
   alianzasCtl.game = null;
   alianzasCtl.onInteract = null;
@@ -135,19 +185,17 @@ function closeAlianzas(){
 }
 
 // The Nodo is active: Luma frames the problem, the lesson follows,
-// and the panel opens on the first phase.
+// and the panel opens on the island's first phase.
 function onNodeActivated(){
   var g = game;
   if(!g || g.walked) return;
   g.walked = true;
   touch.hidden = true;
   roomHud.hidden = true;
+  hideGemCard();
   if(alianzasCtl.scene) alianzasCtl.scene.showNode();
-  showDialogue([
-    { who: 'luma', text: 'El altar está corrupto: el aislamiento y la falta de alianzas han drenado su energía, alimentando la <b>Neblina Gris</b>. Para restaurar el pulso de este distrito, necesitamos mapear el ecosistema y conectar las piezas clave.' },
-    { who: 'luma', text: 'El reto: <b>¿cómo fortalecer este proyecto de economía circular para que tenga apoyo técnico, comercial y financiero?</b>' }
-  ], {
-    eyebrow: 'Nodo de Pregunta · El Vacío de Alianzas', doneLabel: 'Activar el Nanocatalizador',
+  showDialogue(g.cfg.nodeLines.map(function(t){ return { who: 'luma', text: t }; }), {
+    eyebrow: 'Nodo de Pregunta · ' + (g.node.galaxy.games[g.node.id] || {}).title, doneLabel: 'Activar el Nanocatalizador',
     onDone: function(){
       if(game !== g) return;
       shell.setPanelHidden(false);
@@ -158,19 +206,21 @@ function onNodeActivated(){
 
 /* ---------- phases ---------- */
 
-function startPhase(i){
-  var g = game;
-  g.phase = i; g.won = false; g.busy = false;
+// step: position in the island's phases; phase: which of the four it is.
+function startPhase(step){
+  var g = game, n = g.cfg.phases.length;
+  g.step = step; g.phase = g.cfg.phases[step]; g.won = false; g.busy = false;
   hideBoard();
   shell.el.panel.scrollTop = 0;
   shell.resetHint();
   shell.hideBanner();
-  shell.renderPips(PHASE_NAMES.length, i, false);
-  [setupActores, setupDirectorio, setupRuta, setupDecision][i]();
+  shell.renderPips(n, step, false);
+  [setupActores, setupDirectorio, setupRuta, setupDecision][g.phase]();
 }
 
 function setGoal(text){
-  shell.el.goal.innerHTML = '<span class="ag-phase-tag">Fase ' + (game.phase + 1) + ' de 4 · ' + PHASE_NAMES[game.phase] + '</span> ' + text;
+  var n = game.cfg.phases.length;
+  shell.el.goal.innerHTML = '<span class="ag-phase-tag">' + (n > 1 ? 'Fase ' + (game.step + 1) + ' de ' + n + ' · ' : '') + PHASE_NAMES[game.phase] + '</span> ' + text;
 }
 
 function setBuild(label, enabled){
@@ -179,19 +229,21 @@ function setBuild(label, enabled){
   elBuild.hidden = !label;
 }
 
+function isLastStep(){ return game.step === game.cfg.phases.length - 1; }
+
 // A phase cleared: colour comes back, the pip turns green, and the button
 // moves on.
 function phaseWon(title, html){
-  var g = game;
+  var g = game, n = g.cfg.phases.length;
   g.won = true;
-  shell.renderPips(PHASE_NAMES.length, g.phase, true);
-  var restored = (g.phase + 1) / PHASE_NAMES.length;
+  shell.renderPips(n, g.step, true);
+  var restored = (g.step + 1) / n;
   shell.setRestored(restored);
   if(alianzasCtl.scene){ alianzasCtl.scene.setRestored(restored); alianzasCtl.scene.burst(); }
   // the board fades so the restored Nodo (and its new satellites) shows
   boardEl.classList.add('cleared');
   shell.renderFeedback({ kind: 'win', title: title, html: html });
-  setBuild(g.phase === PHASE_NAMES.length - 1 ? '✦ Purificar el Nodo' : 'Siguiente fase →', true);
+  setBuild(isLastStep() ? '✦ Purificar el Nodo' : 'Siguiente fase →', true);
 }
 
 function phaseFailed(title, html){
@@ -204,7 +256,7 @@ elBuild.addEventListener('click', function(){
   var g = game;
   if(!g || g.phase < 0 || g.busy) return;
   if(g.won){
-    if(g.phase < PHASE_NAMES.length - 1) startPhase(g.phase + 1);
+    if(!isLastStep()) startPhase(g.step + 1);
     else showAlianzasFinal();
     return;
   }
@@ -325,6 +377,7 @@ function makeBoard(o){
   function startDrag(e, ent, it){
     e.preventDefault();
     stopHandHint();
+    shell.hideHint(); // it covers the bottom of the board
     var sx = e.clientX, sy = e.clientY, ghost = null, over = null;
     var w = ent.offsetWidth, h = ent.offsetHeight;
     function onMove(ev){
@@ -438,7 +491,9 @@ function radarHtml(b, cardHtml){
   ORBITS.forEach(function(o){
     var R = RINGS[o.id], here = b.items.filter(function(it){ return it.slot === o.id; });
     here.forEach(function(it, i){
-      var deg = here.length === 1 && o.id === 'form' ? 90 : 300 + (i + .5) * 300 / here.length;
+      // a lone card sits in the centre (Formación) or to one side, so it
+      // never stacks under the one in the middle
+      var deg = here.length === 1 ? { form: 90, legal: 180, fin: 0 }[o.id] : 300 + (i + .5) * 300 / here.length;
       var s = here.length === 1 && o.id === 'form' ? 0 : R.at;
       var x = C.cx + R.rx * s * Math.cos(deg * Math.PI / 180), y = C.cy + R.ry * s * Math.sin(deg * Math.PI / 180);
       cards += '<div class="ag-placed" style="left:' + (x / C.w * 100) + '%;top:' + (y / C.h * 100) + '%">' + cardHtml(it) + '</div>';
@@ -464,10 +519,7 @@ function radarTargetAt(x, y){
 
 function setupActores(){
   var g = game;
-  // two entities per orbit, so every orbit gets used
-  var picked = [];
-  ORBITS.forEach(function(o){ picked = picked.concat(shuffled(ENTITIES.filter(function(e){ return e.orbit === o.id; })).slice(0, 2)); });
-  picked = shuffled(picked);
+  var picked = g.entities; // the ones met as gems on the walk
   setGoal('Analiza la naturaleza de cada entidad y arrástrala a su órbita correspondiente para calibrar la red de apoyo del ecosistema.');
   shell.renderFeedback(null, '<p class="fb-idle"><span><b>Las tres órbitas del conocimiento:</b> quienes <strong>forman</strong> y potencian el talento, quienes <strong>formalizan</strong> y estructuran el tejido legal, y quienes <strong>financian</strong> la materialización de las ideas.</span></p>');
   showBoard('radar');
@@ -688,22 +740,37 @@ function setupRuta(){
 function setupDecision(){
   var g = game;
   var cards = shuffled(CARDS);
-  var tried = {};
+  var tried = {}, chosen = null;
   setGoal('Elige la estrategia con la que el proyecto saldrá adelante.');
   shell.renderFeedback(null, '<p class="fb-idle">Las tres son posibles, pero solo una disipa la neblina por completo.</p>');
   setBuild('', false);
+  // A chosen card turns over its result: a stamp and the supports it brings.
+  function cardHtml(c, i){
+    var state = chosen === c.id ? ' chosen' : (tried[c.id] ? ' tried' : '');
+    var open = chosen === c.id || tried[c.id];
+    return '<button type="button" class="ag-card' + state + '" data-i="' + i + '"' + (open || g.won ? ' disabled' : '') + '>' +
+      '<span class="ag-card-top"><span class="ag-card-letter">' + 'ABC'[i] + '</span>' +
+        (open ? '<span class="ag-card-stamp">' + (chosen === c.id ? '✓ Estrategia elegida' : '✗ Se queda corta') + '</span>' : '') +
+        '<span class="ag-card-icon" aria-hidden="true">' + c.icon + '</span></span>' +
+      '<b class="ag-card-title">' + c.title + '</b>' +
+      '<span class="ag-card-text">' + c.text + '</span>' +
+      (open
+        ? '<span class="ag-card-covers">' + SUPPORTS.map(function(sp){
+            var has = c.covers.indexOf(sp.id) !== -1;
+            return '<span class="' + (has ? 'yes' : 'no') + '">' + (has ? '✓ ' : '✗ ') + sp.name + '</span>';
+          }).join('') + '</span>'
+        : '<span class="ag-card-pick">Elegir esta estrategia</span>') +
+      '</button>';
+  }
   function render(){
-    elWork.innerHTML = '<div class="ag-cards">' + cards.map(function(c, i){
-      return '<button type="button" class="ag-card tone-' + c.tone + (tried[c.id] ? ' tried' : '') + '" data-i="' + i + '"' + (tried[c.id] || g.won ? ' disabled' : '') + '>' +
-        '<span class="ag-card-tag">Tarjeta ' + 'ABC'[i] + '</span><span class="ag-card-text">' + c.text + '</span></button>';
-    }).join('') + '</div>';
+    elWork.innerHTML = '<div class="ag-cards' + (g.won ? ' won' : '') + '">' + cards.map(cardHtml).join('') + '</div>';
     elWork.querySelectorAll('.ag-card').forEach(function(btn){
       btn.addEventListener('click', function(){
         var c = cards[+btn.dataset.i];
         if(c.win){
+          chosen = c.id;
           phaseWon('¡La neblina se disipa!', '<p>' + c.result + '</p>');
           render(); // g.won now locks every card
-          elWork.querySelectorAll('.ag-card')[+btn.dataset.i].classList.add('chosen');
           return;
         }
         tried[c.id] = true;
@@ -717,16 +784,13 @@ function setupDecision(){
 
 /* ---------- final ---------- */
 function showAlianzasFinal(){
-  var g = game, r = g.reward;
-  var rewards = '';
-  if(r.cells || g.cells) rewards += '<span class="gm-reward"><b>◆ +' + ((r.cells || 0) + g.cells) + '</b> Células Lógicas</span>';
-  if(r.badge) rewards += '<span class="gm-reward badge">🏅 Insignia <b>' + r.badge.name + '</b></span>';
+  var g = game, r = g.reward, n = g.cfg.phases.length;
   if(alianzasCtl.scene){ alianzasCtl.scene.setRestored(1); alianzasCtl.scene.burst(); }
+  shell.setWallet((r.wallet || 0) + (r.cells || 0) + g.cells, r.cells || 0);
   shell.showFinal({
-    icon: '✦', title: '¡Nodo purificado!', total: PHASE_NAMES.length, unit: 'fases', article: 'las', fails: g.fails,
-    luma: 'Ningún emprendimiento crece solo. Hoy le diste al distrito una red que lo sostiene.',
-    recap: 'el ecosistema tiene quienes forman, quienes formalizan y quienes financian; y una convocatoria se gana en orden: requisitos, propuesta, alianzas, carga, subsanación y sustentación.',
-    rewardsHtml: rewards,
+    icon: '✦', title: '¡Nodo purificado!', total: n, unit: n === 1 ? 'fase' : 'fases', article: 'las', fails: g.fails,
+    luma: g.cfg.luma, recap: g.cfg.recap,
+    rewardsHtml: shell.rewardsHtml(r, g.cells),
     onContinue: function(){ g.onFinish(g.fails, closeAlianzas, g.cells); }
   });
 }

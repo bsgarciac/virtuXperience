@@ -43,10 +43,10 @@ shell.setHint(
 );
 
 // onFinish(score, close) runs when the player completes every abyss.
-export function openBridge(node, onFinish){
-  bridge = { node: node, onFinish: onFinish, round: pickRound(), level: 0, fails: 0, levelFails: 0,
+export function openBridge(node, onFinish, reward){
+  bridge = { node: node, onFinish: onFinish, reward: reward || {}, round: pickRound(), level: 0, fails: 0, levelFails: 0,
              busy: false, won: false, result: null, feedback: null, nope: -1, pop: '', tiles: [], slots: [] };
-  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeBridge);
+  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeBridge, (reward || {}).wallet);
   bridgeCtl.initialTarget = bridge.round[0].target;
   setupBridgeLevel();
   try{
@@ -347,10 +347,12 @@ function nextBridgeLevel(){
 
 function showBridgeFinal(){
   var b = bridge;
+  if(b.reward.cells) shell.setWallet((b.reward.wallet || 0) + b.reward.cells, b.reward.cells);
   shell.showFinal({
     icon: '🌉', title: '¡Abismos superados!', total: b.round.length, unit: 'abismos', fails: b.fails,
     luma: 'Los puentes vuelven a unir a las colonias y los cristales fluyen otra vez. Eso es restaurar el flujo.',
     recap: 'primero los paréntesis, luego la multiplicación, y al final las sumas y restas de izquierda a derecha.',
+    rewardsHtml: shell.rewardsHtml(b.reward),
     onContinue: function(){ b.onFinish(b.fails, closeBridge); }
   });
 }

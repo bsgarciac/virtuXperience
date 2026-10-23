@@ -4,7 +4,7 @@ import { isDone, planetFullyDone } from './progress.js';
 import { isPlayable, isUnlocked, gameTitle, attemptOpenIsland } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
-import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor } from './scene-common.js';
+import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, seeded, drawCrater } from './scene-common.js';
 
 /* ---- Island scene: one planet's chain of floating islands ---- */
 // Landing on a planet shows its islands — one challenge each — strung along
@@ -75,6 +75,7 @@ IslandScene.prototype.drawPlanetHorizon = function(){
   this.add.circle(this.centerX, cy, R + 16, accent, 0.1);
   var body = this.add.circle(this.centerX, cy, R, tint, 1);
   body.setStrokeStyle(3, accent, 0.9);
+  this.drawHorizonTexture(cy, R);
   this.add.circle(this.centerX + R * 0.12, cy + R * 0.08, R * 0.95, 0x05070a, 0.28);
 
   var title = this.add.text(this.centerX, this.horizonY - 70, p.glyph + '  ' + p.name, {
@@ -87,6 +88,30 @@ IslandScene.prototype.drawPlanetHorizon = function(){
     align:'center', wordWrap: { width: this.W - 40 }
   }).setOrigin(0.5);
   tag.setAlpha(0.7);
+};
+
+// Craters and bands on the visible cap of the planet (the band above the
+// horizon line), kept clear of the title in the middle.
+IslandScene.prototype.drawHorizonTexture = function(cy, R){
+  var g = this.add.graphics(), rnd = seeded(this.planet.id), cx = this.centerX;
+  var clip = this.make.graphics();
+  clip.fillStyle(0xffffff); clip.fillCircle(cx, cy, R - 2);
+  g.setMask(clip.createGeometryMask());
+  function inside(x, y, m){ var dx = x - cx, dy = y - cy; return dx * dx + dy * dy < (R - m) * (R - m); }
+  for(var b = 0; b < 4; b++){ // long soft bands, like on a gas giant
+    var by = this.horizonY - 20 - b * 34 - rnd.realInRange(0, 14);
+    g.fillStyle(b % 2 ? 0xffffff : 0x05070a, b % 2 ? 0.05 : 0.09);
+    g.fillEllipse(cx + rnd.realInRange(-80, 80), by, this.W * rnd.realInRange(0.9, 1.4), rnd.realInRange(12, 26));
+  }
+  var placed = 0;
+  for(var t = 0; t < 120 && placed < 16; t++){
+    var cr = rnd.realInRange(5, placed < 4 ? 22 : 12);
+    var x = rnd.realInRange(0, this.W), y = rnd.realInRange(-10, this.horizonY - cr);
+    if(!inside(x, y, cr + 4)) continue;
+    if(Math.abs(x - cx) < 200 && y > this.horizonY - 95) continue; // the title and tag
+    drawCrater(g, x, y, cr, 0.75);
+    placed++;
+  }
 };
 
 IslandScene.prototype.drawPath = function(){
@@ -145,6 +170,20 @@ IslandScene.prototype.drawIslands = function(){
     ], true);
     rock.fillStyle(0x05070a, 0.25); // shadowed right flank
     rock.fillPoints([{x:r*0.3, y:r*0.2}, {x:r*1.0, y:r*0.2}, {x:r*0.4, y:r*0.95}, {x:r*0.05, y:r*1.45}], true);
+    // strata and pebbles, so the underside reads as layered stone
+    var rnd = seeded(island.id);
+    rock.lineStyle(1.4, 0x05070a, 0.35);
+    [0.62, 0.86, 1.1].forEach(function(f){
+      var hw = r * 1.15 * (1 - f / 1.5);
+      rock.beginPath(); rock.moveTo(-hw, r * f);
+      rock.lineTo(-hw * 0.3, r * (f + 0.05)); rock.lineTo(hw * 0.35, r * (f - 0.03)); rock.lineTo(hw, r * (f + 0.02));
+      rock.strokePath();
+    });
+    for(var pb = 0; pb < 9; pb++){
+      var py = rnd.realInRange(0.25, 1.2), phw = r * 1.1 * (1 - py / 1.5);
+      rock.fillStyle(pb % 3 ? 0x05070a : 0xffffff, pb % 3 ? 0.3 : 0.12);
+      rock.fillCircle(rnd.realInRange(-phw, phw), r * py, rnd.realInRange(1.2, 2.6));
+    }
     rock.lineStyle(1.6, unlocked || done ? accent : 0x35406e, 0.55);
     rock.strokePoints(rockPts, true);
 
@@ -154,13 +193,18 @@ IslandScene.prototype.drawIslands = function(){
     var top = self.add.ellipse(0, 0, r * 2.5, r * 0.95, topColor, 1);
     top.setStrokeStyle(2.4, unlocked || done ? accent : 0x35406e, 1);
     var shine = self.add.ellipse(-r * 0.45, -r * 0.12, r * 0.9, r * 0.28, 0xffffff, done ? 0.22 : 0.08);
+    // small craters on the surface, flattened by the angle (kept off the glyph)
+    var craters = self.add.graphics();
+    [[-0.72, 0.12, 0.16], [0.62, -0.1, 0.13], [0.3, 0.22, 0.09], [-0.32, -0.24, 0.08]].forEach(function(c){
+      drawCrater(craters, r * c[0] + rnd.realInRange(-3, 3), r * c[1], r * c[2], 0.42);
+    });
 
     var glyph = self.add.text(0, -2, planet.glyph, {
       fontFamily:'Cinzel, serif', fontSize:'20px', fontStyle:'700',
       color: done ? '#0b1226' : (unlocked ? planet.color : '#4b5588')
     }).setOrigin(0.5);
 
-    var layers = [glowBg, rock, top, shine, glyph];
+    var layers = [glowBg, rock, top, craters, shine, glyph];
 
     // A crystal spire marks the last island of the planet (Avanzado).
     if(island.isLastOfPlanet){

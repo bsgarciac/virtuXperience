@@ -109,13 +109,71 @@ export var STEPS = [
     bad: '¡Casi lo logras! La sustentación careció de tracción comercial y el jurado dudó de la ejecución financiera. No alcanzaste el puntaje de corte en la final.' }
 ];
 
-// Lienzo de Decisión. Only B restores the Nodo; A and C cost a try and
-// let the player choose again.
+// Lienzo de Decisión. Only the network strategy restores the Nodo; the
+// others cost a try and let the player choose again. covers: which kind of
+// support the strategy brings (técnico, comercial, financiero) — shown only
+// once the card is chosen, so it explains the result without giving it away.
+export var SUPPORTS = [
+  { id: 'tec', name: 'Técnico' }, { id: 'com', name: 'Comercial' }, { id: 'fin', name: 'Financiero' }
+];
 export var CARDS = [
-  { id: 'A', tone: 'amber', text: 'Avanzar con recursos internos y dejar para después a los aliados y las mentorías.',
+  { id: 'A', icon: '🏠', title: 'Avanzar por cuenta propia', covers: [], text: 'Avanzar con recursos internos y dejar para después a los aliados y las mentorías.',
     result: 'La neblina retrocede un poco, pero no se va. Sin mentoría ni aliados, el proyecto repite errores que otros ya resolvieron: hay que iterar.' },
-  { id: 'B', tone: 'teal', win: true, text: 'Diseñar una estrategia de red: mentoría con los actores del ecosistema, alianzas con otros productores y una ruta hacia convocatorias de capital semilla.',
+  { id: 'B', icon: '🕸️', title: 'Tejer una red de apoyo', covers: ['tec', 'com', 'fin'], win: true, text: 'Diseñar una estrategia de red: mentoría con los actores del ecosistema, alianzas con otros productores y una ruta hacia convocatorias de capital semilla.',
     result: 'Formación, alianzas y financiación trabajando juntas: el proyecto ya no está solo. La neblina se disipa.' },
-  { id: 'C', tone: 'rose', text: 'Pedir un crédito en un banco tradicional y dejar para después la capacitación y la mentoría.',
+  { id: 'C', icon: '🏦', title: 'Pedir un crédito bancario', covers: ['fin'], text: 'Pedir un crédito en un banco tradicional y dejar para después la capacitación y la mentoría.',
     result: 'El dinero llega, pero sin acompañamiento el proyecto no sabe cómo invertirlo y ahora carga una deuda. Se consumió energía: hay que ajustar la estrategia.' }
 ];
+
+// The Distrito Cristalino's three islands, one per level, each a walk to
+// its own Nodo and part of the four phases (0 Mapa de Actores, 1 Directorio
+// de Contactos, 2 Ruta de Convocatorias, 3 Lienzo de Decisión).
+// nodeLines: what Luma says when the Nodo is activated. gems: what Luma
+// explains as each gem is picked up, in pickup order — on Instituciones they
+// are the entities of the Mapa de Actores (see the controller), so the
+// player meets them before sorting them. luma, recap: the final card.
+export var ISLANDS = {
+  inicial: {
+    phases: [0, 1],
+    nodeLines: [
+      'El altar está corrupto: el aislamiento y la falta de alianzas han drenado su energía, alimentando la <b>Neblina Gris</b>. Para restaurar el pulso de este distrito, necesitamos mapear el ecosistema y conectar las piezas clave.',
+      'Empecemos por lo primero: <b>conocer a las instituciones</b> del ecosistema y saber a cuál acudir para cada necesidad.'
+    ],
+    luma: 'Ahora sabes quién es quién en el ecosistema y a qué puerta tocar.',
+    recap: 'el ecosistema tiene quienes forman, quienes formalizan y quienes financian, y cada necesidad tiene su aliado.'
+  },
+  intermedio: {
+    phases: [2],
+    nodeLines: [
+      'Este Nodo guarda la <b>Ruta de Convocatorias</b>. Muchos emprendedores pierden la financiación de su proyecto por saltarse un paso.',
+      'Ordena la ruta para que el proyecto llegue hasta la firma del convenio.'
+    ],
+    gems: [
+      { title: 'Términos de referencia (TDR)', text: 'son las reglas de la convocatoria: quién puede postular, qué se financia y qué documentos piden.' },
+      { title: 'Presupuesto', text: 'es el plan de en qué se usará cada peso que pides; los evaluadores revisan que sea realista.' },
+      { title: 'Carta de intención', text: 'es un documento en el que un aliado se compromete a apoyar tu proyecto si lo aprueban.' },
+      { title: 'Anexos', text: 'son los documentos obligatorios que acompañan la postulación: certificados, cotizaciones y formatos firmados.' },
+      { title: 'Subsanación', text: 'es el plazo para corregir o completar lo que el evaluador pidió aclarar.' },
+      { title: 'Pitch', text: 'es una presentación corta y convincente de tu proyecto ante un comité.' }
+    ],
+    luma: 'Una buena idea también necesita un buen trámite.',
+    recap: 'una convocatoria se gana en orden: requisitos, propuesta, alianzas, carga, subsanación y sustentación.'
+  },
+  avanzado: {
+    phases: [3],
+    nodeLines: [
+      'Llegó el momento de decidir. Con los actores, los contactos y la ruta que ya conoces, elige cómo fortalecer el proyecto.',
+      'El reto: <b>¿cómo fortalecer este proyecto de economía circular para que tenga apoyo técnico, comercial y financiero?</b>'
+    ],
+    gems: [
+      { title: 'Mentoría', text: 'es el acompañamiento de alguien con experiencia que te ayuda a no repetir errores que otros ya resolvieron.' },
+      { title: 'Alianza', text: 'es un acuerdo con otra organización para lograr juntos lo que solos costaría más.' },
+      { title: 'Capital semilla', text: 'es dinero para arrancar, muchas veces no reembolsable, que entregan fondos y convocatorias.' },
+      { title: 'Deuda', text: 'es dinero prestado que debes devolver con intereses, aunque el proyecto todavía no venda.' },
+      { title: 'Economía circular', text: 'es producir aprovechando residuos y reutilizando materiales, para que nada se desperdicie.' },
+      { title: 'Red de apoyo', text: 'es el conjunto de actores que forman, formalizan y financian un proyecto para que no avance solo.' }
+    ],
+    luma: 'Ningún emprendimiento crece solo. Hoy le diste al distrito una red que lo sostiene.',
+    recap: 'formación, alianzas y financiación funcionan mejor juntas que por separado.'
+  }
+};

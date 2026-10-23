@@ -5,7 +5,7 @@
 //
 // def: { id, name, emblem, sun: { label, glyph }, planets: [{ id, name, glyph,
 // color, tag }], levels: [{ id, label }], games: { islandId: { title, open,
-// cells } }, lessons: { islandId: markdown }, intro: [dialogue lines],
+// cells } }, lessons: { islandId: infographic (shared/infographic.js) }, intro: [dialogue lines],
 // briefings: { islandId: [dialogue lines] } }
 export function defineGalaxy(def){
   def.islands = [];
@@ -15,7 +15,7 @@ export function defineGalaxy(def){
       var id = planet.id + '-' + level.id;
       def.islands.push({
         id: id, galaxy: def, planet: planet, level: level, levelIndex: li,
-        lesson: (def.lessons || {})[id] || null, // Markdown, shown when it opens
+        lesson: (def.lessons || {})[id] || null, // shown when it opens
         isLastOfPlanet: li === def.levels.length - 1
       });
     });

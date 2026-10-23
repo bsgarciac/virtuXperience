@@ -26,6 +26,11 @@ export function refreshHud(){
   if(cells() > prev){
     var chip = elCells.parentNode;
     chip.classList.remove('bump'); void chip.offsetWidth; chip.classList.add('bump');
+    var plus = document.createElement('span');
+    plus.className = 'hud-cells-plus';
+    plus.textContent = '+' + (cells() - prev);
+    chip.appendChild(plus);
+    setTimeout(function(){ plus.remove(); }, 1600);
   }
   elTitle.textContent = 'Atlas ' + g.name;
   elEmblem.textContent = g.emblem;
