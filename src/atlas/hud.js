@@ -19,7 +19,7 @@ export function refreshHud(){
   var count = islands.filter(function(i){ return isDone(i.id); }).length; // ignores stale saved ids
   var pct = Math.round(count / islands.length * 100);
   elProgressFill.style.width = pct + '%';
-  elProgressLabel.textContent = 'Equilibrio · ' + count + '/' + islands.length + ' islas';
+  elProgressLabel.textContent = 'Equilibrio · ' + count + '/' + islands.length + ' nodos';
   elProgressPct.textContent = pct + '%';
   var prev = +elCells.textContent || 0;
   elCells.textContent = cells();

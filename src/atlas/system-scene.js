@@ -4,7 +4,7 @@ import { doneCount, planetFullyDone, galaxyDone } from './progress.js';
 import { playableCount } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
-import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, drawPlanetTexture } from './scene-common.js';
+import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, drawPlanetTexture, isMapClick } from './scene-common.js';
 
 /* ---- System scene: a galaxy's sun and its planets ---- */
 // The current galaxy seen from above: its hack (the Matriz Lógica, the
@@ -136,7 +136,7 @@ SystemScene.prototype.drawPlanets = function(){
       align:'center', wordWrap: { width: 130 }
     }).setOrigin(0.5, 0);
     name.setShadow(0, 2, '#05070f', 4, false, true);
-    var sub = self.add.text(0, r + 12 + name.height, built ? (mastered ? '💎 ' : '') + done + '/' + total + ' islas' : 'Próximamente', {
+    var sub = self.add.text(0, r + 12 + name.height, built ? (mastered ? '💎 ' : '') + done + '/' + total + ' nodos' : 'Próximamente', {
       fontFamily:'Space Mono, monospace', fontSize:'10px', color: mastered ? planet.color : '#9aa3c7'
     }).setOrigin(0.5, 0);
 
@@ -157,14 +157,15 @@ SystemScene.prototype.drawPlanets = function(){
       c.setScale(c.scale * 1.08);
       var rect = self.game.canvas.getBoundingClientRect();
       showTooltip(c.x + rect.left, c.y - r * c.scale + rect.top,
-        '<b>' + planet.name + '</b><br>' + planet.tag + '<br>' + (built ? done + '/' + total + ' islas restauradas' : 'Islas próximamente'));
+        '<b>' + planet.name + '</b><br>' + planet.tag + '<br>' + (built ? done + '/' + total + ' nodos restaurados' : 'Nodos próximamente'));
     });
     body.on('pointerout', function(){
       self.paused = false;
       body.setStrokeStyle(2.4, accent, built ? 1 : 0.5);
       hideTooltip();
     });
-    body.on('pointerup', function(){
+    body.on('pointerup', function(pointer){
+      if(!isMapClick(self, pointer)) return;
       hideTooltip();
       self.scene.start('IslandScene', { planetId: planet.id });
     });

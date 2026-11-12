@@ -2,9 +2,11 @@ import neuromath from '../galaxies/neuromath/index.js';
 import activa from '../galaxies/activa-tu-idea/index.js';
 import comunicarte from '../galaxies/comunicarte/index.js';
 import voxcivitas from '../galaxies/voxcivitas/index.js';
+import latidosocial from '../galaxies/latidosocial/index.js';
+import gerencia from '../galaxies/gerencia/index.js';
 
 // Every galaxy with a built path, and the one the player is exploring.
-export var GALAXY_DEFS = [neuromath, activa, comunicarte, voxcivitas];
+export var GALAXY_DEFS = [neuromath, activa, comunicarte, latidosocial, voxcivitas, gerencia];
 var current = neuromath;
 
 export function galaxy(){ return current; }

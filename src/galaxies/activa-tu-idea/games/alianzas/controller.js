@@ -97,7 +97,7 @@ var HINTS = [
   'Por cada entidad, pregúntate qué hace por un emprendedor: ¿le <b>enseña y lo acompaña</b>, lo <b>formaliza y lo conecta</b>, o le <b>pone el dinero</b>?',
   'Busca el verbo de cada necesidad: <b>registrar</b>, <b>financiar</b>, <b>asesorar</b>, <b>proteger una marca</b>… Cada contacto hace una sola de esas cosas mejor que nadie.',
   'Piensa en qué necesitas tener listo antes de cada paso: no puedes cargar documentos que aún no redactaste, ni subsanar algo que no has radicado.',
-  '¿Cuál de las tres opciones usa todo lo que construiste en las islas anteriores: actores, contactos y ruta?'
+  '¿Cuál de las tres opciones usa todo lo que construiste en los cometas anteriores: actores, contactos y ruta?'
 ];
 var PHASE_NAMES = ['Mapa de Actores', 'Directorio de Contactos', 'Ruta de Convocatorias', 'Lienzo de Decisión'];
 
@@ -135,7 +135,7 @@ export function openAlianzas(node, onFinish, reward){
     gems: shuffled(entities ? entityGems(entities) : cfg.gems).slice(0, CELL_TOTAL),
     step: -1, phase: -1, fails: 0, won: false, cells: 0
   };
-  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeAlianzas, game.reward.wallet);
+  shell.open(node.planet.name + ' · ' + node.name, closeAlianzas, game.reward.wallet);
   shell.setTitle((node.galaxy.games[node.id] || {}).title || node.planet.name);
   shell.setPanelHidden(true);
   shell.renderPips(cfg.phases.length, 0, false);

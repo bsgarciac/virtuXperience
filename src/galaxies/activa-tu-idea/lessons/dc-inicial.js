@@ -9,7 +9,7 @@ export default {
       { icon: '📜', title: 'Formalización', text: 'Te ayudan a existir legalmente y a conectarte.', eg: 'Cámara de Comercio, DIAN, FENALCO', color: '#6fe39a' },
       { icon: '💰', title: 'Financiación', text: 'Ponen el dinero para arrancar o crecer.', eg: 'Fondo Emprender, Bancóldex', color: '#e86bd0' }
     ] },
-    { type: 'steps', heading: 'Lo que harás en esta isla', items: [
+    { type: 'steps', heading: 'Lo que harás en este cometa', items: [
       { title: 'Mapa de Actores', text: 'Ubica cada entidad en su órbita.' },
       { title: 'Directorio de Contactos', text: 'Conecta cada necesidad con quien la resuelve.' }
     ] },

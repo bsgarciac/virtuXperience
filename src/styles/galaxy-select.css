@@ -17,7 +17,7 @@
 .galaxy-select-sub{font-size:14px;color:var(--text-dim);max-width:520px;margin:0 auto;line-height:1.55;}
 .galaxy-grid{
   display:flex;flex-wrap:wrap;justify-content:center;gap:28px 12px;
-  max-width:1020px;margin:0 auto;
+  max-width:620px;margin:0 auto; /* three cards per row: six galaxies in 3 + 3 */
 }
 .galaxy-card{
   appearance:none;border:none;background:none;cursor:pointer;color:inherit;

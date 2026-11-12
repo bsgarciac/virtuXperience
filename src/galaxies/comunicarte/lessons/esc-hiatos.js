@@ -18,6 +18,6 @@ export default {
     { type: 'compare', heading: 'La excepción que más se olvida',
       bad: { title: 'dia, pais, baul', text: 'Las vocales se separan, pero sin tilde se leerían juntas.' },
       good: { title: 'dí-a, pa-ís, ba-úl', text: 'La tilde marca el hiato.' } },
-    { type: 'tip', text: 'En el recurso de esta isla clasificarás palabras nivel por nivel. Antes de cada respuesta, sepárala en sílabas: ¿las vocales quedan juntas o separadas?' }
+    { type: 'tip', text: 'En este meteoro clasificarás palabras nivel por nivel. Antes de cada respuesta, sepárala en sílabas: ¿las vocales quedan juntas o separadas?' }
   ]
 };

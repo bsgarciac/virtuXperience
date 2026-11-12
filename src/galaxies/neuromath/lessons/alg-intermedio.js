@@ -14,6 +14,6 @@ export default {
       { icon: '🧱', title: 'Golpe horizontal', text: 'Si el vértice cae justo en el muro, la bala llega derecha.' }
     ] },
     { type: 'formula', heading: 'Ejemplo con $a = -1$, $b = 6$, $c = 0$', tex: 'f(2) = -1 \\cdot 4 + 6 \\cdot 2 + 0 = 8' },
-    { type: 'tip', text: 'En esta isla, el cañón dispara siguiendo $f(x)$. Ajusta los parámetros hasta que la bala dé en la grieta del muro.' }
+    { type: 'tip', text: 'En este cometa, el cañón dispara siguiendo $f(x)$. Ajusta los parámetros hasta que la bala dé en la grieta del muro.' }
   ]
 };

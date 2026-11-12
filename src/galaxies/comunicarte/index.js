@@ -10,9 +10,9 @@ import escHiatos from './lessons/esc-hiatos.js';
 // (shared/game/recurso.js).
 var open = createRecursoGame({
   galaxy: 'comunicarte', name: 'ComunicArte', emblem: '✎', planets: PLANETS,
-  outro: 'Cada recurso que completas le devuelve la voz a ComunicArte. ¡Sigue con la próxima isla!'
+  outro: 'Cada recurso que completas le devuelve la voz a ComunicArte. ¡Sigue tu camino!'
 });
-var built = recursoGalaxy(PLANETS, open, 50);
+var built = recursoGalaxy(PLANETS, open);
 
 export default defineGalaxy({
   id: 'comunicarte', name: 'ComunicArte', emblem: '✎',
@@ -24,6 +24,6 @@ export default defineGalaxy({
 
   intro: [
     { who: 'luma', text: 'Bienvenido a <b>ComunicArte</b>, Sintonizador. Aquí la <b>Neblina Gris</b> enreda las palabras: las ideas existen, pero no logran llegar a nadie.' },
-    { who: 'luma', text: 'Cada isla guarda un recurso para afinar tu escritura, tu voz y tu lectura. Recórrelo completo, pulsa <b>Terminé</b> y con tu <b>Holófono Cuántico</b> devolverás el color a la isla y ganarás <b>Células Lógicas</b>.' }
+    { who: 'luma', text: 'Cada nodo del camino guarda un recurso para afinar tu escritura, tu voz y tu lectura: las <b>islas</b> son videos y los <b>meteoros</b>, recursos interactivos. Recórrelo completo, pulsa <b>Terminé</b> y con tu <b>Holófono Cuántico</b> le devolverás el color y ganarás <b>Células Lógicas</b>.' }
   ]
 });

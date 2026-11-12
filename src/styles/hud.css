@@ -53,6 +53,7 @@
 #info-pop p{margin:0 0 10px;font-size:13px;line-height:1.5;color:var(--text-dim);}
 .legend-row{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;}
 .legend-dot{width:14px;height:14px;border-radius:50%;flex:none;border:2px solid #444d80;}
+.legend-kind{width:18px;flex:none;text-align:center;font-size:14px;line-height:1;}
 .legend-dot.locked{background:#232c53;}
 .legend-dot.available{background:#0f1530;border-color:var(--cyan);box-shadow:0 0 8px var(--cyan);}
 .legend-dot.done{background:var(--emerald);border-color:var(--emerald);}

@@ -1,4 +1,4 @@
-// The wider VirtuXperience galaxy map — Neuromath, Activa tu idea, ComunicArte and VoxCivitas have a
+// The wider VirtuXperience galaxy map — Neuromath, Activa tu idea, ComunicArte, VoxCivitas, LatidoSocial and Gerencia+ have a
 // built path (atlas/world.js); the rest are shown as "próximamente" so the
 // galaxy-select screen reads as a real hub.
 export var GALAXIES = [
@@ -8,8 +8,10 @@ export var GALAXIES = [
     colors:{ g1:'#6fe39a', g2:'#1f8f87', g3:'#e4ffd9' } },
   { id:'comunicarte',  name:'ComunicArte',  sub:'Habilidades comunicativas', enabled:true,
     colors:{ g1:'#6c8cff', g2:'#3b4fd1', g3:'#bfd0ff' } },
-  { id:'latidosocial', name:'LatidoSocial', sub:'Próximamente', enabled:false,
+  { id:'latidosocial', name:'LatidoSocial', sub:'Compromiso social', enabled:true,
     colors:{ g1:'#ff6fae', g2:'#a03a8c', g3:'#ffd1e6' } },
   { id:'voxcivitas',   name:'VoxCivitas',   sub:'Ciudadanía y proyecto de vida', enabled:true,
-    colors:{ g1:'#ffa94d', g2:'#c2502e', g3:'#ffe2a8' } }
+    colors:{ g1:'#ffa94d', g2:'#c2502e', g3:'#ffe2a8' } },
+  { id:'gerencia',     name:'Gerencia+',    sub:'Habilidades gerenciales', enabled:true,
+    colors:{ g1:'#f5c84c', g2:'#9a6b1c', g3:'#fff2c2' } }
 ];

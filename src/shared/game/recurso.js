@@ -27,20 +27,39 @@ var DEFAULTS = {
   }
 };
 
-// The galaxy's planets (with their numbered islands) and games, for
-// defineGalaxy. open: the galaxy's recurso game; cells: Células per island.
-export function recursoGalaxy(planets, open, cells){
+// What kind of node each resource is on the map (atlas/define.js NODE_KINDS)
+// and what it pays the first time: a video is the lightest, a Genially asks
+// more; our own games (comets) pay 100.
+var KIND = {
+  youtube:  { kind: 'isla',    cells: 20 },
+  genially: { kind: 'meteoro', cells: 50 }
+};
+
+// The games for a list of planets' resources, for defineGalaxy. Entries
+// without a src (e.g. { key: 'inicial' }, a stop that is one of the
+// galaxy's own games) are left to the galaxy. open: the galaxy's recurso game.
+export function recursoGames(planets, open){
   var games = {};
-  var defs = planets.map(function(p){
+  planets.forEach(function(p){
     p.islands.forEach(function(r){
-      games[p.id + '-' + r.key] = { title: r.title, open: open, cells: cells };
+      if(!r.src) return;
+      games[p.id + '-' + r.key] = { title: r.title, open: open, kind: KIND[r.kind].kind, cells: KIND[r.kind].cells };
     });
-    return {
-      id: p.id, name: p.name, glyph: p.glyph, color: p.color, tag: p.tag,
-      islands: p.islands.map(function(r, i){ return { id: r.key, label: String(i + 1) }; })
-    };
   });
-  return { planets: defs, games: games };
+  return games;
+}
+
+// A planet's own numbered list of stops, for defineGalaxy's planet.islands.
+export function numberedIslands(p){
+  return p.islands.map(function(r, i){ return { id: r.key, label: String(i + 1) }; });
+}
+
+// The planets and games of a galaxy made only of resources.
+export function recursoGalaxy(planets, open){
+  var defs = planets.map(function(p){
+    return { id: p.id, name: p.name, glyph: p.glyph, color: p.color, tag: p.tag, islands: numberedIslands(p) };
+  });
+  return { planets: defs, games: recursoGames(planets, open) };
 }
 
 // One game shell per galaxy. opts: { galaxy (id), name, emblem, planets,
@@ -49,7 +68,7 @@ export function recursoGalaxy(planets, open, cells){
 export function createRecursoGame(opts){
   var resources = {};
   opts.planets.forEach(function(p){
-    p.islands.forEach(function(r){ resources[p.id + '-' + r.key] = r; });
+    p.islands.forEach(function(r){ if(r.src) resources[p.id + '-' + r.key] = r; });
   });
 
   var shell = createShell({
@@ -97,7 +116,7 @@ export function createRecursoGame(opts){
     var res = resources[island.id], d = DEFAULTS[res.kind];
     current = { island: island, res: res, onFinish: onFinish, reward: reward || {} };
 
-    shell.open(island.planet.name + ' · Isla ' + island.level.label, close, current.reward.wallet);
+    shell.open(island.planet.name + ' · ' + island.name, close, current.reward.wallet);
     shell.setTitle(res.title);
     shell.renderPips(1, 0, false);
     shell.resetHint();

@@ -54,6 +54,7 @@ src/
     select.js                 galaxy select screen
     neuromath/
       index.js                planets, games, intro and briefings
+      recursos.js             each planet's path: old-site resources + games
       lessons/                the topic lesson shown when each island opens
                               (one infographic object per island)
       games/bridge/           "Puente de operaciones"
@@ -64,7 +65,8 @@ src/
         scene.js              Phaser scene: abyss, planks, rover, effects
       games/cannon/           "Cañón parabólico", same layout
     activa-tu-idea/
-      index.js                Distrito Cristalino, its three islands, intro
+      index.js                its planets, the three walk-game comets, intro
+      recursos.js             each planet's path: old-site resources + games
       lessons/                lesson for each island
       games/alianzas/         the Distrito Cristalino's islands (one game)
         content.js            entities, needs, call steps, decision cards,
@@ -77,30 +79,40 @@ src/
       content.js              planets and their resources (Genially/YouTube
                               URL, optional goal, hint, recap)
       lessons/                lesson for the islands that have one
+    latidosocial/             LatidoSocial, same layout as comunicarte/
+    gerencia/                 Gerencia+, same layout as comunicarte/
     voxcivitas/               VoxCivitas, same layout as comunicarte/
         controller.js         the embed in the stage, "Terminé", final card
 public/assets/                images served as-is (art, Luma's portrait, entity logos)
 ```
 
-## Galaxias → planetas → islas
+## Galaxias → planetas → nodos
 
-A galaxy is an area (Neuromath, Activa tu idea, ComunicArte, VoxCivitas). Entering it shows a solar
-system: its hack as the sun (the *Matriz Lógica*, the *Nanocatalizador
-Creativo*) and one planet per subarea (Cálculo, Fundamentos
-de matemáticas, Álgebra, Estadística), which the player can visit in any
-order. A planet holds islands, one challenge each (Inicial, Intermedio,
-Avanzado). Inside a planet the islands suggest an order: jumping past an
-unfinished built island asks first; unbuilt islands don't block.
+A galaxy is an area (Neuromath, Activa tu idea, ComunicArte, LatidoSocial,
+VoxCivitas, Gerencia+). Entering it shows a solar system: its hack as the
+sun (the *Matriz Lógica*, the *Nanocatalizador Creativo*, the *Holófono
+Cuántico*, the *Pulsar Social*, the *Gafas de Realidad Social*, the
+*Brújula de Gestión Ágil*) and one planet per
+subarea, which the player can visit in any order. A planet holds a path of
+**nodes**, numbered in a suggested order: jumping past an unfinished one asks
+first.
 
-Each galaxy has its own way of playing an island: in Neuromath you fly the
-map and the challenge is a mini-game; in Activa tu idea you land and **walk**
-the Sintonizador to the island's Nodo before the challenge opens; in
-ComunicArte and VoxCivitas the island plays an embedded resource (see below).
+Each node is one of three kinds, drawn differently on the path
+(`atlas/island-scene.js`) and paying different **Células Lógicas** the first
+time it's restored:
 
-Islands pay **Células Lógicas** the first time they're restored (and
-Activa tu idea adds the ones picked up while walking); some also award an Open
-Badge. The HUD shows the wallet and the current galaxy's *Índice de
-Equilibrio* (islands restored).
+| Kind | Holds | Drawn as | Células |
+|---|---|---|---|
+| Isla | a YouTube video | a floating island | 20 |
+| Meteoro | a Genially | a burning rock with a flame trail and embers | 50 |
+| Cometa | one of our games | an icy nucleus with a glowing coma and two tails | 100 |
+
+Comets are our mini-games: in Neuromath the challenge opens on the stage
+(Puente de operaciones, Cañón parabólico); in Activa tu idea you land and
+**walk** the Sintonizador to the Nodo first. Islands and meteors play an
+embedded resource (see below). Activa tu idea adds the Células picked up
+while walking; some comets also award an Open Badge. The HUD shows the
+wallet and the current galaxy's *Índice de Equilibrio* (nodes restored).
 
 ## Activa tu idea · Distrito Cristalino
 
@@ -129,30 +141,37 @@ The Sintonizador's poses are keyed out of a JPG sheet at load time
 (`sprites.js`); with transparent PNGs that file can go. Open the game with
 `?debug` in the URL to see the platforms' physics bodies.
 
-## Migrated resources · ComunicArte, VoxCivitas
+## Migrated resources
 
-These galaxies bring over the old VirtuXperience site
+Islands and meteors bring over the old VirtuXperience site
 (uniminuto.edu/virtuxperience-home), which has one hub page per galaxy
 (`uniminuto.edu/virtual-<hub>`) with articles that each wrap one Genially
 or YouTube embed. The article pages can't be framed
-(`X-Frame-Options: SAMEORIGIN`), so each island embeds the Genially/YouTube
+(`X-Frame-Options: SAMEORIGIN`), so each node embeds the Genially/YouTube
 URL directly, through the shared game in `src/shared/game/recurso.js`.
-We can't see inside the embed, so the island is restored when the player
+We can't see inside the embed, so the node is restored when the player
 presses **Terminé**; the final card has no stars.
 
-| Galaxy | Old hub | Planets (islands) |
+| Galaxy | Old hub | Planets (nodes) |
 |---|---|---|
+| Neuromath | logico-matematico | Cálculo (10), Fundamentos (9), Álgebra (11), Estadística (7), Desafíomente (9), IA y Matemáticas (5) |
+| Activa tu idea | proyectos-e-investigacion | Distrito Cristalino (16), Investigación (8) |
 | ComunicArte | habilidades-comunicativas | Escritura (15), Oralidad (12), Lectura (15), Multilingüismo (5) |
+| LatidoSocial | misionales | Responsabilidad Social (13), FEBIPE (5), Liderazgo Social (5) |
 | VoxCivitas | voxcivitas | Competencias Ciudadanas (10), Aprendizaje Autónomo (15), Proyecto de Vida (14) |
+| Gerencia+ | habilidades-gerenciales | Liderazgo Gerencial (16), Metodologías Ágiles (8), Marketing (7), Talento Humano (7) |
 
-Planets are the old hub's sections. Unlike Neuromath and Activa, these
-planets list their own islands (`planet.islands` in `atlas/define.js`),
-numbered in a suggested learning order. Island ids are
-`<planet>-<resource key>`, so the list can be reordered without losing
-progress, but keys must never change. Islands with a lesson (so far only
-ComunicArte's *Acentuación de hiatos y diptongos*) show it before the
-resource. To add a galaxy this way, copy `voxcivitas/` and fill its
-`content.js` from the old hub.
+Planets are the old hub's sections (plus Neuromath's original four). Each
+planet lists its own nodes (`planet.islands` in `atlas/define.js`): the
+resources in `content.js` (or `recursos.js` in Neuromath and Activa, where
+an entry with only a key is one of our games, keeping its old
+`<planet>-<level>` id). Node ids are `<planet>-<key>`, so a path can be
+reordered without losing progress, but keys must never change. Nodes with a
+lesson (so far only ComunicArte's *Acentuación de hiatos y diptongos*) show
+it before the resource. To add a galaxy this way, copy `latidosocial/` and
+fill its `content.js` from the old hub. Every hub is migrated; a few old
+articles were left out because they only link a PDF or embed another
+article's resource (see the top of each `content.js`/`recursos.js`).
 
 ## Modo desarrollador
 

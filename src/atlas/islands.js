@@ -7,6 +7,7 @@ import { showConfirm } from '../shared/confirm.js';
 import { notifyHost } from '../shared/host.js';
 import { briefThenOpen } from './story.js';
 import { setDevActions } from '../shared/dev.js';
+import { NODE_KINDS } from './define.js';
 
 // Opening and finishing islands, for any galaxy. Which islands are built
 // comes from each galaxy's def.games (see atlas/define.js).
@@ -38,7 +39,7 @@ function rewardOf(island){
 
 function openIsland(island){
   // Dev mode: finish the island right away, as a flawless win.
-  setDevActions('island', [{ label: '⏭ Completar isla', run: function(){
+  setDevActions('island', [{ label: '⏭ Completar nodo', run: function(){
     var close = document.querySelector('.gm-overlay.open .gm-close-btn');
     if(!close){ setDevActions('island', []); return; } // the game was already closed
     close.click();
@@ -53,7 +54,7 @@ function openIsland(island){
 // suggested route without forcing it: jumping ahead asks for confirmation first.
 export function attemptOpenIsland(island){
   if(!isPlayable(island)){
-    showToast('🔒 Esta isla se abrirá pronto.');
+    showToast('🔒 Este nodo se abrirá pronto.');
     return;
   }
   if(isUnlocked(island) || isDone(island.id)){
@@ -62,7 +63,7 @@ export function attemptOpenIsland(island){
   }
   showConfirm(
     '¿Saltar hacia adelante?',
-    'Todavía no completaste las islas anteriores de ' + island.planet.name + '. ¿Seguro quieres ir aquí sin pasar por las otras? Podrías perderte conceptos importantes.',
+    'Todavía no completaste los nodos anteriores de ' + island.planet.name + '. ¿Seguro quieres ir aquí sin pasar por las otras? Podrías perderte conceptos importantes.',
     function(){ openIsland(island); }
   );
 }
@@ -82,7 +83,7 @@ function finishIsland(island, attempts, closeFn, extraCells){
   if(reward.firstTime && planetFullyDone(island.planet.id)){
     showToast('💎 ¡Gema de maestría obtenida en ' + island.planet.name + '!');
   } else if(reward.firstTime){
-    showToast('✦ La neblina retrocede: isla ' + island.level.label + ' de ' + island.planet.name + ' restaurada');
+    showToast('✦ La neblina retrocede: ' + island.name + ' de ' + island.planet.name + ' ' + NODE_KINDS[island.kind].restored);
   }
   if(reward.firstTime && galaxyDone(island.galaxy)){
     setTimeout(function(){ showToast('👑 ¡El sector ' + island.galaxy.name + ' recuperó todo su color!'); }, 900);

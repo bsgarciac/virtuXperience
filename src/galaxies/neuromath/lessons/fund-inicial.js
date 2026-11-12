@@ -12,6 +12,6 @@ export default {
     { type: 'compare', heading: 'Ejemplo: $3 + 4 \\times 2$',
       bad: { title: 'Sumar primero', text: '$7 \\times 2 = 14$' },
       good: { title: 'Multiplicar primero', text: '$3 + 8 = 11$' } },
-    { type: 'tip', text: 'En esta isla, el largo de cada puente es el resultado de tu expresión. Si te saltas el orden, el puente se queda corto o se pasa.' }
+    { type: 'tip', text: 'En este cometa, el largo de cada puente es el resultado de tu expresión. Si te saltas el orden, el puente se queda corto o se pasa.' }
   ]
 };

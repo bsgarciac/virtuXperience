@@ -46,7 +46,7 @@ shell.setHint(
 export function openBridge(node, onFinish, reward){
   bridge = { node: node, onFinish: onFinish, reward: reward || {}, round: pickRound(), level: 0, fails: 0, levelFails: 0,
              busy: false, won: false, result: null, feedback: null, nope: -1, pop: '', tiles: [], slots: [] };
-  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeBridge, (reward || {}).wallet);
+  shell.open(node.planet.name + ' · ' + node.name, closeBridge, (reward || {}).wallet);
   bridgeCtl.initialTarget = bridge.round[0].target;
   setupBridgeLevel();
   try{

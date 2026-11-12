@@ -4,11 +4,13 @@ import { isDone, planetFullyDone } from './progress.js';
 import { isPlayable, isUnlocked, gameTitle, attemptOpenIsland } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
-import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, seeded, drawCrater } from './scene-common.js';
+import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, seeded, drawCrater, isMapClick } from './scene-common.js';
 
 /* ---- Island scene: one planet's chain of floating islands ---- */
 // Landing on a planet shows its islands — one challenge each — strung along
 // a winding path below the planet's horizon, with the mastery gem at the end.
+
+var KIND_ICON = { isla: '▶', meteoro: '✦', cometa: '🎮' }; // in the tooltip, before the title
 
 var backBtn = document.getElementById('btn-back');
 backBtn.addEventListener('click', function(){
@@ -150,71 +152,12 @@ IslandScene.prototype.drawIslands = function(){
     var playable = isPlayable(island);
     var unlocked = playable && isUnlocked(island);
     var done = isDone(island.id);
-    var r = 40;
-
     var container = self.add.container(x, y);
-    var glowBg = self.add.circle(0, r * 0.2, r + 16, accent, done ? 0.22 : (unlocked ? 0.16 : 0));
+    var ctx = { island: island, planet: planet, accent: accent, done: done, unlocked: unlocked, rnd: seeded(island.id) };
+    var drawn = (NODE_DRAW[island.kind] || drawIsla)(self, ctx);
+    var r = drawn.r, glowBg = drawn.glow, layers = drawn.layers;
 
-    // The rocky underside: a jagged cone hanging from the surface, with a
-    // lighter stratum so it reads as stone.
-    var rockPts = [
-      {x:-r*1.22, y:0}, {x:r*1.22, y:0}, {x:r*0.85, y:r*0.5}, {x:r*0.4, y:r*0.95},
-      {x:r*0.05, y:r*1.45}, {x:-r*0.3, y:r*0.95}, {x:-r*0.9, y:r*0.55}
-    ];
-    var rock = self.add.graphics();
-    rock.fillStyle(ColorNum(done ? '#6a5a8c' : (unlocked ? '#4c4370' : '#2f2b4c')), 1);
-    rock.fillPoints(rockPts, true);
-    rock.fillStyle(ColorNum(done ? '#82719f' : (unlocked ? '#5e5486' : '#38345a')), 1);
-    rock.fillPoints([
-      {x:-r*1.1, y:r*0.1}, {x:r*1.1, y:r*0.1}, {x:r*0.75, y:r*0.4}, {x:-r*0.8, y:r*0.45}
-    ], true);
-    rock.fillStyle(0x05070a, 0.25); // shadowed right flank
-    rock.fillPoints([{x:r*0.3, y:r*0.2}, {x:r*1.0, y:r*0.2}, {x:r*0.4, y:r*0.95}, {x:r*0.05, y:r*1.45}], true);
-    // strata and pebbles, so the underside reads as layered stone
-    var rnd = seeded(island.id);
-    rock.lineStyle(1.4, 0x05070a, 0.35);
-    [0.62, 0.86, 1.1].forEach(function(f){
-      var hw = r * 1.15 * (1 - f / 1.5);
-      rock.beginPath(); rock.moveTo(-hw, r * f);
-      rock.lineTo(-hw * 0.3, r * (f + 0.05)); rock.lineTo(hw * 0.35, r * (f - 0.03)); rock.lineTo(hw, r * (f + 0.02));
-      rock.strokePath();
-    });
-    for(var pb = 0; pb < 9; pb++){
-      var py = rnd.realInRange(0.25, 1.2), phw = r * 1.1 * (1 - py / 1.5);
-      rock.fillStyle(pb % 3 ? 0x05070a : 0xffffff, pb % 3 ? 0.3 : 0.12);
-      rock.fillCircle(rnd.realInRange(-phw, phw), r * py, rnd.realInRange(1.2, 2.6));
-    }
-    rock.lineStyle(1.6, unlocked || done ? accent : 0x35406e, 0.55);
-    rock.strokePoints(rockPts, true);
-
-    // The surface: green-ish with the planet's colour once restored, faint
-    // while it waits, grey under the fog.
-    var topColor = done ? accent : (unlocked ? blendColor('#1c274d', planet.color, 0.5) : ColorNum('#2a3152'));
-    var top = self.add.ellipse(0, 0, r * 2.5, r * 0.95, topColor, 1);
-    top.setStrokeStyle(2.4, unlocked || done ? accent : 0x35406e, 1);
-    var shine = self.add.ellipse(-r * 0.45, -r * 0.12, r * 0.9, r * 0.28, 0xffffff, done ? 0.22 : 0.08);
-    // small craters on the surface, flattened by the angle (kept off the glyph)
-    var craters = self.add.graphics();
-    [[-0.72, 0.12, 0.16], [0.62, -0.1, 0.13], [0.3, 0.22, 0.09], [-0.32, -0.24, 0.08]].forEach(function(c){
-      drawCrater(craters, r * c[0] + rnd.realInRange(-3, 3), r * c[1], r * c[2], 0.42);
-    });
-
-    var glyph = self.add.text(0, -2, planet.glyph, {
-      fontFamily:'Cinzel, serif', fontSize:'20px', fontStyle:'700',
-      color: done ? '#0b1226' : (unlocked ? planet.color : '#4b5588')
-    }).setOrigin(0.5);
-
-    var layers = [glowBg, rock, top, craters, shine, glyph];
-
-    // A crystal spire marks the last island of the planet (Avanzado).
-    if(island.isLastOfPlanet){
-      var crystal = self.add.graphics();
-      crystal.fillStyle(unlocked || done ? accent : 0x35406e, done ? 1 : 0.8);
-      crystal.fillPoints([{x:r*0.72, y:-r*1.05}, {x:r*0.88, y:-r*0.55}, {x:r*0.72, y:-r*0.2}, {x:r*0.56, y:-r*0.55}], true);
-      layers.splice(4, 0, crystal);
-    }
-
-    var label = self.add.text(0, r * 1.45 + 12, island.level.label + (playable ? ' · ' + gameTitle(island) : ''), {
+    var label = self.add.text(0, drawn.labelY, island.name + (playable ? ' · ' + gameTitle(island) : ''), {
       fontFamily:'Space Mono, monospace', fontSize:'11px', color: unlocked || done ? '#c3c9e6' : '#5d6690'
     }).setOrigin(0.5, 0);
     layers.push(label);
@@ -244,23 +187,24 @@ IslandScene.prototype.drawIslands = function(){
 
     // An invisible ellipse over surface and rock is the click target, so
     // the whole island is clickable rather than just its outline.
-    var hit = self.add.ellipse(0, r * 0.3, r * 2.6, r * 2.1, 0x000000, 0.001);
+    var hit = self.add.ellipse(0, drawn.hit.y, drawn.hit.w, drawn.hit.h, 0x000000, 0.001);
     container.add(hit);
     hit.setInteractive();
     hit.input.cursor = CURSOR_HOVER;
     hit.on('pointerup', function(pointer){
-      if(pointer.getDistance() > 8) return;
+      if(pointer.getDistance() > 8 || !isMapClick(self, pointer)) return;
       attemptOpenIsland(island);
     });
     hit.on('pointerover', function(){
       var rect = self.game.canvas.getBoundingClientRect();
       var sx = x - self.cameras.main.scrollX + rect.left;
-      var sy = container.y - r * 0.5 - self.cameras.main.scrollY + rect.top;
-      var status = done ? 'Restaurada' : (unlocked ? 'Disponible' : (playable ? 'Bloqueada' : 'Próximamente'));
-      showTooltip(sx, sy, '<b>Isla ' + island.level.label + '</b> · ' + planet.name + '<br>' + (playable ? '🎮 ' + gameTitle(island) + ' · ' : '') + status);
-      top.setStrokeStyle(3.2, accent, 1);
+      var sy = container.y - drawn.tipY - self.cameras.main.scrollY + rect.top;
+      var fem = island.kind === 'isla';
+      var status = done ? (fem ? 'Restaurada' : 'Restaurado') : (unlocked ? 'Disponible' : (playable ? (fem ? 'Bloqueada' : 'Bloqueado') : 'Próximamente'));
+      showTooltip(sx, sy, '<b>' + island.name + '</b> · ' + planet.name + '<br>' + (playable ? KIND_ICON[island.kind] + ' ' + gameTitle(island) + ' · ' : '') + status);
+      drawn.outline(true);
     });
-    hit.on('pointerout', function(){ hideTooltip(); top.setStrokeStyle(2.4, unlocked || done ? accent : 0x35406e, 1); });
+    hit.on('pointerout', function(){ hideTooltip(); drawn.outline(false); });
 
     self.nodeLayer.add(container);
   });
@@ -419,3 +363,258 @@ IslandScene.prototype.restoreBurst = function(idx){
     });
   }
 };
+
+// The three kinds of node (atlas/define.js NODE_KINDS), each drawn around
+// (0, 0) in its container: { r, glow, layers, outline(hover) }. glow pulses
+// while the node is available; outline highlights it on hover. Colours
+// follow the same rule for all: grey under the fog, faint while it waits,
+// the planet's colour once restored.
+
+// Isla (a video): a floating island, rocky underside and a grassy top.
+function drawIsla(self, ctx){
+  var island = ctx.island, planet = ctx.planet, accent = ctx.accent, done = ctx.done, unlocked = ctx.unlocked;
+  var r = 40;
+  var glowBg = self.add.circle(0, r * 0.2, r + 16, accent, done ? 0.22 : (unlocked ? 0.16 : 0));
+
+  // The rocky underside: a jagged cone hanging from the surface, with a
+  // lighter stratum so it reads as stone.
+  var rockPts = [
+    {x:-r*1.22, y:0}, {x:r*1.22, y:0}, {x:r*0.85, y:r*0.5}, {x:r*0.4, y:r*0.95},
+    {x:r*0.05, y:r*1.45}, {x:-r*0.3, y:r*0.95}, {x:-r*0.9, y:r*0.55}
+  ];
+  var rock = self.add.graphics();
+  rock.fillStyle(ColorNum(done ? '#6a5a8c' : (unlocked ? '#4c4370' : '#2f2b4c')), 1);
+  rock.fillPoints(rockPts, true);
+  rock.fillStyle(ColorNum(done ? '#82719f' : (unlocked ? '#5e5486' : '#38345a')), 1);
+  rock.fillPoints([
+    {x:-r*1.1, y:r*0.1}, {x:r*1.1, y:r*0.1}, {x:r*0.75, y:r*0.4}, {x:-r*0.8, y:r*0.45}
+  ], true);
+  rock.fillStyle(0x05070a, 0.25); // shadowed right flank
+  rock.fillPoints([{x:r*0.3, y:r*0.2}, {x:r*1.0, y:r*0.2}, {x:r*0.4, y:r*0.95}, {x:r*0.05, y:r*1.45}], true);
+  // strata and pebbles, so the underside reads as layered stone
+  var rnd = ctx.rnd;
+  rock.lineStyle(1.4, 0x05070a, 0.35);
+  [0.62, 0.86, 1.1].forEach(function(f){
+    var hw = r * 1.15 * (1 - f / 1.5);
+    rock.beginPath(); rock.moveTo(-hw, r * f);
+    rock.lineTo(-hw * 0.3, r * (f + 0.05)); rock.lineTo(hw * 0.35, r * (f - 0.03)); rock.lineTo(hw, r * (f + 0.02));
+    rock.strokePath();
+  });
+  for(var pb = 0; pb < 9; pb++){
+    var py = rnd.realInRange(0.25, 1.2), phw = r * 1.1 * (1 - py / 1.5);
+    rock.fillStyle(pb % 3 ? 0x05070a : 0xffffff, pb % 3 ? 0.3 : 0.12);
+    rock.fillCircle(rnd.realInRange(-phw, phw), r * py, rnd.realInRange(1.2, 2.6));
+  }
+  rock.lineStyle(1.6, unlocked || done ? accent : 0x35406e, 0.55);
+  rock.strokePoints(rockPts, true);
+
+  // The surface: green-ish with the planet's colour once restored, faint
+  // while it waits, grey under the fog.
+  var topColor = done ? accent : (unlocked ? blendColor('#1c274d', planet.color, 0.5) : ColorNum('#2a3152'));
+  var top = self.add.ellipse(0, 0, r * 2.5, r * 0.95, topColor, 1);
+  top.setStrokeStyle(2.4, unlocked || done ? accent : 0x35406e, 1);
+  var shine = self.add.ellipse(-r * 0.45, -r * 0.12, r * 0.9, r * 0.28, 0xffffff, done ? 0.22 : 0.08);
+  // small craters on the surface, flattened by the angle (kept off the glyph)
+  var craters = self.add.graphics();
+  [[-0.72, 0.12, 0.16], [0.62, -0.1, 0.13], [0.3, 0.22, 0.09], [-0.32, -0.24, 0.08]].forEach(function(c){
+    drawCrater(craters, r * c[0] + rnd.realInRange(-3, 3), r * c[1], r * c[2], 0.42);
+  });
+
+  var glyph = self.add.text(0, -2, planet.glyph, {
+    fontFamily:'Cinzel, serif', fontSize:'20px', fontStyle:'700',
+    color: done ? '#0b1226' : (unlocked ? planet.color : '#4b5588')
+  }).setOrigin(0.5);
+
+  var layers = [glowBg, rock, top, craters, shine, glyph];
+
+  // A crystal spire marks the last island of the planet (Avanzado).
+  if(island.isLastOfPlanet){
+    var crystal = self.add.graphics();
+    crystal.fillStyle(unlocked || done ? accent : 0x35406e, done ? 1 : 0.8);
+    crystal.fillPoints([{x:r*0.72, y:-r*1.05}, {x:r*0.88, y:-r*0.55}, {x:r*0.72, y:-r*0.2}, {x:r*0.56, y:-r*0.55}], true);
+    layers.splice(4, 0, crystal);
+  }
+  return { r: r, glow: glowBg, layers: layers,
+    labelY: r * 1.45 + 12, hit: { y: r * 0.3, w: r * 2.6, h: r * 2.1 }, tipY: r * 0.5,
+    outline: function(on){ top.setStrokeStyle(on ? 3.2 : 2.4, on || unlocked || done ? accent : 0x35406e, 1); } };
+}
+
+// Meteoro (a Genially): a jagged rock falling through space, a flame trail
+// streaming up behind it.
+function drawMeteoro(self, ctx){
+  var accent = ctx.accent, done = ctx.done, unlocked = ctx.unlocked, rnd = ctx.rnd, planet = ctx.planet;
+  var r = 34, lit = done || unlocked;
+  var glowBg = self.add.circle(0, 0, r + 18, accent, done ? 0.22 : (unlocked ? 0.16 : 0));
+
+  // The trail: three tapering flames, hot near the rock, fading behind it.
+  var flameColor = done ? accent : (unlocked ? ColorNum('#ff9a4d') : ColorNum('#3a4066'));
+  var trail = self.add.graphics();
+  [[1.0, 0.16, 3.6], [0.85, 0.24, 3.0], [0.68, 0.34, 2.4], [0.5, 0.55, 1.8]].forEach(function(f){
+    trail.fillStyle(f[1] > 0.5 && lit ? ColorNum('#ffe2a8') : flameColor, lit ? f[1] : 0.25);
+    trail.fillPoints([
+      { x: -r * 0.75 * f[0], y: -r * 0.45 * f[0] },
+      { x: r * f[2] * 0.95, y: -r * f[2] * 1.05 },
+      { x: r * 0.45 * f[0], y: r * 0.75 * f[0] }
+    ], true);
+  });
+  for(var sp = 0; sp < 16; sp++){ // sparks shed along the trail
+    var t = rnd.realInRange(1.0, 3.4);
+    trail.fillStyle(lit ? ColorNum('#ffe2a8') : 0x4b5588, lit ? rnd.realInRange(0.4, 0.9) : 0.3);
+    trail.fillCircle(r * t * 0.9 + rnd.realInRange(-10, 10), -r * t + rnd.realInRange(-10, 10), rnd.realInRange(1.2, 2.6));
+  }
+
+  // The rock: an irregular polygon with a lit facet, craters and a shadow.
+  var pts = [];
+  for(var i = 0; i < 11; i++){
+    var a = (i / 11) * Math.PI * 2, rr = r * rnd.realInRange(0.84, 1.06);
+    pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr });
+  }
+  var rock = self.add.graphics();
+  rock.fillStyle(ColorNum(done ? '#6a5a8c' : (unlocked ? '#4c4370' : '#2f2b4c')), 1);
+  rock.fillPoints(pts, true);
+  rock.fillStyle(ColorNum(done ? '#82719f' : (unlocked ? '#5e5486' : '#38345a')), 1);
+  rock.fillPoints(pts.slice(5, 11).map(function(p){ return { x: p.x * 0.8 - r * 0.08, y: p.y * 0.8 - r * 0.08 }; }), true);
+  rock.fillStyle(0x05070a, 0.28);
+  rock.fillPoints(pts.slice(0, 5).concat([{ x: 0, y: 0 }]), true);
+  [[-0.38, -0.3, 0.2], [0.35, 0.28, 0.16], [0.42, -0.36, 0.11], [-0.3, 0.42, 0.12]].forEach(function(c){
+    drawCrater(rock, r * c[0], r * c[1], r * c[2], 0.9);
+  });
+  rock.lineStyle(2.2, lit ? accent : 0x35406e, done ? 1 : 0.8);
+  rock.strokePoints(pts, true);
+  var ring = self.add.circle(0, 0, r * 1.08, 0x000000, 0);
+
+  var glyph = self.add.text(0, 0, planet.glyph, {
+    fontFamily:'Cinzel, serif', fontSize:'18px', fontStyle:'700',
+    color: done ? '#ffffff' : (unlocked ? planet.color : '#4b5588')
+  }).setOrigin(0.5);
+
+  if(lit){ // the flames flicker
+    self.nodeTweened.push(trail);
+    self.tweens.add({ targets: trail, alpha: { from: 0.75, to: 1 }, duration: 260 + rnd.between(0, 120), yoyo: true, repeat: -1 });
+  }
+  var layers = [glowBg, trail, rock, ring, glyph];
+
+  if(lit){
+    // Embers: hot specks that break off the rock and race up the trail,
+    // cooling from white to orange to red as they fade.
+    var EMBER = [0xfff1c4, 0xffc15a, 0xff8a3d, 0xff5a2e];
+    // A soft fire glow along the trail, under the embers.
+    var blaze = self.add.graphics();
+    for(var b = 0; b <= 30; b++){
+      var bt = b / 30;
+      blaze.fillStyle(bt < 0.35 ? 0xffd27a : 0xff7a3a, 0.09 * (1 - bt));
+      blaze.fillCircle(r * 3.2 * bt * 0.95, -r * 3.2 * bt * 1.05, r * (0.75 - 0.45 * bt));
+    }
+    blaze.setBlendMode(Phaser.BlendModes.ADD);
+    self.nodeTweened.push(blaze);
+    self.tweens.add({ targets: blaze, alpha: { from: 0.7, to: 1 }, duration: 180, yoyo: true, repeat: -1 });
+    layers.splice(2, 0, blaze);
+    for(var e = 0; e < 32; e++){
+      var ember = self.add.circle(0, 0, rnd.realInRange(1.6, 3.8), EMBER[e % EMBER.length], 1);
+      ember.setBlendMode(Phaser.BlendModes.ADD);
+      var reach = rnd.realInRange(1.6, 3.8);
+      self.nodeTweened.push(ember);
+      self.tweens.add({
+        targets: ember,
+        x: { from: rnd.realInRange(-r * 0.4, r * 0.5), to: r * reach * 0.95 + rnd.realInRange(-14, 14) },
+        y: { from: rnd.realInRange(-r * 0.5, r * 0.3), to: -r * reach * 1.05 + rnd.realInRange(-14, 14) },
+        alpha: { from: 1, to: 0 }, scale: { from: 1, to: 0.3 },
+        duration: rnd.between(600, 1300), delay: rnd.between(0, 1300), repeat: -1, ease: 'Quad.easeOut'
+      });
+      layers.splice(2, 0, ember); // behind the rock, over the trail
+    }
+  }
+  return { r: r, glow: glowBg, layers: layers,
+    labelY: r * 1.2 + 10, hit: { y: -r * 0.2, w: r * 3, h: r * 3 }, tipY: r * 0.9,
+    outline: function(on){ ring.setStrokeStyle(on ? 2.4 : 0, accent, on ? 0.9 : 0); } };
+}
+
+// Cometa (one of our games, the big challenge): an icy nucleus in a glowing
+// coma, a curved dust tail of soft light and a straight blue ion tail, with
+// sparks drifting off it — the most striking thing on the path. Lit layers
+// use additive blending so overlaps glow instead of stacking flat.
+function drawCometa(self, ctx){
+  var accent = ctx.accent, done = ctx.done, unlocked = ctx.unlocked, rnd = ctx.rnd, planet = ctx.planet;
+  var r = 34, lit = done || unlocked;
+  var ADD = Phaser.BlendModes.ADD;
+  // Dust takes the planet's colour once restored; while waiting it's a
+  // pale gold, like sunlight on ice. Under the fog everything is grey.
+  var dustColor = done ? accent : (unlocked ? ColorNum('#ffd98a') : ColorNum('#3a4066'));
+  var ionColor = lit ? ColorNum('#9fe8ff') : ColorNum('#33395c');
+  var glowBg = self.add.circle(0, 0, r * 2.2, accent, done ? 0.16 : (unlocked ? 0.12 : 0));
+
+  // Dust tail: soft discs along a curve sweeping up-left, shrinking and
+  // fading with distance from the head.
+  var dust = self.add.graphics();
+  var tip = { x: -r * 6.4, y: -r * 4.2 }, bend = { x: -r * 1.6, y: -r * 3.6 };
+  for(var i = 0; i <= 80; i++){
+    var t = i / 80, u = 1 - t;
+    var cx = 2 * u * t * bend.x + t * t * tip.x, cy = 2 * u * t * bend.y + t * t * tip.y;
+    var rad = r * (0.62 - 0.4 * t) * (1 + 0.35 * t);
+    dust.fillStyle(dustColor, (lit ? 0.13 : 0.06) * Math.pow(u, 1.3));
+    dust.fillCircle(cx, cy, rad);
+  }
+  if(lit) dust.setBlendMode(ADD);
+
+  // Ion tail: thin straight streaks pointing straight away from the sun.
+  var ion = self.add.graphics();
+  [[0.5, 0.42, 7.4], [0.28, 0.6, 6.4], [0.12, 0.85, 5.2]].forEach(function(f){
+    ion.fillStyle(ionColor, lit ? f[1] * 0.55 : 0.2);
+    ion.fillPoints([
+      { x: r * f[0] * 0.6, y: -r * f[0] }, { x: -r * f[2], y: -r * f[2] * 0.42 }, { x: -r * f[0] * 0.6, y: r * f[0] * 0.5 }
+    ], true);
+  });
+  if(lit) ion.setBlendMode(ADD);
+
+  // Coma: a soft halo built from concentric discs, brightest at the head.
+  var coma = self.add.graphics();
+  for(var k = 0; k < 24; k++){ // many faint discs, so the halo has no visible rings
+    coma.fillStyle(lit ? (k < 14 ? dustColor : 0xffffff) : 0x3a4066, lit ? 0.035 : 0.025);
+    coma.fillCircle(0, 0, r * (2.0 - k * 0.05));
+  }
+  if(lit) coma.setBlendMode(ADD);
+
+  // Nucleus: a bright icy core with a darker irregular rock showing through.
+  var coreColor = done ? blendColor('#ffffff', planet.color, 0.45) : (unlocked ? ColorNum('#f2fbff') : ColorNum('#2f3557'));
+  var nucleus = self.add.circle(0, 0, r * 0.82, coreColor, 1);
+  nucleus.setStrokeStyle(2, lit ? 0xffffff : 0x35406e, lit ? 0.95 : 1);
+  var ice = self.add.graphics();
+  ice.fillStyle(lit ? 0xffffff : 0x4b5588, lit ? 0.7 : 0.2);
+  ice.fillEllipse(-r * 0.28, -r * 0.3, r * 0.42, r * 0.26);
+  ice.fillStyle(0x0b1226, lit ? 0.08 : 0.2);
+  ice.fillCircle(r * 0.25, r * 0.22, r * 0.28);
+
+  var glyph = self.add.text(0, 1, planet.glyph, {
+    fontFamily:'Cinzel, serif', fontSize:'28px', fontStyle:'700',
+    color: lit ? '#0b1226' : '#4b5588'
+  }).setOrigin(0.5);
+
+  var layers = [glowBg, dust, ion, coma, nucleus, ice, glyph];
+
+  if(lit){
+    // The coma breathes and the tails shimmer.
+    self.nodeTweened.push(coma, dust, ion);
+    self.tweens.add({ targets: coma, scale: { from: 0.94, to: 1.08 }, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    self.tweens.add({ targets: [dust, ion], alpha: { from: 0.78, to: 1 }, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    // Sparks peel off the head and drift down the tail, fading out.
+    for(var sp = 0; sp < 7; sp++){
+      var spark = self.add.circle(0, 0, rnd.realInRange(1.4, 2.6), sp % 3 ? 0xffffff : dustColor, 1);
+      spark.setBlendMode(ADD);
+      var tt = rnd.realInRange(0.45, 1);
+      self.nodeTweened.push(spark);
+      self.tweens.add({
+        targets: spark,
+        x: { from: rnd.realInRange(-6, 6), to: tip.x * tt + rnd.realInRange(-18, 18) },
+        y: { from: rnd.realInRange(-6, 6), to: tip.y * tt + rnd.realInRange(-18, 18) },
+        alpha: { from: 0.95, to: 0 },
+        duration: rnd.between(1800, 2800), delay: rnd.between(0, 2400), repeat: -1, ease: 'Sine.easeOut'
+      });
+      layers.splice(3, 0, spark);
+    }
+  }
+  return { r: r, glow: glowBg, layers: layers,
+    labelY: r * 1.9 + 8, hit: { y: -r * 0.3, w: r * 3.6, h: r * 3.4 }, tipY: r * 1.1,
+    outline: function(on){ nucleus.setStrokeStyle(on ? 3.4 : 2, on ? accent : (lit ? 0xffffff : 0x35406e), 1); } };
+}
+
+var NODE_DRAW = { isla: drawIsla, meteoro: drawMeteoro, cometa: drawCometa };

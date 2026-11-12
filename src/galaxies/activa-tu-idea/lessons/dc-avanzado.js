@@ -9,6 +9,6 @@ export default {
       { icon: '🤝', title: 'Comercial', text: 'Aliados y redes para vender y crecer.', color: '#6fe39a' },
       { icon: '💰', title: 'Financiero', text: 'Recursos para arrancar, si sabes cómo usarlos.', color: '#e86bd0' }
     ] },
-    { type: 'tip', text: 'Vas a elegir entre tres estrategias. Piensa cuál aprovecha todo lo que aprendiste en las islas anteriores.' }
+    { type: 'tip', text: 'Vas a elegir entre tres estrategias. Piensa cuál aprovecha todo lo que aprendiste en los cometas anteriores.' }
   ]
 };

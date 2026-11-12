@@ -12,10 +12,15 @@ no TypeScript, no test runner.** Deployed to GitHub Pages on every push to
 `main` (`.github/workflows/deploy.yml`) and embedded by a host site in an
 `<iframe>`.
 
-Hierarchy: **galaxy** (area) → **planet** (subarea) → **island**
-(`<planet>-<level>`, one challenge each). Built galaxies: `neuromath`
-(src/galaxies/neuromath) and `activa` — "Activa tu idea"
-(src/galaxies/activa-tu-idea).
+Hierarchy: **galaxy** (area) → **planet** (subarea) → **node** (one stop
+on the planet's path, `<planet>-<key>`). A node is one of three kinds
+(`NODE_KINDS` in `atlas/define.js`): an **isla** (a YouTube video), a
+**meteoro** (a Genially) or a **cometa** (one of our own games, the big
+challenge). Most nodes are resources migrated from the old site
+(uniminuto.edu/virtuxperience-home) and played by `shared/game/recurso.js`.
+Built galaxies: `neuromath`, `activa` ("Activa tu idea", in
+src/galaxies/activa-tu-idea), `comunicarte`, `latidosocial`, `voxcivitas`,
+`gerencia` (Gerencia+). Every old hub is migrated.
 
 ## Commands
 
@@ -67,12 +72,13 @@ Match the existing code, which is deliberately old-school:
 - **Everything the player sees is in Spanish** (neutral Latin American,
   `tú`). Code, comments, commit messages and README are in English.
 - The story is **BIOSA**: the player is the *Sintonizador*; the **Neblina
-  Gris** greys things out and solving islands restores colour. One guide:
+  Gris** greys things out and completing nodes restores colour. One guide:
   **Luma** (blue, the crystal fox) — explains mechanics, gives hints and says
   why it matters to people. There is no second guide (the gold one and the
   name "Aura" were dropped). Currency: **Células
-  Lógicas**. Challenges: **Nodos de Pregunta**. Use these terms; don't invent
-  new ones.
+  Lógicas**. Challenges: **Nodos de Pregunta**. Path stops: **nodos**, each
+  an **isla**, **meteoro** or **cometa** (above). Use these terms; don't
+  invent new ones.
 - Feedback cards point at the mistake and the rule behind it but **never give
   the answer** outright.
 - `shared/ai.js` is a simulated assistant: canned hints, no live model calls.

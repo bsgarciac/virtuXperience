@@ -18,7 +18,7 @@
     </div>
     <div class="hud-cells" title="Células Lógicas"><span class="hud-cells-gem" aria-hidden="true">◆</span><span id="hud-cells">0</span><span class="hud-cells-label">Células</span></div>
     <div class="hud-progress">
-      <div class="hud-progress-top"><span id="progress-label">Equilibrio · 0/12 islas</span><span id="progress-pct">0%</span></div>
+      <div class="hud-progress-top"><span id="progress-label">Equilibrio · 0/12 nodos</span><span id="progress-pct">0%</span></div>
       <div class="hud-bar-track"><div class="hud-bar-fill" id="progress-fill" style="width:0%"></div></div>
     </div>
     <button class="hud-btn" id="btn-galaxies" type="button">🌌 Galaxias</button>
@@ -29,11 +29,14 @@
 
   <div id="info-pop" role="dialog" aria-label="Cómo leer el atlas">
     <h3>Tu misión</h3>
-    <p>La <b style="color:var(--text)">Neblina Gris</b> cubre cada galaxia y congela sus planetas. Elige un planeta en el orden que quieras y resuelve el Nodo de Pregunta de cada una de sus islas para hacerla retroceder, devolverle el color y ganar <b style="color:var(--gold)">Células Lógicas</b>.</p>
+    <p>La <b style="color:var(--text)">Neblina Gris</b> cubre cada galaxia y congela sus planetas. Elige un planeta en el orden que quieras y recorre los nodos de su camino para hacerla retroceder, devolverle el color y ganar <b style="color:var(--gold)">Células Lógicas</b>:</p>
+    <div class="legend-row"><span class="legend-kind" aria-hidden="true">🏝️</span> <b>Isla</b> &mdash; un video corto</div>
+    <div class="legend-row"><span class="legend-kind" aria-hidden="true">☄️</span> <b>Meteoro</b> &mdash; un recurso interactivo</div>
+    <div class="legend-row"><span class="legend-kind" aria-hidden="true">💫</span> <b>Cometa</b> &mdash; un juego, el gran reto</div>
     <div class="legend-row"><span class="legend-dot locked"></span> Bajo la neblina &mdash; se abrirá pronto</div>
     <div class="legend-row"><span class="legend-dot available"></span> Listo para restaurar</div>
-    <div class="legend-row"><span class="legend-dot done"></span> Isla restaurada</div>
-    <p style="margin-bottom:0;">En cada juego, <b style="color:var(--luma)">Luma</b> te da una pista sin revelar la solución y te recuerda para quién lo haces. En un planeta, arrastra o usa la rueda del mouse para volar entre sus islas.</p>
+    <div class="legend-row"><span class="legend-dot done"></span> Nodo restaurado</div>
+    <p style="margin-bottom:0;">En cada juego, <b style="color:var(--luma)">Luma</b> te da una pista sin revelar la solución y te recuerda para quién lo haces. En un planeta, arrastra o usa la rueda del mouse para volar entre sus nodos.</p>
   </div>
 
   <div id="game-wrap">
@@ -62,7 +65,7 @@
     <div class="galaxy-select-head">
       <span class="hud-eyebrow">VirtuXperience</span>
       <h1 class="galaxy-select-title">Elige tu galaxia</h1>
-      <p class="galaxy-select-sub">Cada galaxia guarda un camino de misiones para afianzar una disciplina distinta. Neuromath, Activa tu idea, ComunicArte y VoxCivitas ya están abiertas.</p>
+      <p class="galaxy-select-sub">Cada galaxia guarda un camino de misiones para afianzar una disciplina distinta. Las seis ya están abiertas.</p>
     </div>
     <div class="galaxy-grid" id="galaxy-grid"></div>
   </div>

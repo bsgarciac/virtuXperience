@@ -3,33 +3,38 @@ import dcInicial from './lessons/dc-inicial.js';
 import dcIntermedio from './lessons/dc-intermedio.js';
 import dcAvanzado from './lessons/dc-avanzado.js';
 import { openAlianzas } from './games/alianzas/controller.js';
+import { createRecursoGame, recursoGames, numberedIslands } from '../../shared/game/recurso.js';
+import { PATHS, pathOf } from './recursos.js';
 
 // Activa tu idea: the entrepreneurship sector, around the Nanocatalizador
-// Creativo. Here the Sintonizador lands on each island and walks to its
-// Nodo (see games/alianzas) instead of flying the map like in Neuromath.
-// The Distrito Cristalino's three islands were one ("El Vacío de
-// Alianzas") until the team split its phases by topic.
+// Creativo. Each planet's path mixes videos (islands) and Genially
+// (meteors) from the old site with our own games (comets): see recursos.js.
+// On the Distrito Cristalino's comets the Sintonizador lands and walks to
+// the Nodo (see games/alianzas) instead of flying the map like in
+// Neuromath. Those three were one ("El Vacío de Alianzas") until the team
+// split its phases by topic.
+var openRecurso = createRecursoGame({
+  galaxy: 'activa', name: 'Activa tu idea', emblem: '✧', planets: PATHS,
+  outro: 'Cada nodo que completas activa una chispa más del Distrito. ¡Sigue tu camino!'
+});
+var games = recursoGames(PATHS, openRecurso);
+// The comets, each with its own walk and Nodo (games/alianzas/content.js
+// ISLANDS); the badge comes with the last one.
+games['dc-inicial'] = { title: 'Instituciones', open: openAlianzas, cells: 100 };
+games['dc-intermedio'] = { title: 'Cómo montar un emprendimiento', open: openAlianzas, cells: 100 };
+games['dc-avanzado'] = { title: 'La Estrategia', open: openAlianzas, cells: 100,
+                         badge: { id: 'tejedor-alianzas', name: 'Tejedor de Alianzas' } };
+
 export default defineGalaxy({
   id: 'activa', name: 'Activa tu idea', emblem: '✧',
   sun: { label: 'NANOCATALIZADOR CREATIVO', glyph: '✧' },
 
   planets: [
-    { id: 'dc', name: 'Distrito Cristalino', glyph: '◇', color: '#5fd3c6', tag: 'Redes de apoyo para emprender' }
-  ],
-  levels: [
-    { id: 'inicial',    label: 'Inicial' },
-    { id: 'intermedio', label: 'Intermedio' },
-    { id: 'avanzado',   label: 'Avanzado' }
+    { id: 'dc', name: 'Distrito Cristalino', glyph: '◇', color: '#5fd3c6', tag: 'Emprender con redes de apoyo', islands: numberedIslands(pathOf('dc')) },
+    { id: 'inv', name: 'Investigación', glyph: '?', color: '#9b8cf2', tag: 'Preguntar, indagar y descubrir', islands: numberedIslands(pathOf('inv')) }
   ],
 
-  // One island per level, each with its own walk and Nodo (see
-  // games/alianzas/content.js ISLANDS); the badge comes with the last one.
-  games: {
-    'dc-inicial':    { title: 'Isla de Instituciones', open: openAlianzas, cells: 50 },
-    'dc-intermedio': { title: 'Isla de Cómo montar un emprendimiento', open: openAlianzas, cells: 50 },
-    'dc-avanzado':   { title: 'Isla de la Estrategia', open: openAlianzas, cells: 50,
-                       badge: { id: 'tejedor-alianzas', name: 'Tejedor de Alianzas' } }
-  },
+  games: games,
   lessons: { 'dc-inicial': dcInicial, 'dc-intermedio': dcIntermedio, 'dc-avanzado': dcAvanzado },
 
   intro: [

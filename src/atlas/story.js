@@ -43,7 +43,7 @@ export function briefThenOpen(island, onDone){
   if(!lines || seen.briefings[island.id]){ onDone(); return; }
   seen.briefings[island.id] = true;
   save();
-  showDialogue(lines, { eyebrow: island.planet.name + ' · Isla ' + island.level.label, doneLabel: 'A la misión', onDone: onDone });
+  showDialogue(lines, { eyebrow: island.planet.name + ' · ' + island.name, doneLabel: 'A la misión', onDone: onDone });
 }
 
 export function resetStory(){

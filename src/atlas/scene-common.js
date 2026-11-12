@@ -103,6 +103,15 @@ export function restartOnResize(scene, data){
   scene.events.once('shutdown', function(){ scene.scale.off('resize', onResize); });
 }
 
+// True when a click really happened on the map: pressed and released on the
+// canvas itself. Phaser also reports a release over the canvas area when the
+// player clicks an HTML dialog drawn on top of it (a lesson, a briefing, a
+// confirm), which used to open whatever node or planet sat underneath.
+export function isMapClick(scene, pointer){
+  var canvas = scene.game.canvas;
+  return pointer.downElement === canvas && pointer.upElement === canvas;
+}
+
 // Drag-free pointer handling shared by both scenes: rocket cursor states.
 export function setupRocketCursor(scene){
   scene.input.setDefaultCursor(CURSOR_IDLE);

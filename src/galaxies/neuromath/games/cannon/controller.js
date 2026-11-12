@@ -44,7 +44,7 @@ var FEEDBACK_IDLE = '<p class="fb-idle"><b>Recuerda:</b> f(0) = c es la altura d
 export function openCannon(node, onFinish, reward){
   game = { node: node, onFinish: onFinish, reward: reward || {}, round: pickRound(), level: 0, fails: 0, levelFails: 0,
            busy: false, won: false, feedback: null, params: null };
-  shell.open(node.planet.name + ' · Isla ' + node.level.label, closeCannon, (reward || {}).wallet);
+  shell.open(node.planet.name + ' · ' + node.name, closeCannon, (reward || {}).wallet);
   setupLevel();
   try{
     shell.startScene(CannonScene);
