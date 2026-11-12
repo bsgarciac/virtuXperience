@@ -72,12 +72,19 @@ src/
         sprites.js            cuts the Sintonizador's poses out of the sheet
         scene.js              Phaser scene: the walkable district, the Nodo
         controller.js         the four phases, panel, flow
+    comunicarte/              ComunicArte (resource islands, see below)
+      index.js                galaxy definition, built from content.js
+      content.js              planets and their resources (Genially/YouTube
+                              URL, optional goal, hint, recap)
+      lessons/                lesson for the islands that have one
+    voxcivitas/               VoxCivitas, same layout as comunicarte/
+        controller.js         the embed in the stage, "Terminé", final card
 public/assets/                images served as-is (art, Luma's portrait, entity logos)
 ```
 
 ## Galaxias → planetas → islas
 
-A galaxy is an area (Neuromath, Activa tu idea). Entering it shows a solar
+A galaxy is an area (Neuromath, Activa tu idea, ComunicArte, VoxCivitas). Entering it shows a solar
 system: its hack as the sun (the *Matriz Lógica*, the *Nanocatalizador
 Creativo*) and one planet per subarea (Cálculo, Fundamentos
 de matemáticas, Álgebra, Estadística), which the player can visit in any
@@ -87,7 +94,8 @@ unfinished built island asks first; unbuilt islands don't block.
 
 Each galaxy has its own way of playing an island: in Neuromath you fly the
 map and the challenge is a mini-game; in Activa tu idea you land and **walk**
-the Sintonizador to the island's Nodo before the challenge opens.
+the Sintonizador to the island's Nodo before the challenge opens; in
+ComunicArte and VoxCivitas the island plays an embedded resource (see below).
 
 Islands pay **Células Lógicas** the first time they're restored (and
 Activa tu idea adds the ones picked up while walking); some also award an Open
@@ -120,6 +128,31 @@ Nodo's art from corrupted to purified.
 The Sintonizador's poses are keyed out of a JPG sheet at load time
 (`sprites.js`); with transparent PNGs that file can go. Open the game with
 `?debug` in the URL to see the platforms' physics bodies.
+
+## Migrated resources · ComunicArte, VoxCivitas
+
+These galaxies bring over the old VirtuXperience site
+(uniminuto.edu/virtuxperience-home), which has one hub page per galaxy
+(`uniminuto.edu/virtual-<hub>`) with articles that each wrap one Genially
+or YouTube embed. The article pages can't be framed
+(`X-Frame-Options: SAMEORIGIN`), so each island embeds the Genially/YouTube
+URL directly, through the shared game in `src/shared/game/recurso.js`.
+We can't see inside the embed, so the island is restored when the player
+presses **Terminé**; the final card has no stars.
+
+| Galaxy | Old hub | Planets (islands) |
+|---|---|---|
+| ComunicArte | habilidades-comunicativas | Escritura (15), Oralidad (12), Lectura (15), Multilingüismo (5) |
+| VoxCivitas | voxcivitas | Competencias Ciudadanas (10), Aprendizaje Autónomo (15), Proyecto de Vida (14) |
+
+Planets are the old hub's sections. Unlike Neuromath and Activa, these
+planets list their own islands (`planet.islands` in `atlas/define.js`),
+numbered in a suggested learning order. Island ids are
+`<planet>-<resource key>`, so the list can be reordered without losing
+progress, but keys must never change. Islands with a lesson (so far only
+ComunicArte's *Acentuación de hiatos y diptongos*) show it before the
+resource. To add a galaxy this way, copy `voxcivitas/` and fill its
+`content.js` from the old hub.
 
 ## Modo desarrollador
 

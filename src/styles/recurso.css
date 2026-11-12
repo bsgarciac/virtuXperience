@@ -1,0 +1,8 @@
+/* Recurso islands (shared/game/recurso.js): an embedded Genially or YouTube resource
+   fills the game stage. It sits above the fog layer so the haze never
+   covers the content the player has to read. */
+.rc-embed{
+  position:absolute;inset:0;z-index:2;display:block;
+  width:100%;height:100%;border:0;background:#0b1226;
+}
+.rc-game .gm-stage{min-height:260px;}

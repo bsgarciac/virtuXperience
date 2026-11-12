@@ -10,6 +10,7 @@ import './styles/game-shell.css';
 import './styles/bridge.css';
 import './styles/cannon.css';
 import './styles/alianzas.css';
+import './styles/recurso.css';
 import './styles/story.css';
 
 import './shared/dev.js'; // reads ?dev=… before anything else

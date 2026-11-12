@@ -251,21 +251,26 @@ export function createShell(opts){
     },
 
     // o: { icon, title, total, unit ('abismos'), article ('los' | 'las'), fails, luma, recap, rewardsHtml, onContinue }
+    // or, for islands with nothing to score (e.g. an embedded resource):
+    // { icon, title, msg, luma, recap, rewardsHtml, onContinue } — no stars.
     showFinal: function(o){
-      var stars = starsFor(o.fails);
-      var starsHtml = '';
-      for(var i = 0; i < 3; i++) starsHtml += i < stars ? '★' : '<span class="off">★</span>';
-      var what = o.total === 1 ? 'el reto' : (o.article || 'los') + ' ' + o.total + ' ' + o.unit;
-      var msg = o.fails === 0
-        ? 'Superaste ' + what + ' sin un solo intento fallido. ¡Impecable!'
-        : 'Superaste ' + what + ' tras ' + o.fails + ' ' + (o.fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
+      var starsHtml = '', msg = o.msg;
+      if(!msg){
+        var stars = starsFor(o.fails);
+        for(var i = 0; i < 3; i++) starsHtml += i < stars ? '★' : '<span class="off">★</span>';
+        starsHtml = '<div class="gm-stars" aria-label="' + stars + ' de 3 estrellas">' + starsHtml + '</div>';
+        var what = o.total === 1 ? 'el reto' : (o.article || 'los') + ' ' + o.total + ' ' + o.unit;
+        msg = o.fails === 0
+          ? 'Superaste ' + what + ' sin un solo intento fallido. ¡Impecable!'
+          : 'Superaste ' + what + ' tras ' + o.fails + ' ' + (o.fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
+      }
       el.finalCard.innerHTML =
         '<div class="result-icon">' + o.icon + '</div>' +
         '<div class="result-title">' + o.title + '</div>' +
-        '<div class="gm-stars" aria-label="' + stars + ' de 3 estrellas">' + starsHtml + '</div>' +
+        starsHtml +
         '<div class="result-msg" style="margin-bottom:12px;">' + msg + '</div>' +
         (o.rewardsHtml ? '<div class="gm-rewards">' + o.rewardsHtml + '</div>' : '') +
-        '<div class="gm-say luma">' + guideAvatarHtml('luma') + '<span><b>Luma</b> ' + (o.luma ? o.luma + ' ' : '') + 'Recuerda: ' + o.recap + '</span></div>' +
+        '<div class="gm-say luma">' + guideAvatarHtml('luma') + '<span><b>Luma</b> ' + (o.luma ? o.luma + ' ' : '') + (o.recap ? 'Recuerda: ' + o.recap : '') + '</span></div>' +
         '<div class="result-actions"><button type="button" class="btn-primary">Continuar</button></div>';
       el.final.classList.add('show');
       el.finalCard.querySelector('.btn-primary').addEventListener('click', o.onContinue);
