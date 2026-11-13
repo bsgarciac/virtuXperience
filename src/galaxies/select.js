@@ -8,7 +8,7 @@ var galaxySelect = document.getElementById('galaxy-select');
 var galaxyGrid = document.getElementById('galaxy-grid');
 var galaxyStars = document.getElementById('galaxy-stars');
 
-startStarfield(galaxyStars, galaxySelect);
+var stars = startStarfield(galaxyStars, galaxySelect);
 
 // Replays the cards' entrance each time the screen opens.
 function playEntrance(){
@@ -35,7 +35,9 @@ export function initGalaxySelect(onEnter){
       '</span>' +
       '<span class="galaxy-name">' + g.name + '</span>' +
       '<span class="galaxy-sub">' + g.sub + '</span>';
-    btn.addEventListener('mouseenter', function(){ if(g.enabled && !busy) sfx('hover'); });
+    // Hovering a galaxy speeds the stars up, as if the ship leaned towards it.
+    btn.addEventListener('mouseenter', function(){ if(g.enabled && !busy){ sfx('hover'); stars.setBoost(3); } });
+    btn.addEventListener('mouseleave', function(){ if(!busy) stars.setBoost(1); });
     btn.addEventListener('click', function(){
       if(!g.enabled){ showToast('🔒 La galaxia ' + g.name + ' se abrirá pronto.'); return; }
       if(busy) return;
@@ -45,9 +47,11 @@ export function initGalaxySelect(onEnter){
       btn.classList.add('chosen');
       galaxySelect.classList.remove('entering');
       galaxySelect.classList.add('leaving');
+      stars.setBoost(14);
       sfx('whoosh');
       warp([g.colors.g1, g.colors.g2, g.colors.g3 || '#ffffff'], function(){
         galaxySelect.classList.add('hidden');
+        stars.setBoost(1);
         btn.classList.remove('chosen');
         busy = false;
         onEnter(g);
