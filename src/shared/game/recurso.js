@@ -103,7 +103,7 @@ export function createRecursoGame(opts){
     shell.hideHint();
     shell.showFinal({
       icon: opts.emblem, title: 'Recurso completado',
-      msg: 'Terminaste <b>' + g.res.title + '</b>. La Neblina Gris se disipa de esta isla.',
+      msg: 'Terminaste <b>' + g.res.title + '</b>. La Neblina Gris se disipa de este nodo.',
       rewardsHtml: shell.rewardsHtml(g.reward),
       luma: g.res.recap ? '' : opts.outro,
       recap: g.res.recap,

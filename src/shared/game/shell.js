@@ -4,6 +4,7 @@ import { aiThinkingHtml, aiBubbleHtml } from '../ai.js';
 import { guideAvatarHtml } from '../guides.js';
 import { renderMarkdown } from '../markdown.js';
 import { renderInfographic } from '../infographic.js';
+import { sfx, confetti, countUp } from '../fx.js';
 
 // The frame every mini-game shares: a full-screen overlay with a top bar
 // (emblem, title, progress pips, close), a stage where the Phaser scene lives
@@ -257,7 +258,7 @@ export function createShell(opts){
       var starsHtml = '', msg = o.msg;
       if(!msg){
         var stars = starsFor(o.fails);
-        for(var i = 0; i < 3; i++) starsHtml += i < stars ? '★' : '<span class="off">★</span>';
+        for(var i = 0; i < 3; i++) starsHtml += '<span class="' + (i < stars ? 'on' : 'off') + '" style="--d:' + (0.35 + i * 0.22) + 's">★</span>';
         starsHtml = '<div class="gm-stars" aria-label="' + stars + ' de 3 estrellas">' + starsHtml + '</div>';
         var what = o.total === 1 ? 'el reto' : (o.article || 'los') + ' ' + o.total + ' ' + o.unit;
         msg = o.fails === 0
@@ -265,6 +266,7 @@ export function createShell(opts){
           : 'Superaste ' + what + ' tras ' + o.fails + ' ' + (o.fails === 1 ? 'intento fallido' : 'intentos fallidos') + '. ¡Sigues avanzando!';
       }
       el.finalCard.innerHTML =
+        '<div class="gm-final-rays" aria-hidden="true"></div>' +
         '<div class="result-icon">' + o.icon + '</div>' +
         '<div class="result-title">' + o.title + '</div>' +
         starsHtml +
@@ -274,6 +276,17 @@ export function createShell(opts){
         '<div class="result-actions"><button type="button" class="btn-primary">Continuar</button></div>';
       el.final.classList.add('show');
       el.finalCard.querySelector('.btn-primary').addEventListener('click', o.onContinue);
+      // Celebrate: fanfare, confetti from the card, the Células counting up.
+      sfx('fanfare');
+      setTimeout(function(){ confetti(el.final); }, 180);
+      var n = el.finalCard.querySelector('.gm-reward b');
+      var m = n && /\+(\d+)/.exec(n.textContent);
+      if(m){
+        var target = +m[1], span = document.createElement('span');
+        n.textContent = '◆ +';
+        n.appendChild(span);
+        countUp(span, 0, target, 900, 450);
+      }
     }
   };
   return shell;

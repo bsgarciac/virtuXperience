@@ -12,6 +12,7 @@ import './styles/cannon.css';
 import './styles/alianzas.css';
 import './styles/recurso.css';
 import './styles/story.css';
+import './styles/fx.css';
 
 import './shared/dev.js'; // reads ?dev=… before anything else
 import { initGalaxySelect } from './galaxies/select.js';
@@ -22,12 +23,14 @@ import { mapRef } from './atlas/map-ref.js';
 import { galaxy, setGalaxy } from './atlas/world.js';
 import { notifyHost } from './shared/host.js';
 import { showIntroOnce } from './atlas/story.js';
+import { refreshGalaxyNav } from './atlas/nav.js';
 
 // Entering a galaxy shows its solar system (the map may still be on the
 // previous galaxy's planets or islands) and its intro the first time.
 initGalaxySelect(function(g){
   setGalaxy(g.id);
   refreshHud();
+  refreshGalaxyNav();
   if(mapRef.scene) mapRef.scene.scene.start('SystemScene');
   showIntroOnce(galaxy());
 });
@@ -46,6 +49,7 @@ function boot(){
 }
 
 refreshHud();
+refreshGalaxyNav();
 if(document.fonts && document.fonts.ready){
   document.fonts.ready.then(boot).catch(boot);
 } else {

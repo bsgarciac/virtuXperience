@@ -97,8 +97,9 @@ export function drawStarfield(scene, w, h){
 // Redraw the scene from scratch when the canvas resizes. The listener is
 // dropped when the scene shuts down, so a scene the player already left
 // isn't brought back by a later resize.
+// data.resized tells create() not to replay its entrance animation.
 export function restartOnResize(scene, data){
-  function onResize(){ scene.scene.restart(data); }
+  function onResize(){ scene.scene.restart(Object.assign({}, data, { resized: true })); }
   scene.scale.on('resize', onResize);
   scene.events.once('shutdown', function(){ scene.scale.off('resize', onResize); });
 }

@@ -4,6 +4,7 @@ import { mapRef } from './map-ref.js';
 import { showToast } from '../shared/toast.js';
 import { notifyHost } from '../shared/host.js';
 import { showIntro, resetStory } from './story.js';
+import { countUp, sfx, isMuted, setMuted } from '../shared/fx.js';
 
 var elProgressFill = document.getElementById('progress-fill');
 var elProgressLabel = document.getElementById('progress-label');
@@ -11,6 +12,8 @@ var elProgressPct = document.getElementById('progress-pct');
 var elCells = document.getElementById('hud-cells');
 var elTitle = document.querySelector('.hud-title');
 var elEmblem = document.querySelector('.hud-emblem');
+
+var shownCells = cells(); // what the wallet shows, to count up from
 
 // The Índice de Equilibrio is the share of the current galaxy's islands
 // restored; the Células Lógicas wallet is shared by every galaxy.
@@ -21,8 +24,10 @@ export function refreshHud(){
   elProgressFill.style.width = pct + '%';
   elProgressLabel.textContent = 'Equilibrio · ' + count + '/' + islands.length + ' nodos';
   elProgressPct.textContent = pct + '%';
-  var prev = +elCells.textContent || 0;
-  elCells.textContent = cells();
+  var prev = shownCells;
+  shownCells = cells();
+  if(cells() > prev) countUp(elCells, prev, cells(), 900);
+  else elCells.textContent = cells();
   if(cells() > prev){
     var chip = elCells.parentNode;
     chip.classList.remove('bump'); void chip.offsetWidth; chip.classList.add('bump');
@@ -76,3 +81,19 @@ btnReset.addEventListener('click', function(){
 });
 
 document.getElementById('btn-story').addEventListener('click', function(){ showIntro(galaxy()); });
+
+// Sound on/off, remembered in this browser (shared/fx.js).
+var btnSound = document.getElementById('btn-sound');
+function paintSound(){
+  btnSound.textContent = isMuted() ? '🔇' : '🔊';
+  btnSound.setAttribute('aria-pressed', isMuted() ? 'false' : 'true');
+  btnSound.title = isMuted() ? 'Activar sonido' : 'Silenciar';
+}
+btnSound.addEventListener('click', function(){ setMuted(!isMuted()); paintSound(); sfx('click'); });
+paintSound();
+
+// Every button clicks.
+document.addEventListener('click', function(e){
+  var b = e.target.closest && e.target.closest('button');
+  if(b && b !== btnSound && !b.disabled && !b.classList.contains('galaxy-card')) sfx('click');
+}, true);

@@ -23,5 +23,54 @@
 #toast.show{opacity:1;transform:translate(-50%,0);}
 
 /* Back to the solar system, shown while a planet's islands are open */
-.map-back{position:absolute;top:14px;left:14px;z-index:12;background:#161f42e6;backdrop-filter:blur(4px);}
-.map-back[hidden]{display:none;}
+/* Portholes over the map (atlas/nav.js): the galaxy's system, top left
+   (only on a planet), and the galaxy itself, top right. Each is a round
+   window with a live mini view and a label; clicking flies there. */
+.map-nav{
+  position:absolute;top:12px;z-index:12;display:flex;align-items:center;gap:10px;
+  appearance:none;border:none;background:none;padding:0;cursor:pointer;color:var(--text);font-family:inherit;
+}
+.map-nav[hidden]{display:none;}
+.nav-system{left:14px;}
+.nav-galaxies{right:14px;flex-direction:row-reverse;text-align:right;}
+.nav-port{
+  position:relative;flex:none;width:68px;height:68px;border-radius:50%;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 45%, #18224d, #070b1c 72%);
+  border:2px solid #3a447c;
+  box-shadow:0 0 0 4px rgba(11,18,38,.75), 0 0 22px -4px rgba(108,196,255,.45), inset 0 0 18px rgba(0,0,0,.8);
+  transition:transform .25s cubic-bezier(.2,1.4,.4,1), box-shadow .25s, border-color .25s;
+}
+/* glass glare across the window */
+.nav-port::after{
+  content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:linear-gradient(140deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 38%);
+}
+.nav-port svg{width:100%;height:100%;display:block;}
+.nav-galaxies .nav-port svg{width:150%;height:150%;flex:none;}
+.nav-label{
+  display:flex;flex-direction:column;line-height:1.15;padding:6px 10px;border-radius:9px;
+  background:rgba(11,18,38,.72);backdrop-filter:blur(4px);border:1px solid #2c376b;
+}
+.nav-label b{font-family:'Cinzel',serif;font-size:13px;font-weight:600;}
+.nav-label i{font-style:normal;font-size:10.5px;color:var(--text-dim);font-family:'Space Mono',monospace;}
+.map-nav:hover .nav-port, .map-nav:focus-visible .nav-port{
+  transform:scale(1.1);border-color:var(--luma);
+  box-shadow:0 0 0 4px rgba(11,18,38,.75), 0 0 30px -2px rgba(108,196,255,.8), inset 0 0 18px rgba(0,0,0,.8);
+}
+.map-nav:hover .nav-label i{color:var(--luma);}
+.map-nav:focus-visible{outline:none;}
+.nav-here{animation:nav-here 1.4s ease-in-out infinite;transform-origin:center;transform-box:fill-box;}
+@keyframes nav-here{50%{opacity:.25;transform:scale(1.4);}}
+/* clicking launches: the window pops and a ring flies out of it */
+.map-nav.launch .nav-port{animation:nav-launch .55s cubic-bezier(.2,1.4,.4,1);}
+@keyframes nav-launch{30%{transform:scale(.88);}65%{transform:scale(1.22);box-shadow:0 0 0 4px rgba(11,18,38,.75), 0 0 50px 6px rgba(108,196,255,.9);}}
+@media (max-width:640px){
+  .nav-port{width:52px;height:52px;}
+  .nav-label i{display:none;}
+  .nav-label{padding:4px 8px;}
+  .nav-label b{font-size:11.5px;}
+}
+@media (prefers-reduced-motion: reduce){
+  .nav-port, .map-nav.launch .nav-port, .nav-here{animation:none;transition:none;}
+}

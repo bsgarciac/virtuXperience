@@ -28,7 +28,9 @@ src/
   shared/                     toast, tooltip, confirm dialog, AI hint bubbles,
                               random helpers, host (iframe) messaging
     guides.js                 Luma, the narrative guide
-    dialogue.js               the guides' one-line-at-a-time conversation box
+    dialogue.js               the guides' one-line-at-a-time conversation box (typed out)
+    fx.js                     game feel: synthesized sounds (🔊 in the HUD mutes them),
+                              confetti, Células flying to the wallet, hyperspace jump
     infographic.js            renders a lesson as an infographic (cards,
                               steps, formula, ✗/✓, Luma's tip; $math$ via KaTeX)
     markdown.js               Markdown + KaTeX (still accepted for a lesson)
@@ -43,6 +45,8 @@ src/
                               (localStorage)
     story.js                  each galaxy's intro and per-island briefings
     hud.js                    Índice de Equilibrio, Células, info, reset
+    nav.js                    the map's portholes: mini system (top left) and
+                              galaxy (top right); clicking flies there
     islands.js                opening/finishing islands, rewards
     scene-common.js           starfield, rocket cursor, resize handling
     system-scene.js           Phaser scene: the sun and the orbiting planets

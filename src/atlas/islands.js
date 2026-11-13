@@ -8,6 +8,7 @@ import { notifyHost } from '../shared/host.js';
 import { briefThenOpen } from './story.js';
 import { setDevActions } from '../shared/dev.js';
 import { NODE_KINDS } from './define.js';
+import { flyCells } from '../shared/fx.js';
 
 // Opening and finishing islands, for any galaxy. Which islands are built
 // comes from each galaxy's def.games (see atlas/define.js).
@@ -76,9 +77,16 @@ function finishIsland(island, attempts, closeFn, extraCells){
   markDone(island.id, attempts);
   if(reward.cells + extraCells) addCells(reward.cells + extraCells);
   if(reward.badge) awardBadge(reward.badge.id);
-  refreshHud();
   closeFn();
   if(mapRef.scene) mapRef.scene.rebuild(island.id);
+  // The Células fly from the node to the wallet, which counts up as they land.
+  var gained = reward.cells + extraCells;
+  var at = mapRef.scene && mapRef.scene.nodeScreenPos ? mapRef.scene.nodeScreenPos(island.id) : null;
+  if(gained && at){
+    setTimeout(function(){ flyCells(at.x, at.y, gained, document.querySelector('.hud-cells'), refreshHud); }, 450);
+  } else {
+    refreshHud();
+  }
   notifyHost('node-completed', { nodeId: island.id, score: attempts });
   if(reward.firstTime && planetFullyDone(island.planet.id)){
     showToast('💎 ¡Gema de maestría obtenida en ' + island.planet.name + '!');

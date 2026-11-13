@@ -4,6 +4,8 @@ import { isDone, planetFullyDone } from './progress.js';
 import { isPlayable, isUnlocked, gameTitle, attemptOpenIsland } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
+import { sfx } from '../shared/fx.js';
+import { showSystemNav } from './nav.js';
 import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, seeded, drawCrater, isMapClick } from './scene-common.js';
 
 /* ---- Island scene: one planet's chain of floating islands ---- */
@@ -12,10 +14,6 @@ import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, set
 
 var KIND_ICON = { isla: '▶', meteoro: '✦', cometa: '🎮' }; // in the tooltip, before the title
 
-var backBtn = document.getElementById('btn-back');
-backBtn.addEventListener('click', function(){
-  if(mapRef.scene && mapRef.scene.goBack) mapRef.scene.goBack();
-});
 
 export function IslandScene(){ Phaser.Scene.call(this, { key: 'IslandScene' }); }
 IslandScene.prototype = Object.create(Phaser.Scene.prototype);
@@ -24,6 +22,8 @@ IslandScene.prototype.constructor = IslandScene;
 IslandScene.prototype.create = function(data){
   mapRef.scene = this;
   this.planet = getPlanet(data && data.planetId) || galaxy().planets[0];
+  this.intro = !(data && data.resized);
+  this.leaving = false;
   this.islands = islandsOf(this.planet.id);
   this.W = this.scale.width;
   this.H = this.scale.height;
@@ -36,21 +36,45 @@ IslandScene.prototype.create = function(data){
   this.drawPlanetHorizon();
   this.drawPath();
   this.nodeLayer = this.add.container(0,0).setDepth(1);
+  this.popNodes = this.intro;
   this.drawIslands();
   this.drawReward();
+  this.popNodes = false;
   this.drawFog(null);
+  this.updatePathProgress(false);
   this.setupControls();
 
   this.cameras.main.setBounds(0, 0, this.W, this.worldHeight);
-  this.scrollToFrontier(true);
+  if(this.intro){
+    // Landing: the view opens on the planet and glides down to the next node.
+    var col = Phaser.Display.Color.HexStringToColor(this.planet.color);
+    this.cameras.main.fadeIn(550, col.red * 0.25, col.green * 0.25, col.blue * 0.35);
+    this.cameras.main.scrollY = 0;
+    var self = this;
+    this.time.delayedCall(420, function(){ self.scrollToFrontier(false, 1100); });
+  } else {
+    this.scrollToFrontier(true);
+  }
 
-  backBtn.hidden = false;
-  backBtn.textContent = '← Sistema ' + this.planet.galaxy.name;
-  this.events.once('shutdown', function(){ backBtn.hidden = true; hideTooltip(); });
+  showSystemNav(this.planet);
+  this.events.once('shutdown', function(){ showSystemNav(null); hideTooltip(); });
   restartOnResize(this, { planetId: this.planet.id });
 };
 
-IslandScene.prototype.goBack = function(){ this.scene.start('SystemScene'); };
+// Back to the system: the camera lifts off the path towards the planet,
+// fades out, and the system opens zoomed in on this planet and pulls back
+// (SystemScene.flyOutFrom) — the reverse of landing.
+IslandScene.prototype.goBack = function(){
+  if(this.leaving) return;
+  this.leaving = true;
+  hideTooltip();
+  sfx('dive');
+  var cam = this.cameras.main, self = this;
+  this.tweens.add({ targets: cam, scrollY: 0, duration: 520, ease: 'Cubic.easeIn' });
+  cam.zoomTo(0.55, 560, 'Cubic.easeIn');
+  this.time.delayedCall(260, function(){ cam.fadeOut(300, 6, 10, 24); });
+  cam.once('camerafadeoutcomplete', function(){ self.scene.start('SystemScene', { fromPlanet: self.planet.id }); });
+};
 
 IslandScene.prototype.computeLayout = function(){
   this.horizonY = 150;
@@ -125,6 +149,8 @@ IslandScene.prototype.drawPath = function(){
 
   var curve = new Phaser.Curves.Spline(pts);
   var smooth = curve.getPoints(pts.length * 22);
+  this.pathCurve = curve;
+  this.pathCount = pts.length;
 
   var glow = this.add.graphics();
   glow.lineStyle(16, ColorNum('#1c274d'), 0.5);
@@ -140,6 +166,62 @@ IslandScene.prototype.drawPath = function(){
     dots.fillCircle(smooth[d].x, smooth[d].y, 1.6);
   }
   this.tweens.add({ targets: dots, alpha: {from:0.55, to:1}, duration: 1700, yoyo:true, repeat:-1, ease:'Sine.easeInOut' });
+
+  // The stretch already travelled, lit in the planet's colour, and a spark
+  // that runs along it to the next node (updatePathProgress).
+  this.pathLit = this.add.graphics();
+  this.pathT = 0;
+  var spark = this.add.container(0, 0);
+  spark.add([
+    this.add.circle(0, 0, 13, ColorNum(this.planet.color), 0.28).setBlendMode(Phaser.BlendModes.ADD),
+    this.add.circle(0, 0, 6, 0xfff1c4, 0.75).setBlendMode(Phaser.BlendModes.ADD),
+    this.add.circle(0, 0, 2.6, 0xffffff, 1)
+  ]);
+  spark.setAlpha(0);
+  this.pathSpark = spark;
+};
+
+// Where the next node sits on the path curve (0 = the planet, 1 = the gem).
+IslandScene.prototype.frontierT = function(){
+  var idx = this.frontierIndex();
+  return idx === -1 ? 1 : (idx + 1) / (this.pathCount - 1);
+};
+
+IslandScene.prototype.drawLitPath = function(t){
+  var g = this.pathLit, curve = this.pathCurve;
+  g.clear();
+  if(t <= 0) return;
+  var pts = [], steps = Math.max(2, Math.round(t * this.pathCount * 22));
+  for(var i = 0; i <= steps; i++) pts.push(curve.getPoint(t * i / steps));
+  g.lineStyle(10, ColorNum(this.planet.color), 0.18);
+  g.strokePoints(pts, false);
+  g.lineStyle(3.5, ColorNum(this.planet.color), 0.9);
+  g.strokePoints(pts, false);
+};
+
+// animate: the lit stretch grows from where it was to the new next node.
+IslandScene.prototype.updatePathProgress = function(animate){
+  var self = this, to = this.frontierT(), from = this.pathT;
+  this.pathT = to;
+  if(this.pathGrow) this.pathGrow.stop();
+  if(animate && to > from){
+    var o = { t: from };
+    this.pathGrow = this.tweens.add({ targets: o, t: to, duration: 1300, delay: 300, ease: 'Cubic.easeInOut',
+      onUpdate: function(){ self.drawLitPath(o.t); } });
+  } else {
+    this.drawLitPath(to);
+  }
+  if(this.sparkRun) this.sparkRun.stop();
+  if(to <= 0) return;
+  var s = { t: 0 };
+  this.sparkRun = this.tweens.add({
+    targets: s, t: to, duration: 900 + 1600 * to, delay: 600, repeat: -1, repeatDelay: 1400, ease: 'Sine.easeInOut',
+    onUpdate: function(){
+      var p = self.pathCurve.getPoint(s.t);
+      self.pathSpark.setPosition(p.x, p.y);
+      self.pathSpark.setAlpha(Math.min(1, s.t / 0.04, (to - s.t) / 0.06 + 0.15));
+    }
+  });
 };
 
 IslandScene.prototype.drawIslands = function(){
@@ -147,6 +229,7 @@ IslandScene.prototype.drawIslands = function(){
   var planet = this.planet;
   var accent = ColorNum(planet.color);
   this.nodeTweened = [];
+  var frontier = this.frontierIndex();
   this.islands.forEach(function(island, idx){
     var x = self.nodeX[idx], y = self.positions[idx];
     var playable = isPlayable(island);
@@ -181,6 +264,27 @@ IslandScene.prototype.drawIslands = function(){
       self.nodeTweened.push(glowBg);
       self.tweens.add({ targets: glowBg, alpha: {from:0.12, to:0.32}, scale:{from:1, to:1.12}, duration:900, yoyo:true, repeat:-1, ease:'Sine.easeInOut' });
     }
+    // The next node to play: a beacon pulses around it and a chevron
+    // bounces above it.
+    if(idx === frontier && unlocked && !done){
+      var beacon = self.add.circle(0, 0, r * 1.1, accent, 0);
+      beacon.setStrokeStyle(2.5, accent, 0.9);
+      var chevron = self.add.text(0, -drawn.tipY - 14, '▼', {
+        fontFamily:'Manrope, sans-serif', fontSize:'18px', fontStyle:'800', color:'#ffe08a'
+      }).setOrigin(0.5);
+      chevron.setShadow(0, 0, '#e8b84b', 10, false, true);
+      container.addAt(beacon, 0);
+      container.add(chevron);
+      self.nodeTweened.push(beacon, chevron);
+      self.tweens.add({ targets: beacon, scale: { from: 0.9, to: 1.9 }, alpha: { from: 0.9, to: 0 }, duration: 1700, repeat: -1, ease: 'Cubic.easeOut' });
+      self.tweens.add({ targets: chevron, y: chevron.y - 8, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+
+    if(self.popNodes){
+      container.setScale(0.15).setAlpha(0);
+      self.tweens.add({ targets: container, scale: 1, alpha: 1, duration: 520, delay: 250 + idx * 70, ease: 'Back.easeOut' });
+    }
+
     // islands float: a slow bob, each at its own pace
     self.nodeTweened.push(container);
     self.tweens.add({ targets: container, y: y - 5, duration: 2200 + idx * 380, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
@@ -193,9 +297,12 @@ IslandScene.prototype.drawIslands = function(){
     hit.input.cursor = CURSOR_HOVER;
     hit.on('pointerup', function(pointer){
       if(pointer.getDistance() > 8 || !isMapClick(self, pointer)) return;
+      sfx('open');
+      self.tweens.add({ targets: container, scale: { from: 1.14, to: 1 }, duration: 380, ease: 'Back.easeOut' });
       attemptOpenIsland(island);
     });
     hit.on('pointerover', function(){
+      sfx('hover');
       var rect = self.game.canvas.getBoundingClientRect();
       var sx = x - self.cameras.main.scrollX + rect.left;
       var sy = container.y - drawn.tipY - self.cameras.main.scrollY + rect.top;
@@ -250,12 +357,12 @@ IslandScene.prototype.frontierIndex = function(){
   return idx;
 };
 
-IslandScene.prototype.scrollToFrontier = function(instant){
+IslandScene.prototype.scrollToFrontier = function(instant, ms){
   var idx = this.frontierIndex();
   if(idx === -1) idx = this.islands.length - 1;
   var targetY = Phaser.Math.Clamp(this.positions[idx] - this.H/2, 0, Math.max(0, this.worldHeight - this.H));
   if(instant){ this.cameras.main.scrollY = targetY; }
-  else { this.tweens.add({ targets: this.cameras.main, scrollY: targetY, duration: 650, ease:'Cubic.easeInOut' }); }
+  else { this.tweens.add({ targets: this.cameras.main, scrollY: targetY, duration: ms || 650, ease:'Cubic.easeInOut' }); }
 };
 
 // restoredId: the island the player just finished, if any — the fog then
@@ -268,7 +375,17 @@ IslandScene.prototype.rebuild = function(restoredId){
   this.drawIslands();
   this.drawReward();
   this.drawFog(restoredId ? oldTop : null);
+  this.updatePathProgress(!!restoredId);
   if(restoredId) this.restoreBurst(this.islands.findIndex(function(i){ return i.id === restoredId; }));
+};
+
+// Where a node is on the page, for effects drawn in HTML over the map
+// (the Células flying to the wallet). null if it isn't on this planet.
+IslandScene.prototype.nodeScreenPos = function(islandId){
+  var idx = this.islands.findIndex(function(i){ return i.id === islandId; });
+  if(idx < 0) return null;
+  var rect = this.game.canvas.getBoundingClientRect(), cam = this.cameras.main;
+  return { x: rect.left + this.nodeX[idx] - cam.scrollX, y: rect.top + this.positions[idx] - cam.scrollY };
 };
 
 /* ---- Neblina Gris ---- */
@@ -349,12 +466,26 @@ IslandScene.prototype.drawFog = function(fromTop){
 IslandScene.prototype.restoreBurst = function(idx){
   if(idx < 0) return;
   var x = this.nodeX[idx], y = this.positions[idx];
+  sfx('restore');
+  this.cameras.main.shake(260, 0.005);
+  var flash = this.add.circle(x, y, 46, 0xffffff, 0.55).setDepth(3).setBlendMode(Phaser.BlendModes.ADD);
+  this.tweens.add({ targets: flash, scale: 2.6, alpha: 0, duration: 650, ease: 'Cubic.easeOut', onComplete: function(){ flash.destroy(); } });
+  var ring2 = this.add.circle(x, y, 30, 0, 0).setDepth(3);
+  ring2.setStrokeStyle(2, 0xfff1c4, 0.9);
+  this.tweens.add({ targets: ring2, scale: 4.5, alpha: 0, duration: 1500, delay: 120, ease: 'Cubic.easeOut', onComplete: function(){ ring2.destroy(); } });
+  var kind = this.islands[idx].kind;
+  var word = this.add.text(x, y - 60, kind === 'isla' ? '¡Restaurada!' : '¡Restaurado!', {
+    fontFamily: 'Cinzel, serif', fontSize: '22px', fontStyle: '700', color: '#fff3cf'
+  }).setOrigin(0.5).setDepth(4).setScale(0.4).setAlpha(0);
+  word.setShadow(0, 0, this.planet.color, 14, false, true);
+  this.tweens.add({ targets: word, scale: 1, alpha: 1, duration: 420, ease: 'Back.easeOut' });
+  this.tweens.add({ targets: word, y: y - 100, alpha: 0, duration: 700, delay: 1100, ease: 'Cubic.easeIn', onComplete: function(){ word.destroy(); } });
   var ring = this.add.circle(x, y, 30, 0, 0).setDepth(3);
   ring.setStrokeStyle(3, ColorNum(this.planet.color), 1);
   this.tweens.add({ targets: ring, scale: 3.2, alpha: 0, duration: 1100, ease: 'Cubic.easeOut', onComplete: function(){ ring.destroy(); } });
   var colors = [ColorNum('#e8b84b'), ColorNum('#6cc4ff')];
-  for(var i = 0; i < 18; i++){
-    var a = i / 18 * Math.PI * 2, d = 60 + Math.random() * 50;
+  for(var i = 0; i < 32; i++){
+    var a = i / 32 * Math.PI * 2, d = 60 + Math.random() * 90;
     var spark = this.add.circle(x, y, 2.5 + Math.random() * 2, colors[i % 2], 1).setDepth(3);
     this.tweens.add({
       targets: spark, x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, alpha: 0,

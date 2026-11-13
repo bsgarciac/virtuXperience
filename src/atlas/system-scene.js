@@ -4,6 +4,7 @@ import { doneCount, planetFullyDone, galaxyDone } from './progress.js';
 import { playableCount } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
+import { sfx } from '../shared/fx.js';
 import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, drawPlanetTexture, isMapClick } from './scene-common.js';
 
 /* ---- System scene: a galaxy's sun and its planets ---- */
@@ -26,8 +27,10 @@ export function SystemScene(){ Phaser.Scene.call(this, { key: 'SystemScene' }); 
 SystemScene.prototype = Object.create(Phaser.Scene.prototype);
 SystemScene.prototype.constructor = SystemScene;
 
-SystemScene.prototype.create = function(){
+SystemScene.prototype.create = function(data){
   mapRef.scene = this;
+  this.intro = !(data && data.resized);
+  this.diving = false;
   this.galaxy = galaxy();
   this.planetDefs = this.galaxy.planets;
   this.W = this.scale.width;
@@ -44,6 +47,58 @@ SystemScene.prototype.create = function(){
   this.drawTitle();
   setupRocketCursor(this);
   restartOnResize(this);
+  var from = data && data.fromPlanet && this.planets[this.planetDefs.findIndex(function(p){ return p.id === data.fromPlanet; })];
+  if(from) this.flyOutFrom(from);
+  else if(this.intro) this.playIntro();
+};
+
+// Coming back from a planet: the view starts close on it and pulls back
+// to the whole system, while that planet keeps its place on the orbit.
+SystemScene.prototype.flyOutFrom = function(p){
+  var cam = this.cameras.main, self = this;
+  this.paused = true;
+  this.diving = true; // no hover or clicks while the camera moves
+  cam.setZoom(3.2);
+  cam.centerOn(p.container.x, p.container.y);
+  cam.fadeIn(380, 6, 10, 24);
+  cam.pan(this.cx, this.cy, 1000, 'Cubic.easeInOut');
+  cam.zoomTo(1, 1000, 'Cubic.easeInOut', false, function(c, k){
+    if(k === 1){ self.paused = false; self.diving = false; }
+  });
+};
+
+// Arriving in the system: the view settles from a little closer in, the
+// sun flares and the planets pop onto their orbits one after another.
+SystemScene.prototype.playIntro = function(){
+  var cam = this.cameras.main, self = this;
+  cam.fadeIn(450, 6, 10, 24);
+  cam.setZoom(1.18);
+  this.tweens.add({ targets: cam, zoom: 1, duration: 1100, ease: 'Cubic.easeOut' });
+  this.sunParts.forEach(function(o){
+    var s = o.scale;
+    o.setScale(s * 0.2);
+    self.tweens.add({ targets: o, scale: s, duration: 700, ease: 'Back.easeOut', delay: 120 });
+  });
+  this.planets.forEach(function(p, i){
+    p.pop = 0;
+    self.tweens.add({ targets: p, pop: 1, duration: 650, ease: 'Back.easeOut', delay: 380 + i * 140,
+      onStart: function(){ sfx('blip'); } });
+  });
+};
+
+// Clicking a planet flies the camera into it before landing on its path.
+SystemScene.prototype.diveInto = function(p, planet){
+  if(this.diving) return;
+  this.diving = true;
+  this.paused = true;
+  hideTooltip();
+  sfx('dive');
+  var cam = this.cameras.main, self = this;
+  cam.pan(p.container.x, p.container.y, 520, 'Cubic.easeIn');
+  cam.zoomTo(3.2, 560, 'Cubic.easeIn');
+  var col = Phaser.Display.Color.HexStringToColor(planet.color);
+  this.time.delayedCall(260, function(){ cam.fadeOut(300, col.red * 0.25, col.green * 0.25, col.blue * 0.35); });
+  cam.once('camerafadeoutcomplete', function(){ self.scene.start('IslandScene', { planetId: planet.id }); });
 };
 
 SystemScene.prototype.computeOrbits = function(){
@@ -84,6 +139,16 @@ SystemScene.prototype.drawSun = function(){
   var core = this.add.circle(cx - r * 0.26, cy - r * 0.28, r * 0.26, 0xffffff, 0.7);
   var glyph = this.add.text(cx, cy, this.galaxy.sun.glyph, { fontFamily:'Cinzel, serif', fontSize: Math.round(r * 0.8) + 'px', fontStyle:'700', color:'#7a4a10' }).setOrigin(0.5).setAlpha(0.75);
   [halo2, halo1, body, inner, core, glyph].forEach(function(o){ o.setDepth(50); });
+  this.sunParts = [body, inner, core, glyph];
+  // a slow corona of light rays turning behind the sun
+  var rays = this.add.graphics().setDepth(49).setPosition(cx, cy).setBlendMode(Phaser.BlendModes.ADD);
+  for(var k = 0; k < 12; k++){
+    var a = k / 12 * Math.PI * 2, w = 0.09, len = r * (k % 2 ? 2.1 : 2.7);
+    rays.fillStyle(0xffd27a, 0.07);
+    rays.fillTriangle(Math.cos(a - w) * r * 0.9, Math.sin(a - w) * r * 0.9, Math.cos(a + w) * r * 0.9, Math.sin(a + w) * r * 0.9, Math.cos(a) * len, Math.sin(a) * len);
+  }
+  this.tweens.add({ targets: rays, angle: 360, duration: 60000, repeat: -1 });
+  this.tweens.add({ targets: rays, alpha: { from: 0.7, to: 1 }, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   this.tweens.add({ targets: halo1, scale: { from: 1, to: 1.15 }, alpha: { from: 0.1, to: 0.2 }, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   this.tweens.add({ targets: halo2, scale: { from: 1, to: 1.1 }, duration: 3400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
@@ -152,7 +217,9 @@ SystemScene.prototype.drawPlanets = function(){
     body.setInteractive();
     body.input.cursor = CURSOR_HOVER;
     body.on('pointerover', function(){
+      if(self.diving) return;
       self.paused = true;
+      sfx('hover');
       body.setStrokeStyle(3.4, accent, 1);
       c.setScale(c.scale * 1.08);
       var rect = self.game.canvas.getBoundingClientRect();
@@ -160,17 +227,17 @@ SystemScene.prototype.drawPlanets = function(){
         '<b>' + planet.name + '</b><br>' + planet.tag + '<br>' + (built ? done + '/' + total + ' nodos restaurados' : 'Nodos próximamente'));
     });
     body.on('pointerout', function(){
+      if(self.diving) return;
       self.paused = false;
       body.setStrokeStyle(2.4, accent, built ? 1 : 0.5);
       hideTooltip();
     });
     body.on('pointerup', function(pointer){
       if(!isMapClick(self, pointer)) return;
-      hideTooltip();
-      self.scene.start('IslandScene', { planetId: planet.id });
+      self.diveInto(p, planet);
     });
 
-    var p = { container: c, orbit: self.orbits[i] };
+    var p = { container: c, orbit: self.orbits[i], pop: 1 };
     self.placePlanet(p);
     return p;
   });
@@ -183,11 +250,12 @@ SystemScene.prototype.placePlanet = function(p){
   var s = Math.sin(o.angle);
   p.container.setPosition(this.cx + Math.cos(o.angle) * o.rx, this.cy + s * o.ry);
   p.container.setDepth(50 + s * 10);
-  if(!this.paused) p.container.setScale(0.86 + 0.14 * (s + 1) / 2);
+  if(!this.paused) p.container.setScale((0.86 + 0.14 * (s + 1) / 2) * p.pop);
 };
 
 SystemScene.prototype.update = function(time, delta){
-  if(this.paused || !this.planets) return;
+  if(!this.planets) return;
+  if(this.paused){ return; }
   var self = this;
   this.planets.forEach(function(p){
     p.orbit.angle += p.orbit.speed * delta;
