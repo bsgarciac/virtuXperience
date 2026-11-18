@@ -8,7 +8,10 @@ var SOUND_KEY = 'vx_sound_off';
 var muted = false;
 try{ muted = localStorage.getItem(SOUND_KEY) === '1'; }catch(e){ /* storage unavailable */ }
 
+// The player's "Reducir movimiento" setting (shared/a11y.js, which follows
+// the system setting until the player picks one) or the system setting.
 export function reducedMotion(){
+  if(document.documentElement.classList.contains('a11y-calm')) return true;
   return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 

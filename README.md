@@ -31,6 +31,8 @@ src/
     dialogue.js               the guides' one-line-at-a-time conversation box (typed out)
     fx.js                     game feel: synthesized sounds (🔊 in the HUD mutes them),
                               confetti, Células flying to the wallet, hyperspace jump
+    a11y.js                   accessibility panel (Aa in the HUD, Alt + A): text size,
+                              contrast, easy-reading font, spacing, calm motion, voice
     infographic.js            renders a lesson as an infographic (cards,
                               steps, formula, ✗/✓, Luma's tip; $math$ via KaTeX)
     markdown.js               Markdown + KaTeX (still accepted for a lesson)
@@ -176,6 +178,34 @@ it before the resource. To add a galaxy this way, copy `latidosocial/` and
 fill its `content.js` from the old hub. Every hub is migrated; a few old
 articles were left out because they only link a PDF or embed another
 article's resource (see the top of each `content.js`/`recursos.js`).
+
+## Accesibilidad
+
+The **Aa** button (in the HUD and on the galaxy select screen) or **Alt + A**
+opens a panel whose settings are remembered in the browser (`vx_a11y`) and
+applied as classes on `<html>` (`styles/a11y.css`):
+
+- **Tamaño del texto**: four steps, applied with CSS `zoom` to the DOM panels
+  only (HUD, dialogue, game shell top and bottom, lesson, results). Never to
+  a Phaser canvas or an embedded resource, so pointer input is unaffected.
+- **Alto contraste**: black panels with white borders and brighter text.
+- **Letra de lectura fácil**: Atkinson Hyperlegible, loaded only when turned on.
+- **Más espacio entre líneas**: line, letter and word spacing.
+- **Reducir movimiento**: follows the system setting until the player picks
+  one. It drives `fx.reducedMotion()`: no warp, confetti, flying Células,
+  typewriter, camera intros, dives or shake, and CSS animations are cut.
+- **Luma lee en voz alta**: Web Speech API (a Spanish voice) reads dialogue
+  lines, hints and results; hidden when the browser can't speak.
+
+The map is a canvas, so its labels (planet names, node names, the sun's Hack)
+read the same settings through `mapLabel()` in `atlas/scene-common.js`: up to
+1.3× bigger, the easy font, more letter spacing, and a bright outlined colour
+in high contrast. Node names wrap to stay on screen. Changing a setting
+redraws the map, as a resize does. New readable text on the map should use
+`mapLabel()`.
+
+Keyboard focus is always visible. New overlays with readable text should be
+added to the zoom list in `styles/a11y.css`.
 
 ## Modo desarrollador
 

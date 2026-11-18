@@ -100,9 +100,67 @@ export function drawStarfield(scene, w, h){
 // data.resized tells create() not to replay its entrance animation.
 export function restartOnResize(scene, data){
   function onResize(){ scene.scene.restart(Object.assign({}, data, { resized: true })); }
+  // a change in the accessibility panel redraws the labels the same way
+  var drawnWith = mapA11yKey();
+  function onA11y(){ if(mapA11yKey() !== drawnWith) onResize(); }
   scene.scale.on('resize', onResize);
-  scene.events.once('shutdown', function(){ scene.scale.off('resize', onResize); });
+  window.addEventListener('vx-a11y', onA11y);
+  scene.events.once('shutdown', function(){
+    scene.scale.off('resize', onResize);
+    window.removeEventListener('vx-a11y', onA11y);
+  });
 }
+
+/* ---- Readable map text and the accessibility panel (shared/a11y.js) ---- */
+// The map is a canvas, so the page CSS can't reach its labels: they read the
+// player's settings here. Text grows less than the HTML panels (up to 1.3×)
+// so the path's labels still fit between nodes.
+var MAP_ZOOM_MAX = 1.3;
+var EASY_FONT = '"Atkinson Hyperlegible", sans-serif';
+
+export function mapA11y(){
+  var html = document.documentElement;
+  var z = parseFloat(getComputedStyle(html).getPropertyValue('--a11y-zoom')) || 1;
+  return {
+    zoom: Math.min(z, MAP_ZOOM_MAX),
+    contrast: html.classList.contains('a11y-contrast'),
+    font: html.classList.contains('a11y-font'),
+    spacing: html.classList.contains('a11y-spacing')
+  };
+}
+function mapA11yKey(){
+  var a = mapA11y();
+  var fontReady = a.font && document.fonts && document.fonts.check('12px ' + EASY_FONT);
+  return [a.zoom, a.contrast, a.font, fontReady, a.spacing].join('|');
+}
+
+// Lighter version of a '#rrggbb' colour (t = 1 → white).
+function lighten(hex, t){
+  var c = Phaser.Display.Color.HexStringToColor(hex);
+  function ch(v){ return Math.round(v + (255 - v) * t); }
+  return Phaser.Display.Color.RGBToString(ch(c.red), ch(c.green), ch(c.blue), 0, '#');
+}
+
+// scene.add.text for a label the player reads, following the settings:
+// bigger, the easy-reading font, more letter spacing, and in high contrast
+// a brighter colour with a dark outline. `onLight` marks dark text drawn on
+// a light surface (the planet's horizon): there contrast makes it black.
+export function mapLabel(scene, x, y, text, style, onLight){
+  var a = mapA11y(), s = Object.assign({}, style);
+  if(a.zoom !== 1) s.fontSize = (parseFloat(s.fontSize) * a.zoom).toFixed(1) + 'px';
+  if(a.font) s.fontFamily = EASY_FONT;
+  if(a.spacing) s.lineSpacing = 6;
+  if(a.contrast){
+    if(onLight) s.color = '#000000';
+    else { s.color = lighten(s.color || '#ffffff', 0.6); s.stroke = '#05070f'; s.strokeThickness = 4; }
+  }
+  var t = scene.add.text(x, y, text, s);
+  if(a.spacing) t.setLetterSpacing(1.5);
+  return t;
+}
+
+// The label's alpha, or fully opaque in high contrast.
+export function labelAlpha(alpha){ return mapA11y().contrast ? 1 : alpha; }
 
 // True when a click really happened on the map: pressed and released on the
 // canvas itself. Phaser also reports a release over the canvas area when the

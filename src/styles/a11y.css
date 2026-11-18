@@ -1,0 +1,111 @@
+/* Accessibility (shared/a11y.js): the panel, and what each setting does.
+   Settings are classes on <html>; the text size is --a11y-zoom, applied
+   with `zoom` to the DOM panels only (never to a Phaser canvas or the
+   embedded resource, whose pointer coordinates must stay untouched). */
+
+/* ---------- The panel ---------- */
+.hud-a11y{font-family:'Atkinson Hyperlegible','Manrope',sans-serif;font-weight:800;letter-spacing:.02em;}
+.galaxy-a11y{position:absolute;top:14px;right:16px;z-index:2;}
+.galaxy-a11y span{font-weight:600;letter-spacing:0;}
+@media (max-width:560px){ .galaxy-a11y span{display:none;} }
+
+#a11y-pop{
+  position:fixed;top:64px;right:16px;z-index:90;width:min(340px,calc(100vw - 32px));
+  max-height:calc(100vh - 80px);overflow:auto;
+  background:#131b3a;border:1px solid #33407c;border-radius:14px;padding:14px 16px;
+  box-shadow:0 24px 50px -12px rgba(0,0,0,.7);
+  display:none;color:var(--text);
+}
+#a11y-pop.open{display:block;}
+.a11y-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.a11y-head h3{margin:0;font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:var(--luma);}
+.a11y-key{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--text-faint);border:1px solid #33407c;border-radius:6px;padding:2px 6px;}
+.a11y-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid #222b55;}
+.a11y-head + .a11y-row{border-top:none;}
+.a11y-label{display:flex;flex-direction:column;gap:2px;margin-right:auto;min-width:0;}
+.a11y-label b{font-size:13.5px;font-weight:700;}
+.a11y-label i{font-style:normal;font-size:11.5px;color:var(--text-dim);line-height:1.35;}
+.a11y-steps{display:flex;gap:6px;flex:none;}
+.a11y-step{
+  appearance:none;width:44px;height:36px;border-radius:8px;cursor:pointer;
+  border:1px solid #394382;background:#161f42;color:var(--text);
+  font-family:'Manrope',sans-serif;font-weight:800;font-size:14px;
+}
+.a11y-step:hover:not(:disabled){background:#1d285a;border-color:var(--luma);}
+.a11y-step:disabled{opacity:.35;cursor:not-allowed;}
+.a11y-toggle{cursor:pointer;position:relative;}
+.a11y-toggle input{position:absolute;opacity:0;width:1px;height:1px;}
+.a11y-switch{
+  flex:none;width:42px;height:24px;border-radius:999px;position:relative;
+  background:#26305a;border:1px solid #3a447c;transition:background .2s, border-color .2s;
+}
+.a11y-switch::after{
+  content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+  background:#9aa3c7;transition:transform .2s, background .2s;
+}
+.a11y-toggle input:checked + .a11y-switch{background:rgba(108,196,255,.35);border-color:var(--luma);}
+.a11y-toggle input:checked + .a11y-switch::after{transform:translateX(18px);background:var(--luma);}
+.a11y-toggle input:focus-visible + .a11y-switch{outline:2px solid var(--cyan);outline-offset:2px;}
+.a11y-toggle input:disabled + .a11y-switch{opacity:.35;}
+.a11y-reset{width:100%;margin-top:8px;}
+
+/* ---------- Visible focus everywhere (keyboard players) ---------- */
+button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--cyan);outline-offset:2px;
+}
+
+/* ---------- Text size ---------- */
+:root{--a11y-zoom:1;}
+#hud, #info-pop, #a11y-pop, #toast, #tooltip, .dlg-card, .confirm-card,
+.galaxy-select-inner, .galaxy-a11y, .nav-label,
+.gm-top, .gm-panel, .gm-hint, .gm-banner, .gm-lesson-card, .gm-final-card{
+  zoom:var(--a11y-zoom);
+}
+/* the HUD and the panel itself grow less, so they still fit on a phone */
+#hud, #a11y-pop, .galaxy-a11y{zoom:min(var(--a11y-zoom), 1.2);}
+/* zoom also scales the panel's width and offsets: on a phone it stays 1:1 */
+@media (max-width:560px){ #a11y-pop, .nav-label{zoom:1;} }
+
+/* ---------- High contrast ---------- */
+html.a11y-contrast{
+  --ink:#000;
+  --text:#ffffff;
+  --text-dim:#e8ebff;
+  --text-faint:#cfd4f2;
+  --fog:#c8cce0;
+}
+html.a11y-contrast #hud{background:#000;border-bottom-color:#fff;}
+html.a11y-contrast :is(.hud-btn, .btn-secondary, .a11y-step){background:#000;border-color:#fff;color:#fff;}
+html.a11y-contrast .btn-primary{outline:2px solid #fff;outline-offset:1px;}
+html.a11y-contrast :is(#info-pop, #a11y-pop, .dlg-card, .confirm-card, .gm-panel, .gm-top, .gm-lesson-card, .gm-final-card, .gm-hint, #toast, #tooltip){
+  background:#000 !important;border:2px solid #fff !important;box-shadow:none !important;
+}
+html.a11y-contrast .gm-shell{background:#000;}
+html.a11y-contrast :is(.a11y-row){border-top-color:#555;}
+html.a11y-contrast a{color:#9fe0ff;text-decoration:underline;}
+html.a11y-contrast .galaxy-card{border:2px solid #fff;}
+
+/* ---------- Easy-reading font ---------- */
+html.a11y-font body, html.a11y-font body *:not(svg):not(svg *){
+  font-family:'Atkinson Hyperlegible', system-ui, sans-serif !important;
+}
+
+/* ---------- More spacing ---------- */
+html.a11y-spacing body{letter-spacing:.03em;word-spacing:.12em;}
+html.a11y-spacing :is(p, li, .dlg-text, .gm-goal, .gm-feedback, .confirm-msg, .result-msg, .legend-row,
+  .gm-lesson-body, .ai-msg, .gm-say, .a11y-label i, .galaxy-select-sub){
+  line-height:1.85 !important;
+}
+html.a11y-spacing p{margin-bottom:1em;}
+
+/* ---------- Reduce motion ---------- */
+/* fx.reducedMotion() also turns off the warp, confetti, flying Células,
+   the typewriter and the map's camera intros. */
+html.a11y-calm *, html.a11y-calm *::before, html.a11y-calm *::after{
+  animation-duration:.001ms !important;
+  animation-iteration-count:1 !important;
+  animation-delay:0s !important;
+  transition-duration:.001ms !important;
+  transition-delay:0s !important;
+  scroll-behavior:auto !important;
+}

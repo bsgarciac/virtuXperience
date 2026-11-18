@@ -1,5 +1,6 @@
 import { GUIDES, guidePortraitHtml } from './guides.js';
 import { sfx, reducedMotion } from './fx.js';
+import { speak, stopSpeaking } from './a11y.js';
 
 // A short story scene told by the guide, one line at a time.
 // lines: [{ who: 'luma', text }]. opts: { eyebrow, doneLabel, onDone }.
@@ -75,6 +76,7 @@ function render(){
   }
   el.who.innerHTML = '<b>' + g.name + '</b><i>' + g.role + '</i>';
   el.text.innerHTML = line.text;
+  speak(line.text);
   var dots = '';
   for(var i = 0; i < cur.lines.length; i++) dots += '<span class="' + (i === cur.i ? 'on' : '') + '"></span>';
   el.dots.innerHTML = dots;
@@ -88,6 +90,7 @@ function render(){
 function finish(){
   if(!cur) return;
   stopTyping();
+  stopSpeaking();
   var done = cur.onDone;
   cur = null;
   root.classList.remove('open');

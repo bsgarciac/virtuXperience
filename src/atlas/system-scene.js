@@ -4,8 +4,8 @@ import { doneCount, planetFullyDone, galaxyDone } from './progress.js';
 import { playableCount } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
-import { sfx } from '../shared/fx.js';
-import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, drawPlanetTexture, isMapClick } from './scene-common.js';
+import { sfx, reducedMotion } from '../shared/fx.js';
+import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, drawPlanetTexture, isMapClick, mapLabel, labelAlpha } from './scene-common.js';
 
 /* ---- System scene: a galaxy's sun and its planets ---- */
 // The current galaxy seen from above: its hack (the Matriz Lógica, the
@@ -29,7 +29,7 @@ SystemScene.prototype.constructor = SystemScene;
 
 SystemScene.prototype.create = function(data){
   mapRef.scene = this;
-  this.intro = !(data && data.resized);
+  this.intro = !(data && data.resized) && !reducedMotion();
   this.diving = false;
   this.galaxy = galaxy();
   this.planetDefs = this.galaxy.planets;
@@ -48,7 +48,7 @@ SystemScene.prototype.create = function(data){
   setupRocketCursor(this);
   restartOnResize(this);
   var from = data && data.fromPlanet && this.planets[this.planetDefs.findIndex(function(p){ return p.id === data.fromPlanet; })];
-  if(from) this.flyOutFrom(from);
+  if(from && !reducedMotion()) this.flyOutFrom(from);
   else if(this.intro) this.playIntro();
 };
 
@@ -94,6 +94,7 @@ SystemScene.prototype.diveInto = function(p, planet){
   hideTooltip();
   sfx('dive');
   var cam = this.cameras.main, self = this;
+  if(reducedMotion()){ this.scene.start('IslandScene', { planetId: planet.id }); return; }
   cam.pan(p.container.x, p.container.y, 520, 'Cubic.easeIn');
   cam.zoomTo(3.2, 560, 'Cubic.easeIn');
   var col = Phaser.Display.Color.HexStringToColor(planet.color);
@@ -152,18 +153,18 @@ SystemScene.prototype.drawSun = function(){
   this.tweens.add({ targets: halo1, scale: { from: 1, to: 1.15 }, alpha: { from: 0.1, to: 0.2 }, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   this.tweens.add({ targets: halo2, scale: { from: 1, to: 1.1 }, duration: 3400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-  var label = this.add.text(cx, cy + r * 1.25 + 10, done ? '♛ SECTOR RESTAURADO' : this.galaxy.sun.label, {
+  var label = mapLabel(this, cx, cy + r * 1.25 + 10, done ? '♛ SECTOR RESTAURADO' : this.galaxy.sun.label, {
     fontFamily:'Space Mono, monospace', fontSize:'10px', color: done ? '#e8b84b' : '#c9a35a'
-  }).setOrigin(0.5).setDepth(50).setAlpha(0.85);
-  label.setLetterSpacing(2);
+  }).setOrigin(0.5).setDepth(50).setAlpha(labelAlpha(0.85));
+  label.setLetterSpacing(Math.max(2, label.letterSpacing));
 };
 
 SystemScene.prototype.drawTitle = function(){
-  var title = this.add.text(this.cx, 26, 'Sistema ' + this.galaxy.name, {
+  var title = mapLabel(this, this.cx, 26, 'Sistema ' + this.galaxy.name, {
     fontFamily:'Cinzel, serif', fontSize:'20px', fontStyle:'600', color:'#ecebf7'
   }).setOrigin(0.5, 0).setDepth(200);
   title.setShadow(0, 2, '#05070f', 6, false, true);
-  this.add.text(this.cx, 54, 'Elige un planeta: puedes explorarlos en el orden que quieras', {
+  mapLabel(this, this.cx, 26 + title.height + 4, 'Elige un planeta: puedes explorarlos en el orden que quieras', {
     fontFamily:'Manrope, sans-serif', fontSize:'12.5px', color:'#9aa3c7',
     align:'center', wordWrap: { width: this.W - 40 }
   }).setOrigin(0.5, 0).setDepth(200);
@@ -196,12 +197,12 @@ SystemScene.prototype.drawPlanets = function(){
     var glyph = self.add.text(0, -1, planet.glyph, {
       fontFamily:'Cinzel, serif', fontSize: Math.round(r * 0.72) + 'px', fontStyle:'700', color:'#0b1226'
     }).setOrigin(0.5).setAlpha(0.8);
-    var name = self.add.text(0, r + 10, planet.name, {
+    var name = mapLabel(self, 0, r + 10, planet.name, {
       fontFamily:'Cinzel, serif', fontSize:'13px', fontStyle:'600', color:'#ecebf7',
       align:'center', wordWrap: { width: 130 }
     }).setOrigin(0.5, 0);
     name.setShadow(0, 2, '#05070f', 4, false, true);
-    var sub = self.add.text(0, r + 12 + name.height, built ? (mastered ? '💎 ' : '') + done + '/' + total + ' nodos' : 'Próximamente', {
+    var sub = mapLabel(self, 0, r + 12 + name.height, built ? (mastered ? '💎 ' : '') + done + '/' + total + ' nodos' : 'Próximamente', {
       fontFamily:'Space Mono, monospace', fontSize:'10px', color: mastered ? planet.color : '#9aa3c7'
     }).setOrigin(0.5, 0);
 

@@ -13,8 +13,10 @@ import './styles/alianzas.css';
 import './styles/recurso.css';
 import './styles/story.css';
 import './styles/fx.css';
+import './styles/a11y.css';
 
 import './shared/dev.js'; // reads ?dev=… before anything else
+import './shared/a11y.js'; // applies saved accessibility settings before anything draws
 import { initGalaxySelect } from './galaxies/select.js';
 import { SystemScene } from './atlas/system-scene.js';
 import { IslandScene } from './atlas/island-scene.js';

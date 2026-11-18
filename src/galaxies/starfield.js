@@ -1,3 +1,5 @@
+import { reducedMotion } from '../shared/fx.js';
+
 // The galaxy-select backdrop: a 3D star field flying towards the viewer.
 // Each star has a depth z; it drifts closer every frame and is projected
 // with x / z, so it speeds up, grows and brightens as it approaches, then
@@ -20,7 +22,7 @@ var NEBULAE = ['#57d9c9', '#9b8cf2', '#ff6fae', '#6c8cff', '#ffa94d', '#f5c84c']
 
 export function startStarfield(canvas, host){
   var ctx = canvas.getContext('2d');
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduce = reducedMotion();
   var W = 0, H = 0, dpr = 1, stars = [], raf = 0, last = 0;
   var lean = { x: 0, y: 0 }, leanTarget = { x: 0, y: 0 };
   var boost = 1, boostTarget = 1;
@@ -154,6 +156,15 @@ export function startStarfield(canvas, host){
   }
 
   window.addEventListener('resize', resize);
+  // the accessibility panel can turn motion off (or back on) at any time
+  window.addEventListener('vx-a11y', function(){
+    var r = reducedMotion();
+    if(r === reduce) return;
+    reduce = r;
+    if(reduce && raf){ cancelAnimationFrame(raf); raf = 0; }
+    meteors = [];
+    if(reduce) draw(0, 0); else sync();
+  });
   document.addEventListener('visibilitychange', sync);
   new MutationObserver(sync).observe(host, { attributes: true, attributeFilter: ['class'] });
   host.addEventListener('pointermove', function(e){

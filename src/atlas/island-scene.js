@@ -4,9 +4,9 @@ import { isDone, planetFullyDone } from './progress.js';
 import { isPlayable, isUnlocked, gameTitle, attemptOpenIsland } from './islands.js';
 import { mapRef } from './map-ref.js';
 import { showTooltip, hideTooltip } from '../shared/tooltip.js';
-import { sfx } from '../shared/fx.js';
+import { sfx, reducedMotion } from '../shared/fx.js';
 import { showSystemNav } from './nav.js';
-import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, seeded, drawCrater, isMapClick } from './scene-common.js';
+import { ColorNum, blendColor, CURSOR_HOVER, drawStarfield, restartOnResize, setupRocketCursor, seeded, drawCrater, isMapClick, mapLabel, labelAlpha } from './scene-common.js';
 
 /* ---- Island scene: one planet's chain of floating islands ---- */
 // Landing on a planet shows its islands — one challenge each — strung along
@@ -22,7 +22,7 @@ IslandScene.prototype.constructor = IslandScene;
 IslandScene.prototype.create = function(data){
   mapRef.scene = this;
   this.planet = getPlanet(data && data.planetId) || galaxy().planets[0];
-  this.intro = !(data && data.resized);
+  this.intro = !(data && data.resized) && !reducedMotion();
   this.leaving = false;
   this.islands = islandsOf(this.planet.id);
   this.W = this.scale.width;
@@ -70,6 +70,7 @@ IslandScene.prototype.goBack = function(){
   hideTooltip();
   sfx('dive');
   var cam = this.cameras.main, self = this;
+  if(reducedMotion()){ this.scene.start('SystemScene', { fromPlanet: this.planet.id }); return; }
   this.tweens.add({ targets: cam, scrollY: 0, duration: 520, ease: 'Cubic.easeIn' });
   cam.zoomTo(0.55, 560, 'Cubic.easeIn');
   this.time.delayedCall(260, function(){ cam.fadeOut(300, 6, 10, 24); });
@@ -104,16 +105,16 @@ IslandScene.prototype.drawPlanetHorizon = function(){
   this.drawHorizonTexture(cy, R);
   this.add.circle(this.centerX + R * 0.12, cy + R * 0.08, R * 0.95, 0x05070a, 0.28);
 
-  var title = this.add.text(this.centerX, this.horizonY - 70, p.glyph + '  ' + p.name, {
+  var title = mapLabel(this, this.centerX, this.horizonY - 70, p.glyph + '  ' + p.name, {
     fontFamily:'Cinzel, serif', fontSize:'20px', fontStyle:'700', color:'#0b1226',
     align:'center', wordWrap: { width: this.W - 40 }
-  }).setOrigin(0.5);
-  title.setAlpha(0.85);
-  var tag = this.add.text(this.centerX, this.horizonY - 40, p.tag, {
+  }, true).setOrigin(0.5);
+  title.setAlpha(labelAlpha(0.85));
+  var tag = mapLabel(this, this.centerX, this.horizonY - 40, p.tag, {
     fontFamily:'Manrope, sans-serif', fontSize:'12.5px', fontStyle:'600', color:'#0b1226',
     align:'center', wordWrap: { width: this.W - 40 }
-  }).setOrigin(0.5);
-  tag.setAlpha(0.7);
+  }, true).setOrigin(0.5);
+  tag.setAlpha(labelAlpha(0.7));
 };
 
 // Craters and bands on the visible cap of the planet (the band above the
@@ -240,8 +241,11 @@ IslandScene.prototype.drawIslands = function(){
     var drawn = (NODE_DRAW[island.kind] || drawIsla)(self, ctx);
     var r = drawn.r, glowBg = drawn.glow, layers = drawn.layers;
 
-    var label = self.add.text(0, drawn.labelY, island.name + (playable ? ' · ' + gameTitle(island) : ''), {
-      fontFamily:'Space Mono, monospace', fontSize:'11px', color: unlocked || done ? '#c3c9e6' : '#5d6690'
+    // long names wrap so they stay on screen beside the zigzag
+    var room = Math.max(140, 2 * (Math.min(x, self.W - x) - 12));
+    var label = mapLabel(self, 0, drawn.labelY, island.name + (playable ? ' · ' + gameTitle(island) : ''), {
+      fontFamily:'Space Mono, monospace', fontSize:'11px', color: unlocked || done ? '#c3c9e6' : '#5d6690',
+      align:'center', wordWrap: { width: Math.min(room, 320), useAdvancedWrap: true }
     }).setOrigin(0.5, 0);
     layers.push(label);
     container.add(layers);
@@ -324,7 +328,7 @@ IslandScene.prototype.drawReward = function(){
   var accent = ColorNum(this.planet.color);
   var halo = this.add.circle(x, y, 22, accent, done ? 0.28 : 0.06);
   var gem = this.add.text(x, y, '◆', { fontFamily:'Manrope, sans-serif', fontSize:'22px', color: done ? this.planet.color : '#3a447c' }).setOrigin(0.5);
-  var label = this.add.text(x, y + 26, done ? 'Gema obtenida' : 'Gema de maestría', {
+  var label = mapLabel(this, x, y + 26, done ? 'Gema obtenida' : 'Gema de maestría', {
     fontFamily:'Space Mono, monospace', fontSize:'10.5px', color: done ? this.planet.color : '#6b74a0'
   }).setOrigin(0.5);
   if(done){
@@ -448,10 +452,10 @@ IslandScene.prototype.drawFog = function(fromTop){
     this.tweens.add({ targets: edge, y: top - 6 - Math.random() * 22, scale: edge.scale * 1.15, duration: 2600 + Math.random() * 1800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Math.random() * 1500 });
   }
 
-  var label = this.add.text(this.W - 16, top + 26, '◌ NEBLINA GRIS', {
+  var label = mapLabel(this, this.W - 16, top + 26, '◌ NEBLINA GRIS', {
     fontFamily: 'Space Mono, monospace', fontSize: '10px', color: '#aab0c6'
-  }).setOrigin(1, 0.5).setAlpha(0.75);
-  label.setLetterSpacing(2);
+  }).setOrigin(1, 0.5).setAlpha(labelAlpha(0.75));
+  label.setLetterSpacing(Math.max(2, label.letterSpacing));
   layer.add(label);
 
   if(fromTop != null && fromTop < top){
@@ -467,7 +471,7 @@ IslandScene.prototype.restoreBurst = function(idx){
   if(idx < 0) return;
   var x = this.nodeX[idx], y = this.positions[idx];
   sfx('restore');
-  this.cameras.main.shake(260, 0.005);
+  if(!reducedMotion()) this.cameras.main.shake(260, 0.005);
   var flash = this.add.circle(x, y, 46, 0xffffff, 0.55).setDepth(3).setBlendMode(Phaser.BlendModes.ADD);
   this.tweens.add({ targets: flash, scale: 2.6, alpha: 0, duration: 650, ease: 'Cubic.easeOut', onComplete: function(){ flash.destroy(); } });
   var ring2 = this.add.circle(x, y, 30, 0, 0).setDepth(3);

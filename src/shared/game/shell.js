@@ -5,6 +5,7 @@ import { guideAvatarHtml } from '../guides.js';
 import { renderMarkdown } from '../markdown.js';
 import { renderInfographic } from '../infographic.js';
 import { sfx, confetti, countUp } from '../fx.js';
+import { speak, stopSpeaking } from '../a11y.js';
 
 // The frame every mini-game shares: a full-screen overlay with a top bar
 // (emblem, title, progress pips, close), a stage where the Phaser scene lives
@@ -89,7 +90,9 @@ export function createShell(opts){
     setTimeout(function(){
       if(!isOpen || el.hintPanel.dataset.token !== token) return;
       el.hintPanel.classList.remove('ai-loading');
-      el.hintPanel.innerHTML = aiBubbleHtml(hintSource()) +
+      var hint = hintSource();
+      speak(hint);
+      el.hintPanel.innerHTML = aiBubbleHtml(hint) +
         '<button type="button" class="gm-hint-close" aria-label="Cerrar pista">✕</button>';
       el.hintPanel.dataset.loaded = '1';
       el.hintBtn.disabled = false;
@@ -125,6 +128,7 @@ export function createShell(opts){
 
     close: function(){
       isOpen = false;
+      stopSpeaking();
       onClose = null;
       document.removeEventListener('keydown', onKey);
       shell.stopScene();
@@ -275,6 +279,7 @@ export function createShell(opts){
         '<div class="gm-say luma">' + guideAvatarHtml('luma') + '<span><b>Luma</b> ' + (o.luma ? o.luma + ' ' : '') + (o.recap ? 'Recuerda: ' + o.recap : '') + '</span></div>' +
         '<div class="result-actions"><button type="button" class="btn-primary">Continuar</button></div>';
       el.final.classList.add('show');
+      speak(o.title + '. ' + msg + ' ' + (o.luma || '') + (o.recap ? ' Recuerda: ' + o.recap : ''));
       el.finalCard.querySelector('.btn-primary').addEventListener('click', o.onContinue);
       // Celebrate: fanfare, confetti from the card, the Células counting up.
       sfx('fanfare');

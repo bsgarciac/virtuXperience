@@ -6,6 +6,7 @@ import { showDialogue } from '../../../../shared/dialogue.js';
 import { guidePortraitHtml } from '../../../../shared/guides.js';
 import { createShell } from '../../../../shared/game/shell.js';
 import { setDevActions } from '../../../../shared/dev.js';
+import { reducedMotion } from '../../../../shared/fx.js';
 
 // The Distrito Cristalino's three islands (see ISLANDS in content.js). On
 // each one the player first walks to the corrupted Nodo (scene.js),
@@ -306,7 +307,7 @@ function hideBoard(){
 // leaves. Any touch on a card stops it.
 function playHandHint(){
   stopHandHint();
-  if(!window.matchMedia || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(reducedMotion()) return;
   var card = elWork.querySelector('.ag-tray .ag-ent');
   var to = boardEl.querySelector('.ag-hand-target') || boardEl;
   if(!card || !handEl.animate) return;
