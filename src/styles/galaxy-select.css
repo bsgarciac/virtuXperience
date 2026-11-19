@@ -1,13 +1,13 @@
 /* ---------- Galaxy select ---------- */
 #galaxy-select{
   position:fixed;inset:0;z-index:40;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:flex-start;justify-content:center; /* the inner margin:auto centres it, yet scrolls from the top when taller */
   background:radial-gradient(ellipse at 50% 20%, #16204a 0%, #0b1226 55%, #060a18 100%);
   overflow:auto;padding:32px 20px;
 }
 #galaxy-select.hidden{display:none;}
 .galaxy-stars{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;}
-.galaxy-select-inner{position:relative;max-width:1060px;width:100%;text-align:center;}
+.galaxy-select-inner{position:relative;max-width:1060px;width:100%;text-align:center;margin:auto 0;}
 .galaxy-select-head{margin-bottom:36px;}
 .galaxy-select-title{
   font-family:'Cinzel',serif;font-weight:700;font-size:clamp(26px,4vw,38px);margin:6px 0 10px;
@@ -53,4 +53,93 @@
 
 @media (max-width:640px){
   .galaxy-card{width:calc(50% - 6px);}
+}
+
+/* ---------- The black hole at the centre (galaxies/vortex.js) ---------- */
+/* Six galaxies in two rows of three with the hole between them; on a phone
+   the hole goes on top and the galaxies two by two below. */
+.galaxy-grid{
+  position:relative;display:grid;justify-content:center;
+  grid-template-columns:repeat(3,188px);
+  grid-template-areas:"g0 g1 g2" "vx vx vx" "g3 g4 g5";
+  gap:6px 12px;max-width:none;
+}
+.galaxy-grid .galaxy-card{width:auto;position:relative;z-index:1;}
+.galaxy-grid .galaxy-art{width:min(36vw,150px);height:min(36vw,150px);}
+.galaxy-select-head{margin-bottom:18px;}
+.galaxy-prog{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--g3,var(--text-dim));min-height:1em;}
+
+.galaxy-corridors{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:0;}
+.cor-base{fill:none;stroke:#8a90a6;stroke-opacity:.28;stroke-width:1.4;stroke-dasharray:3 9;stroke-linecap:round;}
+.cor-color{fill:none;stroke-width:2;stroke-dasharray:3 9;stroke-linecap:round;}
+.cor-glow{fill:none;stroke-width:7;stroke-opacity:.18;stroke-linecap:round;}
+.cor-color.stable{stroke-width:2.6;stroke-dasharray:14 10;}
+@media (prefers-reduced-motion: no-preference){
+  /* grey dashes slide in toward the hole; a stable corridor flows back out */
+  .cor-base, .cor-color{animation:cor-pull 1.6s linear infinite;}
+  .cor-color.stable{animation:cor-flow 1.2s linear infinite;}
+}
+@keyframes cor-pull{to{stroke-dashoffset:-24;}}
+@keyframes cor-flow{to{stroke-dashoffset:48;}}
+
+.galaxy-vortex{
+  grid-area:vx;position:relative;z-index:1;justify-self:center;
+  appearance:none;border:none;background:none;color:inherit;cursor:pointer;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 8px 6px;
+  width:min(520px,100%);
+}
+.vortex-canvas{display:block;width:100%;height:190px;transition:transform .35s ease;}
+.galaxy-vortex:hover .vortex-canvas{transform:scale(1.05);}
+.vortex-label{font-family:'Cinzel',serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#cfc6ff;}
+.vortex-sub{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--text-dim);}
+.galaxy-vortex:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:14px;}
+#galaxy-select.leaving .galaxy-vortex, #galaxy-select.leaving .galaxy-corridors{opacity:0;transition:opacity .35s;}
+
+@media (max-width:640px){
+  .galaxy-grid{grid-template-columns:1fr 1fr;grid-template-areas:"vx vx" "g0 g1" "g2 g3" "g4 g5";}
+  .galaxy-corridors{display:none;} /* in two columns they would cross the names */
+  .vortex-canvas{height:160px;}
+}
+
+/* Luma's panel about the hole */
+#vortex-pop{
+  position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:16px;
+  background:rgba(4,6,16,.82);backdrop-filter:blur(4px);
+}
+#vortex-pop.open{display:flex;}
+.vx-card{
+  position:relative;width:min(760px,100%);max-height:calc(100vh - 32px);overflow:auto;
+  background:linear-gradient(180deg,#141b3c,#0c1230);border:1px solid #4a3f8f;border-radius:18px;
+  padding:18px 20px 20px;box-shadow:0 30px 80px -20px rgba(0,0,0,.8), 0 0 60px -20px #9b8cf2;
+}
+.vx-close{position:absolute;top:12px;right:12px;}
+.vx-title{margin:4px 0 12px;font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#d9d1ff;}
+.vx-luma{display:flex;gap:14px;align-items:flex-end;margin-bottom:14px;}
+.vx-portrait{flex:none;}
+.vx-portrait .guide-portrait{width:86px;height:104px;}
+.vx-say{margin:0;font-size:14px;line-height:1.55;color:var(--text-dim);background:#101736;border:1px solid var(--luma);border-radius:12px;padding:10px 12px;}
+.vx-who{color:var(--luma);margin-right:4px;}
+.vx-say b{color:var(--text);}
+.vx-hacks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.vx-hack{
+  display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;align-items:center;gap:4px 10px;
+  padding:8px 10px;border-radius:10px;background:#0f1533;border:1px solid #262f5c;
+}
+.vx-hack.stable{border-color:var(--g1);box-shadow:0 0 16px -6px var(--g1);}
+.vx-hack-emblem{grid-row:span 2;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-weight:700;color:#0b1226;background:radial-gradient(circle at 35% 30%, var(--g1), var(--g2));}
+.vx-hack:not(.stable) .vx-hack-emblem{filter:grayscale(.85) brightness(.75);}
+.vx-hack-text{display:flex;flex-direction:column;min-width:0;}
+.vx-hack-text b{font-size:12.5px;}
+.vx-hack-text i{font-style:normal;font-size:11px;color:var(--text-dim);}
+.vx-hack-state{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
+.vx-hack.stable .vx-hack-state{color:var(--g1);font-weight:700;}
+.vx-hack-bar{grid-column:2 / 4;height:4px;border-radius:3px;background:#222a52;overflow:hidden;}
+.vx-hack-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--g2),var(--g1));}
+.vx-video-wrap .hud-eyebrow{display:block;margin-bottom:8px;}
+.vx-video{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;border:1px solid #262f5c;}
+.vx-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+@media (max-width:560px){
+  .vx-hacks{grid-template-columns:1fr;}
+  .vx-portrait .guide-portrait{width:64px;height:78px;}
 }

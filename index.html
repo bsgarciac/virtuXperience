@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Atlas VirtuXperience</title>
+<title>VirtuXperience · UNIMINUTO Virtual</title>
+<meta name="description" content="Devuélvele el color al universo del saber: seis galaxias de aprendizaje con videos, recursos interactivos y juegos. Recorre sus nodos, gana Células Lógicas y despierta los seis Hacks de Sintonía.">
+<meta name="theme-color" content="#0b1226">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VirtuXperience · Devuélvele el color al universo del saber">
+<meta property="og:description" content="Seis galaxias de aprendizaje de UNIMINUTO Virtual: videos, recursos interactivos y juegos.">
+<meta property="og:locale" content="es_CO">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.5' cy='.5' r='.5'%3E%3Cstop offset='.35' stop-color='%23000'/%3E%3Cstop offset='.5' stop-color='%239b8cf2'/%3E%3Cstop offset='.75' stop-color='%2357d9c9' stop-opacity='.5'/%3E%3Cstop offset='1' stop-color='%2357d9c9' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%230b1226'/%3E%3Ccircle cx='32' cy='32' r='28' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
@@ -61,7 +68,8 @@
   </div>
 </div>
 
-<div id="galaxy-select">
+<div id="galaxy-select" class="hidden">
+  <button class="hud-btn galaxy-home" id="btn-home" type="button" aria-label="Volver al inicio">⌂ <span>Inicio</span></button>
   <canvas class="galaxy-stars" id="galaxy-stars" aria-hidden="true"></canvas>
   <button class="hud-btn hud-a11y galaxy-a11y" type="button" data-a11y aria-haspopup="dialog" aria-expanded="false" aria-label="Accesibilidad (Alt + A)" title="Accesibilidad (Alt + A)">Aa <span>Accesibilidad</span></button>
   <div class="galaxy-select-inner">
@@ -73,6 +81,8 @@
     <div class="galaxy-grid" id="galaxy-grid"></div>
   </div>
 </div>
+
+<div id="home" tabindex="-1" role="region" aria-label="Inicio de VirtuXperience"></div>
 
 <script type="module" src="/src/main.js"></script>
 </body>

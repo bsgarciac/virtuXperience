@@ -13,6 +13,7 @@ import './styles/alianzas.css';
 import './styles/recurso.css';
 import './styles/story.css';
 import './styles/fx.css';
+import './styles/home.css';
 import './styles/a11y.css';
 
 import './shared/dev.js'; // reads ?dev=… before anything else
@@ -26,6 +27,7 @@ import { galaxy, setGalaxy } from './atlas/world.js';
 import { notifyHost } from './shared/host.js';
 import { showIntroOnce } from './atlas/story.js';
 import { refreshGalaxyNav } from './atlas/nav.js';
+import './home/home.js'; // the first screen, in front of the galaxy select
 
 // Entering a galaxy shows its solar system (the map may still be on the
 // previous galaxy's planets or islands) and its intro the first time.

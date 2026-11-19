@@ -9,8 +9,8 @@ version plus the rules that aren't obvious from the code.
 Learning galaxies as mini-games for university students. Plain JavaScript
 (ES modules) + Phaser 3 for canvas scenes, bundled with Vite. **No framework,
 no TypeScript, no test runner.** Deployed to GitHub Pages on every push to
-`main` (`.github/workflows/deploy.yml`) and embedded by a host site in an
-`<iframe>`.
+`main` (`.github/workflows/deploy.yml`). It is the main site (it opens on
+the home page, `src/home/`); it can still be embedded in an `<iframe>`.
 
 Hierarchy: **galaxy** (area) → **planet** (subarea) → **node** (one stop
 on the planet's path, `<planet>-<key>`). A node is one of three kinds
@@ -87,7 +87,7 @@ Match the existing code, which is deliberately old-school:
 
 - Never commit `.dev-code` or print its contents; only its SHA-256 lives in
   `src/shared/dev.js`.
-- Progress lives in the iframe's `localStorage` (`atlas/progress.js`). Don't
+- Progress lives in the site's `localStorage` (`atlas/progress.js`). Don't
   rename keys without a migration — students would lose progress.
 - Host messages (`shared/host.js`) always carry `source: 'virtuxperience'`;
   the `ready` / `node-completed` / `progress-reset` contract is public, so

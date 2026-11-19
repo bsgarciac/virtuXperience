@@ -58,11 +58,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 :root{--a11y-zoom:1;}
 #hud, #info-pop, #a11y-pop, #toast, #tooltip, .dlg-card, .confirm-card,
 .galaxy-select-inner, .galaxy-a11y, .nav-label,
-.gm-top, .gm-panel, .gm-hint, .gm-banner, .gm-lesson-card, .gm-final-card{
+.gm-top, .gm-panel, .gm-hint, .gm-banner, .gm-lesson-card, .gm-final-card, .vx-card, .galaxy-vortex .vortex-label, .galaxy-vortex .vortex-sub,
+.home-bar, .home-hero-text, .home-wrap, .home-manifesto, .home-final-text, .galaxy-home{
   zoom:var(--a11y-zoom);
 }
 /* the HUD and the panel itself grow less, so they still fit on a phone */
-#hud, #a11y-pop, .galaxy-a11y{zoom:min(var(--a11y-zoom), 1.2);}
+#hud, #a11y-pop, .galaxy-a11y, .galaxy-home, .home-bar{zoom:min(var(--a11y-zoom), 1.2);}
 /* zoom also scales the panel's width and offsets: on a phone it stays 1:1 */
 @media (max-width:560px){ #a11y-pop, .nav-label{zoom:1;} }
 
@@ -77,13 +78,16 @@ html.a11y-contrast{
 html.a11y-contrast #hud{background:#000;border-bottom-color:#fff;}
 html.a11y-contrast :is(.hud-btn, .btn-secondary, .a11y-step){background:#000;border-color:#fff;color:#fff;}
 html.a11y-contrast .btn-primary{outline:2px solid #fff;outline-offset:1px;}
-html.a11y-contrast :is(#info-pop, #a11y-pop, .dlg-card, .confirm-card, .gm-panel, .gm-top, .gm-lesson-card, .gm-final-card, .gm-hint, #toast, #tooltip){
+html.a11y-contrast :is(#info-pop, #a11y-pop, .vx-card, .home-panel, .home-card, .vx-say, .vx-hack, .dlg-card, .confirm-card, .gm-panel, .gm-top, .gm-lesson-card, .gm-final-card, .gm-hint, #toast, #tooltip){
   background:#000 !important;border:2px solid #fff !important;box-shadow:none !important;
 }
 html.a11y-contrast .gm-shell{background:#000;}
 html.a11y-contrast :is(.a11y-row){border-top-color:#555;}
 html.a11y-contrast a{color:#9fe0ff;text-decoration:underline;}
 html.a11y-contrast .galaxy-card{border:2px solid #fff;}
+html.a11y-contrast :is(.home-hero, .home-final)::before{background:rgba(0,0,0,.7);}
+html.a11y-contrast .home-manifesto .hw{color:rgba(255,255,255,.4);}
+html.a11y-contrast .home-manifesto .hw.on{color:#fff;}
 
 /* ---------- Easy-reading font ---------- */
 html.a11y-font body, html.a11y-font body *:not(svg):not(svg *){

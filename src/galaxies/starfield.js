@@ -67,6 +67,7 @@ export function startStarfield(canvas, host){
   function resize(){
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = canvas.clientWidth; H = canvas.clientHeight;
+    if(!W || !H) return; // the screen is hidden: sized when it shows
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var n = Math.max(260, Math.min(900, Math.round(W * H / 1500)));
@@ -78,6 +79,7 @@ export function startStarfield(canvas, host){
   }
 
   function draw(t, dt){
+    if(!W || !H) return;
     ctx.clearRect(0, 0, W, H);
     boost += (boostTarget - boost) * Math.min(1, dt * 4);
     // nebulae: drifting, breathing, wrapping around the edges
@@ -150,6 +152,7 @@ export function startStarfield(canvas, host){
 
   function running(){ return !host.classList.contains('hidden') && !document.hidden; }
   function sync(){
+    if(!W && running()) resize(); // it started hidden
     if(reduce) return;
     if(running() && !raf){ last = 0; raf = requestAnimationFrame(frame); }
     else if(!running() && raf){ cancelAnimationFrame(raf); raf = 0; }

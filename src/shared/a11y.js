@@ -96,8 +96,9 @@ export function speak(html){
 export function stopSpeaking(){ if(synth) synth.cancel(); }
 
 /* ---------------- The panel ---------------- */
-// Opened from the HUD and from the galaxy select screen (any [data-a11y]).
-var triggers = document.querySelectorAll('[data-a11y]');
+// Opened from any [data-a11y] button (the HUD, the galaxy select screen, the
+// home page), including ones added to the page later.
+function triggers(){ return document.querySelectorAll('[data-a11y]'); }
 var opener = null; // the button that opened it, to give focus back
 var pop = document.createElement('div');
 pop.id = 'a11y-pop';
@@ -163,9 +164,17 @@ pop.querySelector('.a11y-reset').addEventListener('click', function(){
   save(); apply(); paint();
 });
 
+// Read or change one setting from elsewhere (the home page's live demo).
+export function a11yPrefs(){ return { size: prefs.size, contrast: !!prefs.contrast, font: !!prefs.font, spacing: !!prefs.spacing, calm: calm(), voice: !!prefs.voice }; }
+export function setA11y(key, value){
+  if(!(key in prefs)) return;
+  prefs[key] = key === 'size' ? Math.max(0, Math.min(SIZES.length - 1, value)) : !!value;
+  save(); apply(); paint();
+}
+
 function isOpen(){ return pop.classList.contains('open'); }
 function setExpanded(v){
-  triggers.forEach(function(t){ t.setAttribute('aria-expanded', v ? 'true' : 'false'); });
+  triggers().forEach(function(t){ t.setAttribute('aria-expanded', v ? 'true' : 'false'); });
 }
 function open(from){
   opener = from || document.activeElement;
@@ -181,13 +190,10 @@ function close(giveFocusBack){
   opener = null;
 }
 
-triggers.forEach(function(t){
-  t.addEventListener('click', function(){ if(isOpen()) close(false); else open(t); });
-});
 document.addEventListener('click', function(e){
-  if(!isOpen() || pop.contains(e.target)) return;
-  for(var i = 0; i < triggers.length; i++) if(triggers[i].contains(e.target)) return;
-  close(false);
+  var t = e.target.closest && e.target.closest('[data-a11y]');
+  if(t){ if(isOpen()) close(false); else open(t); return; }
+  if(isOpen() && !pop.contains(e.target)) close(false);
 });
 document.addEventListener('keydown', function(e){
   // e.code, because on a Mac Alt+A types "å"

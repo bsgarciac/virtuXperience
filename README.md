@@ -26,7 +26,7 @@ src/
   main.js                     entry: styles, galaxy select, boots the map
   styles/                     CSS split by area; tokens live in base.css
   shared/                     toast, tooltip, confirm dialog, AI hint bubbles,
-                              random helpers, host (iframe) messaging
+                              random helpers, host messaging (only when embedded)
     guides.js                 Luma, the narrative guide
     dialogue.js               the guides' one-line-at-a-time conversation box (typed out)
     fx.js                     game feel: synthesized sounds (🔊 in the HUD mutes them),
@@ -53,11 +53,19 @@ src/
     scene-common.js           starfield, rocket cursor, resize handling
     system-scene.js           Phaser scene: the sun and the orbiting planets
     island-scene.js           Phaser scene: one planet's path of islands
+  home/
+    home.js                   the home page, the first screen: hero, story, how to
+                              play, the six galaxies, Luma, live accessibility, the
+                              black hole and a closing call; "Inicio" brings it back
+    hero.js                   its animated universe (one canvas): galaxies orbiting
+                              the black hole under the Neblina Gris
   galaxies/
     catalog.js                the galaxies shown on the select screen
     galaxy-art.js             procedural spiral-galaxy SVG for each card
     starfield.js              canvas backdrop: stars flying towards you
     select.js                 galaxy select screen
+    vortex.js                 the black hole of Interferencia Estática at its centre,
+                              its corridors and Luma's panel (Hacks + VirtuXperience video)
     neuromath/
       index.js                planets, games, intro and briefings
       recursos.js             each planet's path: old-site resources + games
@@ -91,6 +99,32 @@ src/
         controller.js         the embed in the stage, "Terminé", final card
 public/assets/                images served as-is (art, Luma's portrait, entity logos)
 ```
+
+## Home page
+
+The first screen (`src/home/`), in front of the galaxy select. One page that
+scrolls over an animated universe: the six galaxies circle the black hole of
+Interferencia Estática, all grey under the Neblina Gris. The player's light
+(the pointer, or a wandering light on touch screens) clears the fog and
+brings back the colour around it. Scrolling restores more and more of it,
+until the closing call shows the whole universe in colour. Galaxies already
+restored keep their colour.
+
+The sections, in order:
+
+- **Hero:** the title revealed word by word.
+- **Story:** lit word by word with the scroll.
+- **How a galaxy is restored:** isla, meteoro and cometa, with counts read
+  from the galaxy definitions.
+- **Galaxy cards:** each one jumps straight into its galaxy; so does
+  clicking a galaxy in the sky.
+- **Luma:** her lines typed out.
+- **Accessibility:** the settings, working live.
+- **The black hole:** its Hacks and the VirtuXperience video.
+- **"Comenzar el viaje":** fades into the galaxy select. Its "Inicio" button
+  brings the home page back.
+
+Reduce motion gives a still sky with every text shown.
 
 ## Galaxias → planetas → nodos
 
@@ -229,6 +263,17 @@ story, gives the hints and the closing recap, and says why the island matters. T
 player enters Neuromath (📜 Historia replays it), and each island has a
 short briefing the first time it is opened.
 
+At the centre of the galaxy select screen sits a **black hole of
+Interferencia Estática**, the source of the Neblina Gris (our addition to the
+team's deck). Its accretion disk pulls in the colour of the six galaxies
+along their **Corredores Cuánticos**. A galaxy's colour shows in the disk
+and its corridor as its nodes are restored; when the whole galaxy is
+restored its **Hack de Sintonía** is stable: its ring lights up around the
+hole, its corridor flows back out, and the hole shrinks and calms. Clicking
+it opens Luma's explanation, the six Hacks with their progress and the
+official VirtuXperience video. With all six Hacks the hole is meant to
+collapse into the **Estación Micelio** (still to build).
+
 ## Puente de operaciones
 
 Each play is a round of 5 abysses, one per difficulty tier (× before +,
@@ -276,18 +321,19 @@ with `createShell` (shared/game/shell.js), mixes `SceneKit` into its Phaser
 scene, exposes `open(island, onFinish)` and is registered with a title in that
 galaxy's `islands.js`.
 
-## Embedding
+## Deploying
 
-The build is a static site meant to be embedded with an `<iframe>` (it assumes
-it owns the whole viewport). Asset URLs are relative, so `dist/` can be served
-from any sub-path.
+VirtuXperience is the main site: a static build that owns the whole
+viewport and opens on the home page. Every push to `main` deploys `dist/` to
+GitHub Pages. Asset URLs are relative, so it can also be served from any
+sub-path or a custom domain. Progress lives in the site's own
+`localStorage`.
 
-```html
-<iframe src="https://your-host/virtuxperience/" style="width:100%;height:100vh;border:0" allow="fullscreen"></iframe>
-```
+### Embedding (optional)
 
-The game reports to the host page with `postMessage`; every message has
-`source: 'virtuxperience'`:
+It can still be embedded with an `<iframe>`. Inside one, it reports progress
+to the host page with `postMessage`; standalone, `shared/host.js` does
+nothing. Every message has `source: 'virtuxperience'`:
 
 | `type`            | payload                         | when                          |
 |-------------------|---------------------------------|-------------------------------|
@@ -301,5 +347,3 @@ window.addEventListener('message', function(e){
   // check e.origin against where you host the game
 });
 ```
-
-Progress is also kept in the iframe's own `localStorage` for now.
